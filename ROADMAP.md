@@ -2,9 +2,9 @@
 
 ## Current State of the Project
 
-### What Is Built and Working
+### What Is Built and Working (Prototype Phase)
 
-**Core learning experience**:
+**Core learning experience** (functional, being enhanced):
 - ✅ Lesson Player with 3-phase flow (read → quiz → results)
 - ✅ 22 lessons across 3 curriculum volumes (Vol I: History, Vol II: Processing, Vol III: Barista)
 - ✅ Multiple-choice quizzes with immediate feedback
@@ -12,243 +12,317 @@
 - ✅ Progress tracking and lesson unlocking logic
 - ✅ Certification badges (Foundations, Bar certified)
 
-**Admin features**:
-- ✅ Roaster dashboard with team overview
-- ✅ Analytics page (team completion %, lessons this week, quiz scores)
-- ✅ Curriculum page (assign volumes to specific baristas)
-- ✅ Team page (roster with progress per person)
-- ✅ Settings page (cafe info, placeholder for integrations)
-- ✅ Volume assignment modal
-- ✅ Activity feed (recent completions and assignments)
+**Basic admin features** (working, being expanded):
+- ✅ Admin dashboard (currently single-role "Roaster Dashboard")
+- ✅ Team roster display
+- ✅ Progress metrics (completion %, quiz scores)
+- ✅ Activity feed
 
-**Barista features**:
-- ✅ "Today" dashboard with next lesson card
-- ✅ Library view (all assigned volumes and lessons)
-- ✅ Profile view (badges, progress history)
-- ✅ Barista detail modal (deep dive into one person's progress)
+**Basic barista features** (working):
+- ✅ "Today" dashboard with next lesson
+- ✅ Library view (all assigned volumes)
+- ✅ Profile view (badges, progress)
 
-**Marketing site**:
-- ✅ Landing page with value prop and CTA
-- ✅ Curriculum page (full volume and lesson list)
-- ✅ Pricing page (3 tiers: Trial, Studio, Roastery)
-- ✅ About page (product story, team)
-
-**Data & state**:
+**Data & state** (working, being migrated to new model):
 - ✅ Global state singleton (CopiStore)
-- ✅ localStorage persistence (survives refresh)
-- ✅ Seeded demo data (6 baristas with realistic progress)
-- ✅ Hardcoded credentials for admin and barista login
+- ✅ localStorage persistence
+- ✅ Hardcoded demo credentials
 
-**Infrastructure**:
-- ✅ Vite dev server and build pipeline
-- ✅ Deployment-ready for Vercel
-- ✅ Supabase client scaffold (not connected)
+**Marketing site** (complete):
+- ✅ Landing page, curriculum, pricing, about pages
 
-### What Is NOT Built
+### What Is Being Built (Active MVP Development)
 
-**Authentication**:
-- ❌ Real user accounts (currently hardcoded credentials)
-- ❌ Signup flow (trial modal opens but doesn't create accounts)
+**Multi-location architecture** (in progress):
+- 🔄 Location management (add locations, assign staff to locations)
+- 🔄 Location-scoped data queries (filter by locationId)
+- 🔄 Owner dashboard with location switcher (dropdown to filter views)
+
+**Role-based permissions** (in progress):
+- 🔄 Four roles: Owner/Admin, Manager, Barista, Host
+- 🔄 Permission checks in CopiStore methods
+- 🔄 Role-specific dashboard routing
+
+**Onboarding milestones** (in progress):
+- 🔄 Milestone templates per role (barista, host, manager)
+- 🔄 Milestone progress tracking (separate from lesson progress)
+- 🔄 Manager approval workflow
+- 🔄 Milestone completion in dashboards
+
+**Manager dashboard** (in progress):
+- 🔄 Location-scoped team view
+- 🔄 Milestone approval interface
+- 🔄 Staff progress monitoring (location-scoped)
+
+**Enhanced owner dashboard** (in progress):
+- 🔄 Location switcher UI
+- 🔄 Multi-location analytics
+- 🔄 Cross-location team roster
+
+**Data model evolution** (in progress):
+- 🔄 Locations entity
+- 🔄 Users with role + locationId
+- 🔄 Onboarding milestones
+- 🔄 Progress split: onboarding vs. lessons
+- 🔄 Migration from v3 to v4 localStorage schema
+
+### What Is NOT Built Yet (Post-MVP)
+
+**AI-powered features**:
+- ❌ AI setup (upload handbook → generate milestones)
+- ❌ AI content gap analysis
+- ❌ AI suggestions for improvement
+
+**Authentication & backend**:
+- ❌ Real user accounts (Supabase Auth)
+- ❌ Signup flow (creates cafe + first owner)
+- ❌ Supabase database (tables, RLS policies)
 - ❌ Password reset, email verification
-- ❌ Multi-cafe support (only "Milano" cafe exists)
-
-**Backend integration**:
-- ❌ Supabase database (tables not created)
-- ❌ API calls (everything is localStorage)
-- ❌ Multi-device sync
-- ❌ Team invites via email (modal exists but doesn't send emails)
+- ❌ Team invites via email
 
 **Content management**:
-- ❌ Admin UI to add/edit lessons (lessons are hardcoded in JSX)
-- ❌ WYSIWYG editor for lesson content
-- ❌ Upload images/videos to lessons
-- ❌ Lesson versioning
+- ❌ Owner can edit milestones
+- ❌ Owner can create custom volumes
+- ❌ Rich text editor for lessons
+- ❌ Upload images/videos
 
 **Advanced features**:
-- ❌ Reminders/notifications (no email, no push)
-- ❌ Team chat or notes
+- ❌ In-app messaging
 - ❌ Export progress reports (PDF, CSV)
-- ❌ Integration with POS systems
 - ❌ Mobile apps (web only)
+- ❌ Reminders/notifications
 
 **Testing & quality**:
-- ❌ Unit tests, integration tests, E2E tests (no test suite)
-- ❌ Accessibility audit (no ARIA labels, no screen reader testing)
+- ❌ Automated tests (unit, integration, E2E)
+- ❌ Accessibility audit
 - ❌ Performance benchmarks
-- ❌ Error boundaries (app crashes on unhandled errors)
 
-## What Is Actively Being Worked On
+## MVP Scope Definition
 
-**Currently**: Nothing - this is a **completed prototype** as of the last commit.
+**MVP Goal**: Prove that cafe owners will pay for a combined onboarding + learning platform with multi-location support.
 
-The prototype successfully demonstrates:
-- Core learning loop (lesson → quiz → certification)
-- Admin management (assign, track, analyze)
-- Two-sided product (admin view vs barista view)
-- Full curriculum (22 lessons, 3 volumes)
+### Must-Have for MVP Launch
 
-## What Is Planned Next
+1. **Multi-location support**:
+   - Owner can add 2-4 locations
+   - Assign staff to locations
+   - Owner dashboard with location switcher
+   - Location-scoped data for managers
 
-### Phase 1: Backend Integration (Q2 2026)
+2. **Four user roles**:
+   - Owner/Admin (multi-location view)
+   - Manager (single location view)
+   - Barista/Host (personal view)
+   - Role-based permissions enforced
 
-**Goal**: Replace localStorage with Supabase so teams can use this in production.
+3. **Onboarding milestones**:
+   - Pre-built milestone templates for barista, host, manager roles
+   - Manager can mark milestones complete
+   - Barista sees onboarding checklist
+   - Progress tracked separately from lessons
 
-**Tasks**:
-1. Create Supabase schema:
-   - `organizations` (cafes)
-   - `profiles` (users with role: admin | barista)
-   - `assignments` (volume assignments)
-   - `progress` (lesson completion records)
-   - `quiz_attempts` (detailed quiz history)
-2. Implement signup flow:
-   - Trial signup creates organization + first admin user
-   - Email verification via Supabase Auth
-3. Migrate CopiStore methods to Supabase:
-   - `assignVolume()` → insert into `assignments` table
-   - `completeLesson()` → insert into `progress` table
-   - All read methods → Supabase queries
-4. Add team invites:
-   - Admin can invite baristas by email
-   - Send invite link via Supabase email templates
-5. Test migration:
-   - Seed production DB with demo data
-   - Verify all flows work with real backend
+4. **Learning tracks** (existing, enhanced):
+   - 22 lessons across 3 volumes (existing)
+   - Role-based assignment (barista gets Vol I-III, host gets Vol I-II)
+   - Certification badges
 
-**Success criteria**: A cafe can sign up, invite their team, assign lessons, and track progress - all persisted to Supabase.
+5. **Supabase backend**:
+   - Replace localStorage with Postgres
+   - Row-level security for location scoping
+   - Supabase Auth for login
+   - Email invites for team
 
-### Phase 2: Mobile Optimization (Q3 2026)
+6. **Basic signup flow**:
+   - Owner creates cafe account
+   - Adds first location
+   - Invites first staff member
+   - (No AI setup at MVP - owner manually adds milestones)
 
-**Goal**: Make the app usable on phones (currently desktop-only).
+### Nice-to-Have for MVP (Deprioritized)
 
-**Tasks**:
-1. Responsive design audit:
-   - Test all views on 375px viewport
-   - Fix layout breaks (dashboards, modals, lesson player)
-2. Touch interactions:
-   - Larger tap targets (44x44px minimum)
-   - Swipe to navigate lessons
-   - Pull-to-refresh on dashboards
-3. Offline support:
-   - Cache lesson content in IndexedDB
-   - Queue quiz submissions when offline
-   - Sync when connection returns
-4. Mobile-specific UX:
-   - Bottom nav for baristas (Today, Library, Profile)
-   - Collapsible admin sidebar
-   - Simplified tables on small screens
+- AI-powered handbook upload → milestone generation (Phase 2)
+- In-app messaging (Phase 2)
+- Export reports (Phase 2)
+- Mobile optimization (Phase 2)
+- Advanced analytics (Phase 2)
 
-**Success criteria**: Baristas can complete lessons on their phones during breaks without frustration.
+## Timeline to MVP
 
-### Phase 3: Content Management (Q4 2026)
+### Phase 1: Core Architecture (Current - 2 weeks)
 
-**Goal**: Let admins create custom lessons beyond the default 22.
+**Goal**: Build multi-location + role foundation in localStorage prototype
 
-**Tasks**:
-1. Lesson editor UI:
-   - Rich text editor for read paragraphs
-   - Quiz builder (add/remove questions, set correct answer)
-   - Drag-to-reorder lessons within volumes
-2. Image/video uploads:
-   - Supabase Storage for media
-   - Embed images in lesson content
-   - Optional video lessons
-3. Custom volumes:
-   - Admins can create "Vol IV: House Standards"
-   - Assign custom volumes to specific teams
-4. Version control:
-   - Edit lessons without breaking in-progress learners
-   - "Publish" vs "Draft" state
+- ✅ Update documentation (CLAUDE.md, ARCHITECTURE.md, PRODUCT.md, ROADMAP.md)
+- 🔄 Migrate CopiStore to new data model (locations, roles, milestones)
+- 🔄 Implement location scoping in all query methods
+- 🔄 Add onboarding milestones system
+- 🔄 Build location switcher UI for owner dashboard
+- 🔄 Create manager dashboard (location-scoped)
+- 🔄 Update barista dashboard with onboarding checklist
+- 🔄 Add hardcoded test data for 2 locations, 4 roles
 
-**Success criteria**: A cafe can add a custom lesson about their espresso blend and assign it to their team.
+**Deliverable**: Functioning prototype with multi-location, onboarding milestones, role-based permissions (localStorage only)
 
-### Phase 4: Advanced Analytics (Q1 2027)
+### Phase 2: Supabase Migration (2-3 weeks)
 
-**Goal**: Give admins deeper insights into team learning.
+**Goal**: Replace localStorage with production backend
 
-**Tasks**:
-1. Quiz analytics:
-   - Which questions are hardest? (low pass rate)
-   - Which baristas struggle with specific topics?
-   - Time-to-complete per lesson
-2. Retention metrics:
-   - How many baristas start Vol I but don't finish?
-   - How long between assignments and first lesson attempt?
-3. Comparative benchmarks:
-   - How does this cafe compare to others?
-   - What's the average completion rate across all Copi cafes?
-4. Export reports:
-   - Generate PDF progress reports per barista
-   - CSV export for HR records
+- Create Supabase project
+- Define schema (cafes, locations, users, milestones, progress)
+- Implement Row-Level Security policies
+- Migrate CopiStore methods to Supabase queries
+- Replace hardcoded credentials with Supabase Auth
+- Test location scoping at database level
 
-**Success criteria**: Admins can identify struggling baristas early and intervene.
+**Deliverable**: Prototype working with Supabase backend, multi-tenant ready
 
-### Phase 5: Certification Platform (Q2 2027)
+### Phase 3: Signup & Invites (1-2 weeks)
 
-**Goal**: Make Copi certifications recognized industry-wide.
+**Goal**: Let owners create accounts and invite team
 
-**Tasks**:
-1. Public certification badges:
-   - Shareable URLs (linkedin.com/in/barista?cert=copi-foundations)
-   - Embeddable badges for cafe websites
-2. Third-party integrations:
-   - SCA (Specialty Coffee Association) partnership
-   - Link Copi certs to SCA credentials
-3. Advanced certifications:
-   - Vol IV: Roasting fundamentals
-   - Vol V: Cafe management
-   - Vol VI: Sensory training (cupping)
-4. Continuing education:
-   - Recertification every 2 years
-   - New content keeps certifications current
+- Build signup flow (create cafe, add location, set up owner account)
+- Implement team invite system (email with login link)
+- Add location management UI (add/edit locations)
+- Add staff management UI (invite, assign role, assign location)
 
-**Success criteria**: "Copi certified" on a resume means something to hiring managers.
+**Deliverable**: Owners can sign up, add locations, invite staff without developer intervention
+
+### Phase 4: Polish & Launch Prep (2 weeks)
+
+**Goal**: Make MVP production-ready
+
+- Mobile responsiveness audit
+- Cross-browser testing
+- Performance optimization
+- Error handling & validation
+- Onboarding tutorial for new owners
+- Deploy to production (Vercel)
+- Beta test with 3-5 cafes
+
+**Deliverable**: Production-ready MVP
+
+**Total to MVP**: ~8 weeks
+
+## What Is Actively Being Worked On (This Week)
+
+**Documentation** (just completed):
+- ✅ Updated CLAUDE.md with multi-location architecture
+- ✅ Updated ARCHITECTURE.md with roles, permissions, location scoping
+- ✅ Updated PRODUCT.md with cafe management vision
+- ✅ Updated ROADMAP.md with MVP scope
+
+**Code (in progress)**:
+- 🔄 Migrate CopiStore data model to v4 schema (locations, roles, milestones)
+- 🔄 Add location management methods to CopiStore
+- 🔄 Implement onboarding milestones system
+- 🔄 Add location switcher to owner dashboard
+- 🔄 Create manager dashboard component
+- 🔄 Update seed data for multi-location demo
+
+## What Is Planned Next (After This Week)
+
+**Week 2-3**: Complete localStorage prototype with all MVP features
+- Finish manager dashboard
+- Add milestone approval workflow
+- Test all 4 roles with location scoping
+- Validate UX with stakeholders
+
+**Week 4-6**: Supabase migration
+- Set up Supabase project
+- Create schema + RLS policies
+- Migrate CopiStore to Supabase
+- Test multi-tenancy
+
+**Week 7-8**: Signup + polish
+- Build signup flow
+- Add team invites
+- Polish UI
+- Beta test
 
 ## Known Issues and Technical Debt
 
-### Critical (blocks production use)
+### Critical (blocks MVP)
 
-1. **No error handling** - App crashes on unhandled errors (e.g., localStorage full, JSON parse fails)
-2. **No auth** - Hardcoded credentials are a security risk
-3. **No backend** - Can't deploy for real teams
+1. **No backend** - localStorage can't support real multi-tenant deployment
+2. **No auth** - Hardcoded credentials don't scale
+3. **No location data** - Current schema doesn't support locations
 
 ### High (quality issues)
 
 4. **No tests** - Refactoring is risky without test coverage
-5. **7000-line monolith** - `App.jsx` is hard to navigate
-6. **No accessibility** - Screen reader users can't use the app
-7. **No mobile layout** - Unusable on phones
+5. **No mobile layout** - Unusable on phones
+6. **No error handling** - App crashes on unhandled errors
+7. **7000-line monolith** - App.jsx is hard to navigate
 
 ### Medium (tech debt)
 
-8. **Inline styles repetition** - Every component redefines palette and fonts
-9. **No TypeScript** - Easy to pass wrong props, break store contract
-10. **No code splitting** - Entire 7000-line app loads upfront
-11. **No image optimization** - Portrait PNGs are large, should be WebP
-12. **window.* exports** - Non-standard module pattern
+8. **Inline styles repetition** - Every component redefines palette
+9. **No TypeScript** - Easy to break store contract
+10. **window.* exports** - Non-standard module pattern
+11. **No code splitting** - Entire app loads upfront
 
 ### Low (nice-to-have)
 
-13. **No animations** - Modal open/close is instant (slightly jarring)
-14. **No dark mode** - Locked to beige/paper aesthetic
-15. **No i18n** - English only
-16. **No keyboard shortcuts** - Power users can't navigate faster
+12. **No animations** - Modal open/close is instant
+13. **No dark mode** - Locked to beige/paper aesthetic
+14. **No i18n** - English only
 
 ### Accepted limitations (by design)
 
-- **No real-time collaboration** - One barista can't see another's progress live (not needed)
-- **No chat** - Training is async, not social (by design)
-- **No gamification** - No points, leaderboards, streaks (editorial product, not a game)
+- **No real-time collaboration** - Not needed for async training
+- **No social features** - Training is personal, not social
+- **No gamification** - Editorial product, not a game
 
-## How to Prioritize Future Work
+## Future Vision (Beyond MVP)
 
-**Guiding principle**: "What gets cafes to pay for this?"
+### Phase 5: AI-Powered Setup (Q3 2026)
 
-1. **Must-have for launch**: Backend integration, auth, mobile optimization
-2. **Differentiators**: Content management (custom lessons), certification platform
-3. **Revenue drivers**: Advanced analytics (upsell to higher tiers), integrations (POS, payroll)
-4. **Quality gates**: Testing, accessibility, performance (before scaling)
+- Upload handbook → AI generates milestones
+- AI content gap analysis
+- AI suggests improvements based on completion data
+- "Smart milestones" that adapt to cafe type (espresso bar vs. full service)
 
-**Not planned**:
-- Social features (comments, chat)
-- Gamification (points, streaks)
-- Consumer-facing product (this is B2B for cafes, not B2C for individual baristas)
+### Phase 6: Advanced Manager Tools (Q4 2026)
+
+- In-app messaging (manager ↔ barista)
+- Shift scheduling integration
+- Progress reports (export PDF for HR)
+- Bulk milestone approval
+
+### Phase 7: Certification Platform (Q1 2027)
+
+- Public certification badges (shareable LinkedIn URLs)
+- SCA (Specialty Coffee Association) partnership
+- Advanced certifications (roasting, cafe management, cupping)
+- Continuing education requirements
+
+### Phase 8: Multi-Cafe Groups (Q2 2027)
+
+- Scale beyond 1-4 locations to 5-20+ locations
+- Regional manager role (manages multiple locations)
+- Cross-location reporting and benchmarks
+- White-label for large chains
+
+## Success Metrics for MVP
+
+**Activation** (Did they set up?):
+- 80% of signups add at least 1 location
+- 60% of signups invite at least 3 staff members
+- 50% of signups create at least 1 custom milestone
+
+**Engagement** (Are they using it?):
+- 70% of invited staff log in within 7 days
+- 40% of baristas complete at least 1 onboarding milestone in first week
+- 30% of baristas complete at least 1 lesson in first month
+
+**Retention** (Do they keep using it?):
+- 60% of cafes have at least 1 active staff member after 30 days
+- 40% of managers approve at least 1 milestone per week
+- Owner logs in at least 2x per month to check progress
+
+**Value** (Will they pay?):
+- 10% of beta testers convert to paid ($25/month) after 30-day trial
+- 50% of paid users stay subscribed after 3 months
+- NPS > 40 from cafe owners
+
+If we hit these metrics, Copi is validated and ready to scale.
