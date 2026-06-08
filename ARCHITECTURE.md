@@ -8,21 +8,42 @@ Copi is a **multi-location cafe management and education platform** with role-ba
 - **Four user roles**: Owner/Admin (multi-location), Manager (single location), Barista/Host (single location, personal view)
 - **Dual education systems**: Onboarding milestones (manager-approved) + Learning tracks (self-paced lessons)
 - **Location filtering**: All data queries respect user's locationId except for Owner/Admin
+- **Separate surfaces**: Marketing site (Next.js) + Application (Vite React) are independent codebases
 
 **Current state**: localStorage-based prototype evolving toward Supabase backend with multi-tenant support.
+
+## Two Separate Surfaces
+
+### Marketing Site (copi.com)
+- **Technology**: Next.js (static export or SSR)
+- **Repository**: Separate codebase from application
+- **Purpose**: Public website, signup page, waitlist
+- **Deployment**: Vercel (separate deployment)
+- **Routing**: After signup, redirects to app.copi.com
+
+### Application (app.copi.com)
+- **Technology**: Vite + React SPA
+- **Repository**: This codebase
+- **Purpose**: Logged-in experience (dashboards, lessons, progress)
+- **Deployment**: Vercel (separate deployment)
+- **Authentication**: Supabase Auth with session management
+
+**Key principle**: Treat these as two independent projects. They share a Supabase backend but have separate builds and deployments.
 
 ### Data Flow
 
 ```
-User Interaction (complete lesson, mark milestone, assign staff)
+User Interaction (complete lesson, mark milestone, invite staff)
          ↓
 Component calls CopiStore method (with current user context)
          ↓
 CopiStore checks permissions (role + locationId)
          ↓
-CopiStore updates internal state object
+CopiStore calls Supabase (queries, mutations)
          ↓
-CopiStore persists to localStorage (will migrate to Supabase)
+Supabase enforces Row-Level Security (RLS)
+         ↓
+Response returned to CopiStore
          ↓
 CopiStore notifies all subscribed components via emit()
          ↓
@@ -33,20 +54,18 @@ Components re-render via useCopiStore() hook
 
 ```
 CopiPrototype (App.jsx - root component)
-├── TrialModal (cafe signup flow)
-├── AddTeamModal (invite staff to location)
+├── SignupFlow (cafe profile setup after auth)
+├── InviteAcceptFlow (staff password setup)
+├── AddTeamModal (manual staff entry or CSV upload)
 ├── LessonPlayer (lesson experience)
 ├── AssignModal (assign curriculum to staff)
 └── Current view (role-based routing):
-    ├── LandingPage (marketing)
-    ├── AboutPage (marketing)
-    ├── PricingPage (marketing)
-    ├── CurriculumPage (marketing)
     ├── OwnerDashboard (multi-location view with location switcher)
     │   ├── Location switcher (dropdown/tabs)
     │   ├── Analytics (aggregated or filtered by location)
     │   ├── Curriculum management
     │   ├── Team roster (all locations or filtered)
+    │   ├── Staff management (invite, CSV upload, resend invites)
     │   ├── Onboarding milestone approvals
     │   └── Settings (billing, integrations)
     ├── ManagerDashboard (single location view)
@@ -61,31 +80,139 @@ CopiPrototype (App.jsx - root component)
         └── My learning library
 ```
 
+## Signup and Authentication Architecture
+
+### Owner Signup Flow
+
+**Step 1: Marketing site signup** (copi.com/signup)
+```
+1. Owner enters email (or uses Google SSO)
+2. Supabase Auth creates account in auth.users
+3. Marketing site redirects to app.copi.com with session token
+```
+
+**Step 2: Cafe profile setup** (app.copi.com/setup)
+```
+1. App checks if user has cafe record
+2. If not, shows cafe profile form:
+   - Cafe name
+   - Number of locations (default: 1)
+   - First location name and address
+3. Submit creates:
+   - Cafe record (with ownerId = current user)
+   - Location record (first location)
+   - User record in public.users (role: owner, locationId: null)
+4. Redirect to owner dashboard
+```
+
+**State transitions**:
+- `auth.users` created → `public.cafes` created → `public.locations` created → `public.users` created → dashboard
+
+### Staff Invite Flow
+
+**Step 1: Owner invites staff**
+```
+Owner Dashboard → Add Staff → (Manual or CSV)
+         ↓
+Creates invite record in public.invites
+         ↓
+Supabase triggers email via Auth email templates
+         ↓
+Email sent with link: app.copi.com/invite/{token}
+```
+
+**Step 2: Staff accepts invite**
+```
+Staff clicks link → App validates token:
+  - Token exists?
+  - Not expired? (< 72 hours old)
+  - Not already used?
+         ↓
+Shows password setup form
+         ↓
+Staff sets password → Supabase Auth creates auth.users
+         ↓
+Creates public.users record (copies data from invite)
+         ↓
+Marks invite as used (usedAt = now)
+         ↓
+Redirects to staff dashboard
+```
+
+**Security**:
+- Token is cryptographically random (UUID or crypto.randomBytes)
+- One-time use (usedAt prevents reuse)
+- Time-limited (expiresAt enforced at validation)
+- Invite email stored in both invites table and later in users table (ensures uniqueness)
+
+### CSV Upload Flow
+
+```
+Owner uploads CSV file
+         ↓
+Frontend parses CSV rows
+         ↓
+Validates each row:
+  - Email format valid?
+  - Role is manager|barista|host?
+  - Location exists in cafe?
+  - Email not already in use?
+         ↓
+If ANY row fails → show errors, don't create anything (atomic)
+         ↓
+If all valid → batch create invite records
+         ↓
+Trigger batch email send via Supabase
+         ↓
+Show success summary: "10 invites sent"
+```
+
+**CSV format**:
+```csv
+name,email,role,location
+Lili Turko,lili@milano.coffee,barista,Downtown
+Jules Patel,jules@milano.coffee,barista,Downtown
+Sarah Chen,sarah@milano.coffee,manager,Westside
+```
+
+### Authentication Methods
+
+| User Type | Email/Password | Google SSO | Password Reset |
+|-----------|----------------|------------|----------------|
+| Owner | ✅ | ✅ | ✅ |
+| Admin | ✅ | ✅ | ✅ |
+| Manager | ✅ | ❌ (MVP) | ✅ |
+| Barista | ✅ | ❌ (MVP) | ✅ |
+| Host | ✅ | ❌ (MVP) | ✅ |
+
+**Post-MVP**: Add Google SSO for all roles.
+
 ## Account and Permission Architecture
 
 ### Account Hierarchy
 
 ```
 Cafe (master account)
-  ├── cafeId: 'cafe-milano'
+  ├── cafeId: 'cafe-uuid'
   ├── name: 'Milano Coffee'
+  ├── ownerId: 'user-uuid' (FK to auth.users)
   ├── billing info
   └── Locations[]
         ├── Location 1
-        │   ├── locationId: 'loc-downtown'
+        │   ├── locationId: 'loc-uuid'
         │   ├── name: 'Milano Downtown'
         │   ├── address: '123 Main St'
         │   └── Users[]
-        │       ├── Manager (locationId: 'loc-downtown')
-        │       ├── Barista 1 (locationId: 'loc-downtown')
-        │       ├── Barista 2 (locationId: 'loc-downtown')
-        │       └── Host (locationId: 'loc-downtown')
+        │       ├── Manager (locationId: 'loc-uuid')
+        │       ├── Barista 1 (locationId: 'loc-uuid')
+        │       ├── Barista 2 (locationId: 'loc-uuid')
+        │       └── Host (locationId: 'loc-uuid')
         └── Location 2
-            ├── locationId: 'loc-westside'
+            ├── locationId: 'loc-uuid-2'
             ├── name: 'Milano Westside'
             └── Users[]
-                ├── Manager (locationId: 'loc-westside')
-                └── Barista 3 (locationId: 'loc-westside')
+                ├── Manager (locationId: 'loc-uuid-2')
+                └── Barista 3 (locationId: 'loc-uuid-2')
   └── Owner/Admin users (locationId: null, see all locations)
 ```
 
@@ -100,6 +227,8 @@ Cafe (master account)
 | **Staff Management** |
 | Add staff to account | ✅ | ❌ | ❌ | ❌ |
 | Remove staff from account | ✅ | ❌ | ❌ | ❌ |
+| Invite staff (manual or CSV) | ✅ | ❌ | ❌ | ❌ |
+| Resend invite | ✅ | ❌ | ❌ | ❌ |
 | View all staff (multi-location) | ✅ | ❌ | ❌ | ❌ |
 | View staff at my location | ✅ | ✅ | ❌ | ❌ |
 | **Onboarding** |
@@ -141,15 +270,29 @@ getStaffForCurrentUser(currentUser) {
 
 ## Frontend Architecture
 
-### No Real Frontend/Backend Split (Current)
+### Supabase Auth Integration
 
-There is no API currently. Supabase client exists at `src/lib/supabaseClient.js` but is not connected. All reads/writes go directly to localStorage.
+**Supabase Auth handles**:
+- Password hashing (bcrypt)
+- Session management (JWT tokens)
+- Email delivery (invites, password resets)
+- OAuth providers (Google, GitHub, etc.)
+- Token refresh
 
-**When Supabase integration happens** (near-term future):
-- CopiStore methods call Supabase instead of localStorage
-- Row-level security (RLS) enforces location scoping at database level
-- `useCopiStore()` hook remains unchanged
-- Components don't need to change
+**Application responsibilities**:
+- Create cafe/location/user records after auth
+- Check if user has completed cafe setup
+- Validate invite tokens before password set
+- Enforce role-based UI routing
+
+**Session flow**:
+```
+1. User logs in → Supabase Auth returns JWT
+2. JWT stored in localStorage (via Supabase client)
+3. Every API request includes JWT in Authorization header
+4. Supabase validates JWT and sets auth.uid() for RLS
+5. RLS policies enforce location scoping
+```
 
 ### State Management Pattern
 
@@ -157,39 +300,54 @@ There is no API currently. Supabase client exists at `src/lib/supabaseClient.js`
 
 ```js
 const CopiStore = (function () {
-  let state = loadState(); // from localStorage
-  const subs = new Set();  // React components subscribed to changes
+  const supabase = window.supabase;
+  const subs = new Set();
 
   function emit() {
-    persist();              // write to localStorage
     subs.forEach(fn => fn()); // trigger re-renders
   }
 
   return {
-    // --- Location management ---
-    getLocations(currentUser),
-    addLocation(cafeId, name, address),
+    // --- Authentication ---
+    async signup(email, password),
+    async signupWithGoogle(),
+    async login(email, password),
+    async logout(),
+    async resetPassword(email),
+    getCurrentUser(),
 
-    // --- User/Staff management ---
-    getStaff(currentUser, locationId),  // respects scoping
-    addStaff(email, name, role, locationId),
-    removeStaff(email),
+    // --- Cafe setup ---
+    async createCafe(name, ownerId),
+    async createLocation(cafeId, name, address),
+    getCafe(cafeId),
+
+    // --- Location management ---
+    async getLocations(currentUser),
+    async addLocation(cafeId, name, address),
+
+    // --- Staff management ---
+    async inviteStaff(cafeId, locationId, name, email, role),
+    async inviteStaffBulk(cafeId, csvRows),
+    async validateInviteToken(token),
+    async acceptInvite(token, password),
+    async resendInvite(inviteId),
+    getStaff(currentUser, locationId),
 
     // --- Onboarding milestones ---
     getMilestones(role),
     getMilestoneProgress(email),
-    completeMilestone(email, milestoneId, completedBy),
+    async completeMilestone(email, milestoneId, completedBy, note),
 
     // --- Learning (existing) ---
     isAssigned(email, volId),
     lessonStatus(email, volId, idx),
-    completeLesson(email, lessonId, score, total),
-    completeFinal(email, volId, score, total),
+    async completeLesson(email, lessonId, score, total),
+    async completeFinal(email, volId, score, total),
 
     // --- Permissions ---
     canViewStaff(currentUser, targetUser),
     canMarkMilestone(currentUser, targetUser),
-    canAssignCurriculum(currentUser),
+    canInviteStaff(currentUser),
 
     // --- React integration ---
     subscribe(fn),
@@ -201,105 +359,190 @@ const CopiStore = (function () {
 
 **No React Router** - event delegation via `copi-prototype-shell.jsx`:
 
-The shell component renders the appropriate dashboard based on logged-in user's role:
-- Owner/Admin → `OwnerDashboard`
-- Manager → `ManagerDashboard`
-- Barista/Host → `BaristaDashboard`
+The shell component renders the appropriate view based on logged-in user state:
 
-Role is determined at login from hardcoded credentials (prototype) or Supabase user metadata (production).
+```js
+// Routing logic
+if (!currentUser) {
+  return <LoginPage />;
+}
+
+if (!currentUser.cafeId) {
+  // Owner just signed up, needs to set up cafe
+  return <CafeSetupFlow />;
+}
+
+if (inviteToken) {
+  // Staff accepting invite
+  return <InviteAcceptFlow token={inviteToken} />;
+}
+
+// Role-based dashboard routing
+switch (currentUser.role) {
+  case 'owner':
+  case 'admin':
+    return <OwnerDashboard user={currentUser} />;
+  case 'manager':
+    return <ManagerDashboard user={currentUser} />;
+  case 'barista':
+  case 'host':
+    return <BaristaDashboard user={currentUser} />;
+}
+```
 
 ## Data Model
 
-### State Object Structure (localStorage)
+### State Object Structure (Supabase PostgreSQL)
 
-Stored at `localStorage['copi.progress.v4']` (versioned up from v3):
+### Database Schema
 
-```js
-{
-  seeded: true,
-  cafeId: 'cafe-milano',
-  cafeName: 'Milano Coffee',
+**auth.users** (Supabase Auth managed)
+```sql
+-- Managed by Supabase Auth
+-- Contains: id (UUID), email, encrypted_password, created_at, etc.
+```
 
-  // --- Locations ---
-  locations: [
-    { id: 'loc-downtown', name: 'Milano Downtown', address: '123 Main St', cafeId: 'cafe-milano' },
-    { id: 'loc-westside', name: 'Milano Westside', address: '456 Oak Ave', cafeId: 'cafe-milano' }
-  ],
+**public.cafes**
+```sql
+CREATE TABLE cafes (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  owner_id UUID REFERENCES auth.users(id) NOT NULL,
+  name TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
+);
 
-  // --- Users (staff) ---
-  users: [
-    {
-      email: 'admin@milano.coffee',
-      name: 'Brian Turko',
-      role: 'owner',
-      locationId: null,  // Owner sees all locations
-      joined: 'Jan 2025'
-    },
-    {
-      email: 'manager@milano.coffee',
-      name: 'Sarah Chen',
-      role: 'manager',
-      locationId: 'loc-downtown',
-      joined: 'Feb 2025'
-    },
-    {
-      email: 'lili@milano.coffee',
-      name: 'Lili Turko',
-      role: 'barista',
-      locationId: 'loc-downtown',
-      joined: 'Aug 2025'
-    }
-  ],
+-- RLS Policy: Users can only see their own cafe
+CREATE POLICY cafes_select_policy ON cafes
+  FOR SELECT
+  USING (
+    owner_id = auth.uid()
+    OR id IN (SELECT cafe_id FROM users WHERE id = auth.uid())
+  );
+```
 
-  // --- Onboarding milestones (role-specific templates) ---
-  milestones: {
-    barista: [
-      { id: 'm-barista-1', title: 'Shadow a shift', order: 1, requiresSignoff: true },
-      { id: 'm-barista-2', title: 'Pull your first espresso', order: 2, requiresSignoff: true },
-      { id: 'm-barista-3', title: 'Complete POS training', order: 3, requiresSignoff: true }
-    ],
-    host: [
-      { id: 'm-host-1', title: 'Shadow a shift', order: 1, requiresSignoff: true },
-      { id: 'm-host-2', title: 'Learn seating system', order: 2, requiresSignoff: true }
-    ],
-    manager: [
-      { id: 'm-mgr-1', title: 'Complete opening procedures', order: 1, requiresSignoff: false },
-      { id: 'm-mgr-2', title: 'Complete closing procedures', order: 2, requiresSignoff: false }
-    ]
-  },
+**public.locations**
+```sql
+CREATE TABLE locations (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  cafe_id UUID REFERENCES cafes(id) ON DELETE CASCADE NOT NULL,
+  name TEXT NOT NULL,
+  address TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+);
 
-  // --- Progress (per user) ---
-  progress: {
-    'lili@milano.coffee': {
-      locationId: 'loc-downtown',
-      onboarding: {
-        'm-barista-1': { completed: true, completedBy: 'manager@milano.coffee', ts: 1234567890 },
-        'm-barista-2': { completed: false }
-      },
-      lessons: {
-        'v1l1': { done: true, score: 3, total: 3, ts: 1234567900 }
-      },
-      finals: {}
-    }
-  },
+-- RLS Policy: Users can only see locations from their cafe
+CREATE POLICY locations_select_policy ON locations
+  FOR SELECT
+  USING (
+    cafe_id IN (SELECT id FROM cafes WHERE owner_id = auth.uid())
+    OR cafe_id IN (SELECT cafe_id FROM users WHERE id = auth.uid())
+  );
+```
 
-  // --- Volume assignments (unchanged) ---
-  assignments: {
-    'vol-1': ['lili@milano.coffee', 'reza@milano.coffee'],
-    'vol-2': ['lili@milano.coffee']
-  },
+**public.users**
+```sql
+CREATE TABLE users (
+  id UUID PRIMARY KEY REFERENCES auth.users(id),
+  cafe_id UUID REFERENCES cafes(id) ON DELETE CASCADE NOT NULL,
+  location_id UUID REFERENCES locations(id),  -- NULL for owner/admin
+  email TEXT UNIQUE NOT NULL,
+  name TEXT NOT NULL,
+  role TEXT NOT NULL CHECK (role IN ('owner', 'admin', 'manager', 'barista', 'host')),
+  joined_at TIMESTAMP DEFAULT NOW()
+);
 
-  // --- Activity feed ---
-  activity: [
-    {
-      who: 'Sarah Chen',
-      action: 'completed milestone',
-      label: 'Lili Turko: Pull your first espresso',
-      kind: 'milestone',
-      ts: Date.now()
-    }
-  ]
-}
+-- RLS Policy: Users see themselves + their cafe owner sees everyone
+CREATE POLICY users_select_policy ON users
+  FOR SELECT
+  USING (
+    id = auth.uid()  -- See yourself
+    OR cafe_id IN (SELECT id FROM cafes WHERE owner_id = auth.uid())  -- Owner sees all
+    OR location_id = (SELECT location_id FROM users WHERE id = auth.uid())  -- Same location
+  );
+```
+
+**public.invites**
+```sql
+CREATE TABLE invites (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  cafe_id UUID REFERENCES cafes(id) ON DELETE CASCADE NOT NULL,
+  location_id UUID REFERENCES locations(id) NOT NULL,
+  email TEXT NOT NULL,
+  name TEXT NOT NULL,
+  role TEXT NOT NULL CHECK (role IN ('manager', 'barista', 'host')),
+  token TEXT UNIQUE NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  used_at TIMESTAMP,
+  created_by UUID REFERENCES auth.users(id) NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW(),
+
+  -- Constraint: can't have multiple pending invites for same email
+  UNIQUE(cafe_id, email) WHERE used_at IS NULL
+);
+
+-- RLS Policy: Only cafe owner can see invites
+CREATE POLICY invites_select_policy ON invites
+  FOR SELECT
+  USING (cafe_id IN (SELECT id FROM cafes WHERE owner_id = auth.uid()));
+
+-- RLS Policy: Only cafe owner can create invites
+CREATE POLICY invites_insert_policy ON invites
+  FOR INSERT
+  WITH CHECK (cafe_id IN (SELECT id FROM cafes WHERE owner_id = auth.uid()));
+```
+
+**public.milestones**
+```sql
+CREATE TABLE milestones (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  role TEXT NOT NULL CHECK (role IN ('manager', 'barista', 'host')),
+  title TEXT NOT NULL,
+  "order" INT NOT NULL,
+  requires_signoff BOOLEAN DEFAULT TRUE
+);
+```
+
+**public.milestone_progress**
+```sql
+CREATE TABLE milestone_progress (
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  milestone_id UUID REFERENCES milestones(id),
+  completed BOOLEAN DEFAULT FALSE,
+  completed_by UUID REFERENCES users(id),
+  note TEXT,
+  completed_at TIMESTAMP,
+  PRIMARY KEY (user_id, milestone_id)
+);
+
+-- RLS Policy: See own progress + manager sees location's progress
+CREATE POLICY milestone_progress_select_policy ON milestone_progress
+  FOR SELECT
+  USING (
+    user_id = auth.uid()  -- See own progress
+    OR user_id IN (  -- Manager sees their location's staff
+      SELECT id FROM users
+      WHERE location_id = (SELECT location_id FROM users WHERE id = auth.uid())
+    )
+    OR EXISTS (  -- Owner sees all
+      SELECT 1 FROM users
+      WHERE id = auth.uid() AND role IN ('owner', 'admin')
+    )
+  );
+```
+
+**public.lesson_progress**
+```sql
+CREATE TABLE lesson_progress (
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  lesson_id TEXT NOT NULL,
+  completed BOOLEAN DEFAULT FALSE,
+  score INT,
+  total INT,
+  completed_at TIMESTAMP,
+  PRIMARY KEY (user_id, lesson_id)
+);
+
+-- Similar RLS policy to milestone_progress
 ```
 
 ### Curriculum Structure (unchanged)
@@ -320,156 +563,97 @@ window.COPI_CURRICULUM = [window.COPI_VOL1, window.COPI_VOL2, window.COPI_VOL3];
 
 ## Key Architectural Decisions
 
-### Why location scoping at the query level?
+### Why separate marketing site from app?
 
-**Decision**: Filter by locationId in every CopiStore method that returns user data.
-
-**Rationale**:
-- Enforces security boundary - Manager at Location A cannot see Location B data
-- Simple to implement correctly from the start
-- When migrating to Supabase, this becomes Row-Level Security (RLS) policies
-- Prevents accidental data leaks
-
-**Trade-off**: Slight performance overhead (filtering arrays), but negligible at MVP scale (<100 staff per cafe).
-
-### Why separate onboarding milestones from lessons?
-
-**Decision**: Two distinct progress systems - milestones (manager-approved) and lessons (self-assessed).
+**Decision**: Two independent codebases (Next.js for marketing, Vite React for app).
 
 **Rationale**:
-- Onboarding is social (requires manager interaction) vs. learning is solo
-- Milestones track real-world tasks ("shadow a shift") vs. lessons track knowledge
-- Completion mechanics differ (external approval vs. quiz score)
-- Product differentiator - most platforms only have one or the other
+- Different optimization goals (SEO/static for marketing, SPA for app)
+- Marketing site can iterate independently without touching app logic
+- Simpler deploys (marketing changes don't require app rebuild)
+- Signup page on marketing site → redirects to app after account creation
+- Clear separation of public vs. authenticated surfaces
 
-**Trade-off**: More complex data model, but matches real cafe workflows.
+**Trade-off**: Can't share React components between sites, but they have different UX paradigms anyway.
 
-### Why Owner/Admin bypass location filtering?
+### Why Supabase Auth instead of custom auth?
 
-**Decision**: Owner and Admin roles have `locationId: null` and see all locations without filtering.
-
-**Rationale**:
-- Multi-location operators need centralized visibility
-- Avoids needing separate login per location
-- Supports "regional manager" use case (admin role, not owner)
-- Owner dashboard can filter UI by location via switcher, but backend returns all data
-
-**Trade-off**: Owner queries return more data (all locations), but this is acceptable for the owner role.
-
-### Why role stored on user record, not separate role table?
-
-**Decision**: `role` is a string field directly on user object: 'owner' | 'admin' | 'manager' | 'barista' | 'host'
+**Decision**: Use Supabase Auth for all authentication, email delivery, and session management.
 
 **Rationale**:
-- At MVP scale, roles are simple and don't change frequently
-- Avoids JOIN complexity in Supabase queries
-- Easier to understand for developers
-- Fast permission checks (just read user.role)
+- Password hashing handled securely (bcrypt)
+- Session tokens (JWT) with automatic refresh
+- Email templates for invites and password resets
+- OAuth providers (Google SSO) out of the box
+- Battle-tested, audited implementation
+- Saves ~2 weeks of development time
 
-**Trade-off**: Harder to add granular permissions (e.g., "can edit curriculum but not billing"), but that's not an MVP requirement.
+**Trade-off**: Vendor lock-in to Supabase, but migration path exists (export users, rebuild auth).
 
-### Why cafe-centric account structure?
+### Why time-limited invite tokens (72 hours)?
 
-**Decision**: Cafe is the billing entity. All users belong to one cafe. Locations belong to one cafe.
+**Decision**: Invite links expire after 72 hours.
 
 **Rationale**:
-- Matches real-world: cafe owner pays, staff work for that cafe
-- Simplifies billing (one subscription per cafe, not per location or per user)
-- Prevents multi-tenancy complexity (staff can't belong to multiple cafes at MVP)
+- Security: Prevents old invite links from being used maliciously
+- UX: Forces timely onboarding (owner can resend if needed)
+- Cleanup: Expired invites can be auto-archived
+- Industry standard (most SaaS products use 24-72 hour invite expiry)
 
-**Trade-off**: Barista who works at two different cafe chains would need two separate accounts, but this edge case is acceptable at MVP.
+**Trade-off**: Adds complexity (need UI to resend invites), but improves security.
+
+### Why atomic CSV validation?
+
+**Decision**: If ANY row in CSV fails validation, don't create ANY invites.
+
+**Rationale**:
+- Prevents partial import ("some staff got invited, others didn't" is confusing)
+- Owner can fix errors in CSV and re-upload
+- Clear success/failure state
+- Easier to troubleshoot
+
+**Trade-off**: Owner must fix all errors before any invites send, but this forces data quality.
+
+### Why separate auth.users from public.users?
+
+**Decision**: Supabase Auth owns `auth.users`, application owns `public.users` with FK relationship.
+
+**Rationale**:
+- Auth table contains sensitive data (password hashes) - kept in secure schema
+- App table contains business data (cafe, location, role) - kept in public schema
+- Supabase Auth can manage its own migrations without touching app data
+- FK relationship ensures referential integrity
+
+**Trade-off**: Two tables instead of one, but separation of concerns is worth it.
 
 ## Migration Path to Supabase
 
 **Current**: localStorage singleton
-**Target**: Supabase PostgreSQL with RLS
+**Target**: Supabase PostgreSQL + Auth
 
-### Supabase Schema (planned)
+### Phase 1: Set up Supabase project
+- Create Supabase project
+- Define schema (tables above)
+- Configure Row-Level Security policies
+- Set up Auth email templates
 
-```sql
--- Cafes (master accounts)
-CREATE TABLE cafes (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  name TEXT NOT NULL,
-  created_at TIMESTAMP DEFAULT NOW()
-);
+### Phase 2: Implement signup flow
+- Owner signup via Supabase Auth
+- Cafe profile setup (creates cafe + location + user records)
+- Test end-to-end signup on staging
 
--- Locations (belong to cafes)
-CREATE TABLE locations (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  cafe_id UUID REFERENCES cafes(id),
-  name TEXT NOT NULL,
-  address TEXT
-);
+### Phase 3: Implement invite flow
+- Manual staff invite (creates invite record + sends email)
+- Invite accept (validates token, creates user)
+- CSV bulk upload
 
--- Users (staff members)
-CREATE TABLE users (
-  id UUID PRIMARY KEY,  -- Supabase Auth user ID
-  cafe_id UUID REFERENCES cafes(id),
-  location_id UUID REFERENCES locations(id),  -- NULL for owner/admin
-  email TEXT UNIQUE NOT NULL,
-  name TEXT NOT NULL,
-  role TEXT NOT NULL CHECK (role IN ('owner', 'admin', 'manager', 'barista', 'host')),
-  joined_at TIMESTAMP DEFAULT NOW()
-);
+### Phase 4: Migrate existing features
+- Lesson completion → lesson_progress table
+- Milestone completion → milestone_progress table
+- Team roster → users table
+- Location switcher → queries locations table
 
--- Onboarding milestone templates
-CREATE TABLE milestones (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  role TEXT NOT NULL,
-  title TEXT NOT NULL,
-  "order" INT NOT NULL,
-  requires_signoff BOOLEAN DEFAULT TRUE
-);
-
--- Onboarding progress
-CREATE TABLE milestone_progress (
-  user_id UUID REFERENCES users(id),
-  milestone_id UUID REFERENCES milestones(id),
-  completed BOOLEAN DEFAULT FALSE,
-  completed_by UUID REFERENCES users(id),
-  completed_at TIMESTAMP,
-  PRIMARY KEY (user_id, milestone_id)
-);
-
--- Lesson progress (existing structure)
-CREATE TABLE lesson_progress (
-  user_id UUID REFERENCES users(id),
-  lesson_id TEXT NOT NULL,
-  completed BOOLEAN DEFAULT FALSE,
-  score INT,
-  total INT,
-  completed_at TIMESTAMP,
-  PRIMARY KEY (user_id, lesson_id)
-);
-
--- Row-Level Security Policies
-ALTER TABLE users ENABLE ROW LEVEL SECURITY;
-
--- Policy: Users can only see users at their location (or all if owner/admin)
-CREATE POLICY users_select_policy ON users
-  FOR SELECT
-  USING (
-    auth.uid() IN (SELECT id FROM users WHERE role IN ('owner', 'admin'))
-    OR location_id = (SELECT location_id FROM users WHERE id = auth.uid())
-  );
-
--- Similar RLS policies for milestone_progress, lesson_progress, etc.
-```
-
-### Migration Steps
-
-1. **Phase 1: Add Supabase alongside localStorage** (dual-write)
-   - CopiStore writes to both localStorage AND Supabase
-   - Reads still from localStorage
-   - Verify data consistency
-
-2. **Phase 2: Switch reads to Supabase** (dual-write continues)
-   - CopiStore reads from Supabase
-   - Still writes to both (fallback safety)
-
-3. **Phase 3: Remove localStorage** (Supabase only)
-   - Remove localStorage writes
-   - Delete old migration code
-
-This gives a safe rollback path if Supabase integration has issues.
+### Phase 5: Deploy
+- Migrate localStorage prototype users to Supabase (optional)
+- Deploy to production (app.copi.com)
+- Monitor for errors

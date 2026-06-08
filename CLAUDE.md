@@ -6,13 +6,48 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Copi is a **cafe management and education platform** that digitizes the full staff journey from onboarding through advanced coffee knowledge. Cafe owners upload existing processes, and AI sets up their training environment automatically, fills gaps, and suggests improvements. Staff move through structured onboarding milestones, then into self-paced learning tracks tied to their role. Education is delivered through Duolingo-style lessons that turn Q-grade level coffee knowledge into bite-sized, gamified learning.
 
-**Current state**: This is a functional prototype demonstrating the core learning experience (lessons, quizzes, progress tracking). The architecture is being evolved to support the full multi-location, role-based cafe management vision.
+**Current state**: This repository contains the **application** (logged-in experience). The marketing site is a separate codebase built in Next.js.
 
 **Target market**: Small to mid-size cafe operators across North America running 1–4 locations, with architecture to scale to larger groups.
+
+## Project Structure: Two Separate Surfaces
+
+### Marketing Site (Separate Codebase)
+- **Technology**: Next.js (static or server-rendered)
+- **Domain**: copi.com
+- **Purpose**: Public website with landing page, pricing, about, curriculum preview
+- **Hosts**: Signup page (creates account), waitlist capture
+- **Deployment**: Vercel (separate deployment from app)
+
+### Application (This Repository)
+- **Technology**: Vite + React SPA
+- **Domain**: app.copi.com
+- **Purpose**: Logged-in experience for owners, managers, baristas
+- **Contains**: Dashboards, lesson player, onboarding milestones, progress tracking
+- **Deployment**: Vercel (separate deployment from marketing site)
+
+**Developer note**: Treat these as two separate builds. They can share a domain with routing (copi.com vs app.copi.com) but have independent codebases. This repository is the **app only**.
 
 ## Account Structure
 
 **Cafe-centric model**: The cafe holds the master account. Individual staff log in as users underneath it, with permissions tied to their assigned role.
+
+### Three-Level Hierarchy
+
+1. **Cafe Account** (top level)
+   - Owns subscription, billing, all data
+   - Created during owner signup
+   - Example: "Milano Coffee"
+
+2. **Locations** (under cafe)
+   - Cafe has 1-N locations
+   - Each location has its own staff roster and progress data
+   - Example: "Milano Downtown", "Milano Westside"
+
+3. **Users** (under location)
+   - Every user except Owner/Admin is assigned to ONE location at creation
+   - Owner/Admin have `locationId: null` (see all locations)
+   - Example: Lili Turko (barista at Downtown location)
 
 ### Four User Roles
 
@@ -28,15 +63,98 @@ Copi is a **cafe management and education platform** that digitizes the full sta
 - Owner dashboard includes location switcher (dropdown/tab) to filter staff and progress data
 - All data queries filter by locationId except for Owner/Admin roles
 
+## Signup and Authentication
+
+### Signup Flow (Cafe Owners)
+
+1. Owner arrives at signup page from marketing site (copi.com/signup)
+2. Creates account via:
+   - **Email + Password** (standard signup)
+   - **Google SSO** (OAuth via Supabase Auth)
+3. After authenticating, prompted to set up cafe profile:
+   - Cafe name
+   - Number of locations (starts with 1, can add more later)
+   - Owner's role (auto-set to "owner")
+4. Master cafe account is created in database
+5. Owner redirected to app.copi.com (app dashboard)
+
+**Waitlist users**: If they signed up from waitlist, email is pre-filled and flow skips email capture.
+
+### Adding Staff
+
+Owners add staff via two methods:
+
+**Method 1: Manual Entry**
+- Owner enters one staff member at a time:
+  - Name
+  - Email
+  - Role (manager, barista, host)
+  - Location assignment (dropdown of cafe's locations)
+- Triggers invite email immediately
+
+**Method 2: CSV Upload**
+- Owner uploads CSV file with columns: name, email, role, location
+- Platform provides downloadable CSV template
+- Bulk processing: validates rows, creates user records, triggers invite emails
+- Shows success/error summary after upload
+
+### Staff Invite Flow
+
+1. Staff member added → receives email invite with unique link
+2. Link format: `app.copi.com/invite/{token}`
+3. Link is **time-limited**: expires after 72 hours
+4. Clicking link prompts staff to:
+   - Set their own password
+   - Confirm their details (name, email, role, location)
+5. After password set → lands directly in their staff dashboard
+6. If link expires → owner can resend invite from staff management panel
+
+**Invite token storage**:
+- Token stored in database with expiry timestamp
+- Invalidated on first use
+- One-time use only
+
+### Authentication Methods
+
+**Owners**:
+- Email + Password (via Supabase Auth)
+- Google SSO (via Supabase Auth OAuth)
+
+**Staff** (MVP):
+- Email + Password only
+- (Google SSO can be added post-MVP)
+
+**Password Reset**:
+- Standard email reset flow for all users
+- "Forgot password" → email with reset link → set new password
+- Handled by Supabase Auth
+
+### Supabase Auth Integration
+
+**Why Supabase Auth**:
+- Handles password hashing automatically
+- Session management built-in
+- SSO integration (Google, GitHub, etc.) out of the box
+- Email delivery for invites and resets
+- JWT tokens for API authentication
+
+**Database relationships**:
+- `auth.users` table (Supabase Auth managed)
+- `public.users` table (application data) with foreign key to `auth.users.id`
+- Account, location, and user records in main app database
+- Invite tokens stored in `public.invites` table with expiry
+
 ## Tech Stack
 
 - **React** 19.x (latest) - UI library
 - **Vite** 6.x (latest) - Build tool and dev server
-- **Supabase** 2.x (latest) - Backend (to be integrated for production multi-location support)
+- **Supabase** 2.x (latest) - Backend (Auth + Database + Storage)
+- **Supabase Auth** - Authentication (email/password, Google SSO, password reset)
+- **PostgreSQL** (via Supabase) - Database with Row-Level Security (RLS)
 - **No routing library** - Custom event delegation via `copi-prototype-shell.jsx`
 - **No state management library** - Global singleton pattern via `CopiStore`
 - **Inline styles** - All styling via React style objects
-- **localStorage** - Current data persistence (will migrate to Supabase for production)
+- **localStorage** - Current prototype persistence (will migrate to Supabase)
 
 ### Fonts
 - **Unna** - Display/heading serif
@@ -51,7 +169,7 @@ src/
 ├── main.jsx                   # Vite entry point
 ├── styles.css                 # Global styles and font imports (minimal)
 ├── lib/
-│   └── supabaseClient.js      # Supabase client scaffold (to be connected)
+│   └── supabaseClient.js      # Supabase client (Auth + Database)
 └── prototype/                 # Extracted modules (loaded via App.jsx)
     ├── copi-store.jsx         # Global state singleton + curriculum assembly
     ├── copi-prototype-shell.jsx  # Navigation and login routing
@@ -88,8 +206,8 @@ npm run preview
 Supabase configuration (create `.env` in project root):
 
 ```
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_ANON_KEY=your_anon_key
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
 See `.env.example` for template.
@@ -97,43 +215,73 @@ See `.env.example` for template.
 ## Running Locally End-to-End
 
 1. `npm install`
-2. `npm run dev`
-3. Open http://localhost:5173
-4. Use demo credentials to log in:
+2. Create `.env` with Supabase credentials (or use localStorage mode for prototype)
+3. `npm run dev`
+4. Open http://localhost:5173
+5. **With Supabase**: Sign up creates real account, invites send real emails
+6. **Without Supabase (prototype)**: Use demo credentials:
    - **Owner**: admin@milano.coffee / copi2026 (full multi-location access)
    - **Manager**: manager@milano.coffee / copi2026 (single location access) [to be added]
    - **Barista**: lili@milano.coffee / copi2026 (personal progress view)
-5. All progress persists to localStorage and survives refreshes
+7. All progress persists to Supabase or localStorage
 
 ## Data Model (Evolving Architecture)
 
 ### Core Entities
 
+**Cafes**
+```js
+{
+  id: 'cafe-uuid',
+  name: 'Milano Coffee',
+  ownerId: 'user-uuid',  // Reference to auth.users
+  createdAt: '2025-06-01'
+}
+```
+
 **Locations**
 ```js
 {
-  id: 'loc-1',
+  id: 'loc-uuid',
+  cafeId: 'cafe-uuid',
   name: 'Milano Downtown',
   address: '123 Main St',
-  cafeId: 'cafe-milano'
+  createdAt: '2025-06-01'
 }
 ```
 
 **Users** (staff members)
 ```js
 {
+  id: 'user-uuid',  // Matches auth.users.id
+  cafeId: 'cafe-uuid',
+  locationId: 'loc-uuid',  // null for owner/admin
   email: 'lili@milano.coffee',
   name: 'Lili Turko',
   role: 'barista' | 'host' | 'manager' | 'owner' | 'admin',
-  locationId: 'loc-1',  // null for owner/admin
   joined: 'Aug 2025'
+}
+```
+
+**Invites** (for staff onboarding)
+```js
+{
+  id: 'invite-uuid',
+  cafeId: 'cafe-uuid',
+  locationId: 'loc-uuid',
+  email: 'newstaff@milano.coffee',
+  role: 'barista',
+  token: 'unique-token-string',
+  expiresAt: '2025-06-10T12:00:00Z',  // 72 hours from creation
+  usedAt: null,  // null until used
+  createdBy: 'user-uuid'
 }
 ```
 
 **Onboarding Milestones** (separate from lessons)
 ```js
 {
-  id: 'milestone-espresso-basics',
+  id: 'milestone-uuid',
   title: 'Pull your first espresso',
   category: 'barista',
   order: 1,
@@ -154,13 +302,14 @@ See `.env.example` for template.
 **Progress** (per user)
 ```js
 {
-  userId: 'lili@milano.coffee',
-  locationId: 'loc-1',
+  userId: 'user-uuid',
+  locationId: 'loc-uuid',
   onboardingMilestones: {
-    'milestone-espresso-basics': {
+    'milestone-uuid': {
       completed: true,
-      completedBy: 'manager@milano.coffee',
-      ts: 1234567890
+      completedBy: 'manager-uuid',
+      note: 'Great first pull!',
+      completedAt: '2025-06-05T14:30:00Z'
     }
   },
   lessons: { /* existing structure */ },
@@ -170,67 +319,19 @@ See `.env.example` for template.
 
 ## Deployment
 
-Designed for Vercel:
-1. Deploy as Vite project
-2. Add Supabase env vars via Vercel Project Settings
-3. `npm run build` produces static assets in `dist/`
+### Application (This Repository)
+- **Platform**: Vercel
+- **Domain**: app.copi.com
+- **Build**: `npm run build` → static SPA in `dist/`
+- **Environment**: Add Supabase env vars via Vercel Project Settings
+
+### Marketing Site (Separate Repository)
+- **Platform**: Vercel
+- **Domain**: copi.com
+- **Build**: Next.js static export or SSR
+- **Routing**: Signup page redirects to app.copi.com after account creation
 
 ## Critical Architectural Rules
-
-### Location Scoping is Mandatory
-
-Every data query must respect location scoping:
-- **Owner/Admin**: Bypass location filter, see all locations
-- **Manager**: Filter by their assigned locationId
-- **Barista/Host**: Filter by their assigned locationId, see only their own data
-
-```js
-// CORRECT
-const getStaffForUser = (currentUser) => {
-  if (currentUser.role === 'owner' || currentUser.role === 'admin') {
-    return allStaff; // no filter
-  }
-  return allStaff.filter(s => s.locationId === currentUser.locationId);
-};
-
-// INCORRECT - doesn't respect location scoping
-const getStaffForUser = () => allStaff;
-```
-
-### Role-Based Permissions
-
-Four roles with distinct permissions:
-
-| Permission | Owner/Admin | Manager | Barista/Host |
-|------------|-------------|---------|--------------|
-| View all locations | ✅ | ❌ | ❌ |
-| Add/remove staff | ✅ | ❌ | ❌ |
-| Edit curriculum | ✅ | ❌ | ❌ |
-| Access billing | ✅ | ❌ | ❌ |
-| Mark milestones complete | ✅ | ✅ | ❌ |
-| View staff progress (location) | ✅ | ✅ | ❌ |
-| View own progress | ✅ | ✅ | ✅ |
-| Complete lessons | ✅ | ✅ | ✅ |
-
-### Onboarding vs. Learning
-
-**Onboarding milestones** are manager-signed tasks that happen first (day 1-30):
-- "Shadow a shift"
-- "Pull your first espresso"
-- "Complete POS training"
-- Require manager approval to mark complete
-- Role-specific (barista milestones ≠ host milestones)
-
-**Learning tracks** are self-paced lessons that happen after onboarding:
-- Vol I: Coffee History
-- Vol II: Processing Methods
-- Vol III: Barista Knowledge
-- Self-assessed via quizzes
-- Lead to certifications
-
-These are separate systems that both contribute to overall staff development.
-
-## Gotchas and Never-Do's
 
 ### NEVER modify state outside CopiStore
 All components must read from and write to `CopiStore`. The store is the single source of truth.
@@ -249,6 +350,15 @@ Every user except Owner/Admin must have:
 - `role` - one of: owner, admin, manager, barista, host
 - `locationId` - which location they belong to
 - Owner/Admin have `locationId: null` (they see all locations)
+
+### NEVER skip invite flow for staff
+Staff must be invited with time-limited token. They cannot "sign up" directly - only owners can create cafe accounts.
+
+### NEVER store passwords in application database
+Supabase Auth handles all password hashing and storage in `auth.users` table. Application database only stores user metadata.
+
+### NEVER send invite emails from application code
+Use Supabase Auth email templates for invites. Configure templates in Supabase dashboard.
 
 ### The curriculum is assembled at runtime
 `COPI_CURRICULUM` is built from `window.COPI_VOL1`, `window.COPI_VOL2`, `window.COPI_VOL3` in `copi-store.jsx`. Don't break this dependency chain.
@@ -290,3 +400,25 @@ The location switcher is a critical UX element:
 - **Persistence**: Remember selection in component state (or localStorage for convenience)
 
 This gives owners full visibility without separate logins and keeps permission logic clean.
+
+## CSV Upload Format for Staff Import
+
+When implementing CSV upload, use this format:
+
+```csv
+name,email,role,location
+Lili Turko,lili@milano.coffee,barista,Downtown
+Jules Patel,jules@milano.coffee,barista,Downtown
+Sarah Chen,sarah@milano.coffee,manager,Westside
+```
+
+**Validation rules**:
+- Email must be valid format
+- Role must be one of: manager, barista, host
+- Location must match existing location name for the cafe
+- Duplicate emails rejected (one user per email)
+
+**Error handling**:
+- Show which rows failed validation
+- Allow owner to fix and re-upload
+- Don't create any users if ANY row fails (atomic operation)

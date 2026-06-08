@@ -1,5 +1,25 @@
 # ROADMAP.md
 
+## Project Structure
+
+**This repository** (copi-vite-project):
+- The Copi APPLICATION (app.copi.com)
+- Built with Vite + React
+- Authenticated user experience (owner, manager, barista, host dashboards)
+- Currently localStorage prototype, migrating to Supabase backend
+
+**Separate marketing site repository** (not in this repo):
+- The Copi MARKETING SITE (copi.com)
+- Built with Next.js (static or server-rendered)
+- Public pages: landing, pricing, curriculum, about, signup
+- Signup page integrates with Supabase Auth
+- Redirects to app.copi.com after successful signup
+
+**Both repositories share**:
+- Supabase project (authentication + database)
+- Same color palette and typography
+- Same brand identity
+
 ## Current State of the Project
 
 ### What Is Built and Working (Prototype Phase)
@@ -28,10 +48,25 @@
 - ✅ localStorage persistence
 - ✅ Hardcoded demo credentials
 
-**Marketing site** (complete):
-- ✅ Landing page, curriculum, pricing, about pages
+**Marketing site** (separate Next.js repository):
+- ✅ Landing page (copi.com)
+- ✅ Curriculum showcase
+- ✅ Pricing page
+- ✅ About page
+- ✅ Signup page (integrates with Supabase Auth)
+- ✅ Static or server-rendered (Next.js)
+- ✅ Redirects to app.copi.com after signup
 
 ### What Is Being Built (Active MVP Development)
+
+**Authentication & signup** (in progress):
+- 🔄 Supabase Auth integration (password + Google SSO)
+- 🔄 Owner signup flow on marketing site (copi.com/signup)
+- 🔄 Staff invite system with time-limited tokens (72-hour expiry)
+- 🔄 CSV bulk upload for staff invites
+- 🔄 Password reset flow
+- 🔄 Email delivery via Supabase (invite links, password reset)
+- 🔄 Invite validation and one-time use enforcement
 
 **Multi-location architecture** (in progress):
 - 🔄 Location management (add locations, assign staff to locations)
@@ -60,11 +95,13 @@
 - 🔄 Cross-location team roster
 
 **Data model evolution** (in progress):
-- 🔄 Locations entity
-- 🔄 Users with role + locationId
+- 🔄 Cafes entity (top-level account)
+- 🔄 Locations entity (belongs to cafe)
+- 🔄 Users with role + locationId (except owners)
+- 🔄 Invites entity (token-based staff invitations)
 - 🔄 Onboarding milestones
 - 🔄 Progress split: onboarding vs. lessons
-- 🔄 Migration from v3 to v4 localStorage schema
+- 🔄 Migration from v3 localStorage to Supabase
 
 ### What Is NOT Built Yet (Post-MVP)
 
@@ -72,13 +109,6 @@
 - ❌ AI setup (upload handbook → generate milestones)
 - ❌ AI content gap analysis
 - ❌ AI suggestions for improvement
-
-**Authentication & backend**:
-- ❌ Real user accounts (Supabase Auth)
-- ❌ Signup flow (creates cafe + first owner)
-- ❌ Supabase database (tables, RLS policies)
-- ❌ Password reset, email verification
-- ❌ Team invites via email
 
 **Content management**:
 - ❌ Owner can edit milestones
@@ -91,6 +121,8 @@
 - ❌ Export progress reports (PDF, CSV)
 - ❌ Mobile apps (web only)
 - ❌ Reminders/notifications
+- ❌ Email verification (beyond basic Supabase flow)
+- ❌ Two-factor authentication
 
 **Testing & quality**:
 - ❌ Automated tests (unit, integration, E2E)
@@ -103,40 +135,44 @@
 
 ### Must-Have for MVP Launch
 
-1. **Multi-location support**:
-   - Owner can add 2-4 locations
-   - Assign staff to locations
+1. **Authentication & signup** (NEW):
+   - Marketing site (Next.js) with signup page
+   - Owner signup via email/password OR Google SSO
+   - Supabase Auth integration (handles passwords, sessions, OAuth)
+   - Staff invite system with time-limited tokens (72-hour expiry)
+   - CSV bulk upload for staff invites
+   - Password reset flow
+   - One-time use invite tokens
+
+2. **Multi-location support**:
+   - Owner can add 2-4 locations during onboarding
+   - Assign staff to locations via invites
    - Owner dashboard with location switcher
    - Location-scoped data for managers
 
-2. **Four user roles**:
+3. **Four user roles**:
    - Owner/Admin (multi-location view)
    - Manager (single location view)
    - Barista/Host (personal view)
    - Role-based permissions enforced
 
-3. **Onboarding milestones**:
+4. **Onboarding milestones**:
    - Pre-built milestone templates for barista, host, manager roles
    - Manager can mark milestones complete
    - Barista sees onboarding checklist
    - Progress tracked separately from lessons
 
-4. **Learning tracks** (existing, enhanced):
+5. **Learning tracks** (existing, enhanced):
    - 22 lessons across 3 volumes (existing)
    - Role-based assignment (barista gets Vol I-III, host gets Vol I-II)
    - Certification badges
 
-5. **Supabase backend**:
+6. **Supabase backend**:
    - Replace localStorage with Postgres
-   - Row-level security for location scoping
-   - Supabase Auth for login
-   - Email invites for team
-
-6. **Basic signup flow**:
-   - Owner creates cafe account
-   - Adds first location
-   - Invites first staff member
-   - (No AI setup at MVP - owner manually adds milestones)
+   - Row-level security for location scoping + cafe scoping
+   - Supabase Auth for all authentication
+   - Email delivery for invites and password reset
+   - Database schema (cafes, locations, users, invites, milestones, progress)
 
 ### Nice-to-Have for MVP (Deprioritized)
 
@@ -148,12 +184,20 @@
 
 ## Timeline to MVP
 
-### Phase 1: Core Architecture (Current - 2 weeks)
+### Phase 1: Core Architecture & Documentation (Current - 2 weeks)
 
-**Goal**: Build multi-location + role foundation in localStorage prototype
+**Goal**: Build multi-location + role foundation in localStorage prototype + document authentication architecture
 
-- ✅ Update documentation (CLAUDE.md, ARCHITECTURE.md, PRODUCT.md, ROADMAP.md)
-- 🔄 Migrate CopiStore to new data model (locations, roles, milestones)
+**Documentation** (COMPLETED):
+- ✅ Update CLAUDE.md with multi-location, roles, authentication flows
+- ✅ Update ARCHITECTURE.md with signup flows, Supabase Auth, database schema
+- ✅ Update PRODUCT.md with 8 user flows (signup, invites, CSV upload, etc.)
+- ✅ Update ROADMAP.md with marketing site tasks
+- ✅ Update CONVENTIONS.md with coding standards
+- ✅ Update TESTING.md with testing strategy
+
+**Code** (IN PROGRESS):
+- 🔄 Migrate CopiStore to new data model (cafes, locations, roles, milestones, invites)
 - 🔄 Implement location scoping in all query methods
 - 🔄 Add onboarding milestones system
 - 🔄 Build location switcher UI for owner dashboard
@@ -163,89 +207,141 @@
 
 **Deliverable**: Functioning prototype with multi-location, onboarding milestones, role-based permissions (localStorage only)
 
-### Phase 2: Supabase Migration (2-3 weeks)
+### Phase 2: Supabase Migration & Authentication (3-4 weeks)
 
-**Goal**: Replace localStorage with production backend
+**Goal**: Replace localStorage with production backend + implement full authentication
 
+**Supabase setup** (Week 1):
 - Create Supabase project
-- Define schema (cafes, locations, users, milestones, progress)
-- Implement Row-Level Security policies
+- Configure Supabase Auth (email/password + Google OAuth provider)
+- Set up email templates (invite, password reset)
+- Define database schema (cafes, locations, users, invites, milestones, progress)
+- Implement Row-Level Security policies (cafe-scoped + location-scoped)
+
+**Application backend** (Week 2-3):
 - Migrate CopiStore methods to Supabase queries
-- Replace hardcoded credentials with Supabase Auth
-- Test location scoping at database level
+- Implement authentication methods (signup, login, logout, resetPassword)
+- Implement invite methods (inviteStaff, inviteStaffBulk, validateInviteToken, acceptInvite)
+- Add CSV parsing and validation for bulk invites
+- Test location scoping and cafe scoping at database level
+- Test RLS policies for all 4 roles
 
-**Deliverable**: Prototype working with Supabase backend, multi-tenant ready
+**Marketing site** (Week 3-4):
+- Build Next.js marketing site (separate repository)
+- Create signup page with Supabase Auth integration
+- Implement Google SSO button
+- Add redirect to app.copi.com after signup
+- Deploy marketing site to Vercel (copi.com)
 
-### Phase 3: Signup & Invites (1-2 weeks)
+**Application changes** (Week 4):
+- Build invite acceptance page (app.copi.com/invite/{token})
+- Build password reset page
+- Remove hardcoded credentials
+- Add session management
+- Test full signup → invite → login flow
 
-**Goal**: Let owners create accounts and invite team
+**Deliverable**: Prototype working with Supabase backend, full authentication, multi-tenant ready
 
-- Build signup flow (create cafe, add location, set up owner account)
-- Implement team invite system (email with login link)
-- Add location management UI (add/edit locations)
-- Add staff management UI (invite, assign role, assign location)
+### Phase 3: Onboarding & Staff Management UI (2 weeks)
 
-**Deliverable**: Owners can sign up, add locations, invite staff without developer intervention
+**Goal**: Complete owner onboarding experience and staff management tools
+
+**Owner onboarding flow** (Week 1):
+- Build 3-step setup wizard after signup:
+  - Step 1: Create cafe (name, type)
+  - Step 2: Add first location (name, address)
+  - Step 3: Invite first staff members (name, email, role)
+- Redirect to owner dashboard after setup complete
+- Allow skipping Step 3 (can invite later)
+
+**Staff management UI** (Week 2):
+- Build location management page (add/edit/delete locations)
+- Build staff roster with invite status (pending, accepted, expired)
+- Build CSV upload interface with validation feedback
+- Add resend invite button for expired/pending invites
+- Add edit staff role and location assignment
+
+**Deliverable**: Owners can sign up, complete onboarding, add locations, invite staff without developer intervention
 
 ### Phase 4: Polish & Launch Prep (2 weeks)
 
 **Goal**: Make MVP production-ready
 
-- Mobile responsiveness audit
-- Cross-browser testing
-- Performance optimization
-- Error handling & validation
-- Onboarding tutorial for new owners
-- Deploy to production (Vercel)
+**Quality assurance** (Week 1):
+- Mobile responsiveness audit (test on iOS/Android)
+- Cross-browser testing (Chrome, Safari, Firefox, Edge)
+- Performance optimization (bundle size, lazy loading)
+- Error handling & validation (all forms, all flows)
+- Security audit (RLS policies, input sanitization, CSRF protection)
+
+**Launch prep** (Week 2):
+- Onboarding tutorial for new owners (in-app walkthrough)
+- Deploy marketing site to Vercel (copi.com)
+- Deploy application to Vercel (app.copi.com)
+- Set up monitoring (Sentry for errors, analytics)
 - Beta test with 3-5 cafes
 
 **Deliverable**: Production-ready MVP
 
-**Total to MVP**: ~8 weeks
+**Total to MVP**: ~10-11 weeks
 
 ## What Is Actively Being Worked On (This Week)
 
-**Documentation** (just completed):
-- ✅ Updated CLAUDE.md with multi-location architecture
-- ✅ Updated ARCHITECTURE.md with roles, permissions, location scoping
-- ✅ Updated PRODUCT.md with cafe management vision
-- ✅ Updated ROADMAP.md with MVP scope
+**Documentation** (COMPLETED):
+- ✅ Updated CLAUDE.md with multi-location architecture, authentication flows, CSV upload
+- ✅ Updated ARCHITECTURE.md with signup flows, Supabase Auth, database schema with RLS
+- ✅ Updated PRODUCT.md with 8 user flows (signup, invites, CSV, password reset, etc.)
+- ✅ Updated ROADMAP.md with marketing site separation and authentication tasks
+- ✅ Updated CONVENTIONS.md with coding standards (completed earlier)
+- ✅ Updated TESTING.md with testing strategy (completed earlier)
 
-**Code (in progress)**:
-- 🔄 Migrate CopiStore data model to v4 schema (locations, roles, milestones)
+**Code (NEXT UP)**:
+- 🔄 Migrate CopiStore data model to v4 schema (cafes, locations, roles, milestones, invites)
 - 🔄 Add location management methods to CopiStore
 - 🔄 Implement onboarding milestones system
 - 🔄 Add location switcher to owner dashboard
 - 🔄 Create manager dashboard component
-- 🔄 Update seed data for multi-location demo
+- 🔄 Update seed data for multi-location demo with 2 locations, 4 roles
 
 ## What Is Planned Next (After This Week)
 
-**Week 2-3**: Complete localStorage prototype with all MVP features
+**Week 2-3 (Phase 1 completion)**: Complete localStorage prototype with all MVP features
 - Finish manager dashboard
 - Add milestone approval workflow
 - Test all 4 roles with location scoping
 - Validate UX with stakeholders
 
-**Week 4-6**: Supabase migration
-- Set up Supabase project
-- Create schema + RLS policies
-- Migrate CopiStore to Supabase
-- Test multi-tenancy
+**Week 4-7 (Phase 2)**: Supabase migration + authentication
+- Set up Supabase project (Auth + Database)
+- Configure Google OAuth and email templates
+- Create database schema + RLS policies
+- Migrate CopiStore to Supabase queries
+- Build Next.js marketing site with signup
+- Build invite acceptance and password reset pages
+- Test full authentication flows
 
-**Week 7-8**: Signup + polish
-- Build signup flow
-- Add team invites
-- Polish UI
-- Beta test
+**Week 8-9 (Phase 3)**: Owner onboarding + staff management UI
+- Build 3-step owner onboarding wizard
+- Build location management UI
+- Build staff roster with invite status
+- Add CSV upload interface
+- Test complete signup → onboarding → invite flow
+
+**Week 10-11 (Phase 4)**: Polish + beta test
+- Mobile responsiveness audit
+- Cross-browser testing
+- Error handling & validation
+- Performance optimization
+- Beta test with 3-5 cafes
 
 ## Known Issues and Technical Debt
 
-### Critical (blocks MVP)
+### Critical (blocks MVP, being addressed in Phase 2)
 
-1. **No backend** - localStorage can't support real multi-tenant deployment
-2. **No auth** - Hardcoded credentials don't scale
-3. **No location data** - Current schema doesn't support locations
+1. **No backend** - localStorage can't support real multi-tenant deployment → migrating to Supabase
+2. **No auth** - Hardcoded credentials don't scale → implementing Supabase Auth + invite system
+3. **No location data** - Current schema doesn't support locations → adding cafes, locations, invites tables
+4. **No marketing site** - Need separate Next.js site for signup → building in Phase 2
 
 ### High (quality issues)
 
