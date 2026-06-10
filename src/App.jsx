@@ -1,5 +1,19 @@
 import React from 'react';
 
+// Import new design system and components
+import './prototype/design-system.jsx';
+import './prototype/coffee-mascot.jsx';
+import './prototype/ui-components.jsx';
+import './prototype/nav-new.jsx';
+import './prototype/hero-section.jsx';
+import './prototype/problem-section.jsx';
+import './prototype/value-props-section.jsx';
+import './prototype/how-it-works-section.jsx';
+import './prototype/curriculum-section.jsx';
+import './prototype/cta-section.jsx';
+import './prototype/footer-new.jsx';
+import './prototype/landing-page-new.jsx';
+
 // Resource URLs extracted from the standalone HTML bundle.
 if (typeof window !== 'undefined') {
   window.__resources = {
@@ -6707,6 +6721,9 @@ function VolumeModal({ open, volume, onClose, onTrial }) {
 // Route → page
 // ────────────────────────────────────────────────────────────
 function PageFor({ route, user }) {
+  // Pull new landing page component from window
+  const LandingPageNew = window.LandingPageNew;
+
   if (route === 'dashboard') return <RoasterDashboard user={user || {}} />;
   if (route === 'team')      return <AdminTeamPage user={user || {}} />;
   if (route === 'admin-curriculum') return <AdminCurriculumPage user={user || {}} />;
@@ -6718,7 +6735,8 @@ function PageFor({ route, user }) {
   if (route === 'curriculum') return <CurriculumPage />;
   if (route === 'pricing')    return <PricingPage />;
   if (route === 'about')      return <AboutPage />;
-  return <BrandingTemplate3 />;
+  // Use new landing page for home route (default)
+  return LandingPageNew ? <LandingPageNew /> : <BrandingTemplate3 />;
 }
 
 // ────────────────────────────────────────────────────────────

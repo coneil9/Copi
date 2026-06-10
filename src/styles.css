@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&family=Unna:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+/* Primary fonts: DM Serif Display (headings), Inter (body/UI), plus legacy fonts */
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600&family=Lato:wght@300;400;700;900&family=Unna:ital,wght@0,400;0,700;1,400;1,700&family=Yrsa:wght@400;500;600;700&display=swap');
 
 * {
   box-sizing: border-box;
@@ -12,8 +13,9 @@ body,
 }
 
 body {
-  background: #E8DDC2;
-  font-family: -apple-system, BlinkMacSystemFont, 'Lato', sans-serif;
+  background: #F0EDE4;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Lato', sans-serif;
+  color: #1C1C1A;
 }
 
 button,

@@ -1,22 +1,25 @@
 // ═════════════════════════════════════════════════════════
 // ADMIN TEAM PAGE — Manage your team, invite new teammates
-// Almanac aesthetic to match the dashboard
+// Updated with new design system: Warm cream · Forest green
 // ═════════════════════════════════════════════════════════
 
 function AdminTeamPage({ user = {} }) {
+  // Import new design system from window
+  const NEW_PAL = window.NEW_PALETTE || {};
+
   const p = {
-    bg: '#E8DDC2',
-    fg: '#1A1410',
-    accent: '#3F5A3A',
-    cream: '#F4EBD2',
-    sun: '#C68A3D',
-    cherry: '#7A2B1F',
+    bg: NEW_PAL.bg || '#F0EDE4',           // Warm cream
+    fg: NEW_PAL.textPrimary || '#1C1C1A', // Dark text
+    accent: NEW_PAL.accent || '#4A7C59',  // Forest green
+    cream: NEW_PAL.bgCard || '#FFFFFF',   // Card white
+    sun: NEW_PAL.progress || '#C8A96E',   // Gold
+    cherry: '#7A2B1F',                     // Error red
   };
-  const display = { fontFamily: 'Unna' };
-  const sub     = { fontFamily: 'Yrsa' };
-  const sans    = { fontFamily: 'Lato' };
-  const lbl     = { fontFamily: 'Lato', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
-  const mono    = { fontFamily: 'Lato', fontVariantNumeric: 'tabular-nums' };
+  const display = { fontFamily: '"DM Serif Display", Georgia, serif' };
+  const sub     = { fontFamily: '"Inter", sans-serif' };
+  const sans    = { fontFamily: '"Inter", sans-serif' };
+  const lbl     = { fontFamily: '"Inter", sans-serif', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', fontSize: 11 };
+  const mono    = { fontFamily: '"Inter", sans-serif', fontVariantNumeric: 'tabular-nums' };
 
   const name = user.name || 'Brian Turko';
   const cafe = user.cafe || 'Milano';
