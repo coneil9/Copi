@@ -36,6 +36,13 @@ function NavNew({ theme = {} }) {
     }
   };
 
+  // Open login modal
+  const openLogin = () => {
+    if (window.CopiActions && window.CopiActions.openLogin) {
+      window.CopiActions.openLogin();
+    }
+  };
+
   const navStyle = {
     position: 'sticky',
     top: 0,
@@ -154,6 +161,19 @@ function NavNew({ theme = {} }) {
               onMouseLeave={() => setHoveredLink(null)}
             >
               Pricing
+            </a>
+          </li>
+          <li>
+            <a
+              onClick={openLogin}
+              style={{
+                ...linkStyle,
+                color: hoveredLink === 'login' ? p.accent : p.textPrimary
+              }}
+              onMouseEnter={() => setHoveredLink('login')}
+              onMouseLeave={() => setHoveredLink(null)}
+            >
+              Log in
             </a>
           </li>
           <li>

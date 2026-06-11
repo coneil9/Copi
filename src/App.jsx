@@ -2378,288 +2378,127 @@ Object.assign(window, { BrandingTemplate3 });
 
 // ===== about-page.jsx =====
 // ═════════════════════════════════════════════════════════
-// ABOUT PAGE — Almanac direction (Template 3)
-// Beige paper · Moss-green accent · Editorial / almanac
+// ABOUT PAGE — Updated to match new design system
+// Warm parchment · Forest green accent · Clean modern layout
 // ═════════════════════════════════════════════════════════
 function AboutPage({ theme = {} }) {
-  const p = {
-    bg: '#E8DDC2',
-    fg: '#1A1410',
-    accent: '#3F5A3A', // moss
-    cream: '#F4EBD2',
-    sun: '#C68A3D', // ochre
-    rule: '#7A6B4E',
-    ...(theme.palette || {})
-  };
-  const display = { fontFamily: theme.displayFont || 'Unna' };
-  const sub = { fontFamily: 'Yrsa' };
-  const sans = { fontFamily: 'Lato' };
-  const lbl = { fontFamily: 'Lato', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
+  const p = { ...window.NEW_PALETTE, ...(theme.palette || {}) };
+  const t = { ...window.TYPOGRAPHY, ...(theme.typography || {}) };
+  const RADIUS = window.RADIUS || { card: 12, pill: 999, tag: 999 };
+  const SHADOW = window.SHADOW || { card: '0 1px 3px rgba(0,0,0,0.04)' };
 
-  // A small editorial portrait — either a real line-art image, or concentric rings + initials placeholder
-  const Portrait = ({ initials, src }) =>
-  <div style={{
-    width: '100%', aspectRatio: '4 / 5', background: p.cream,
-    border: `1.5px solid ${p.fg}`, position: 'relative', overflow: 'hidden',
-    display: 'grid', placeItems: 'center'
-  }}>
-      <svg width="100%" height="100%" viewBox="0 0 200 250" style={{ position: 'absolute', inset: 0, opacity: src ? 0.25 : 0.5 }}>
-        <defs>
-          <pattern id={`hatch-${initials}`} width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-            <line x1="0" y1="0" x2="0" y2="6" stroke={p.fg} strokeWidth="0.4" opacity="0.5" />
-          </pattern>
-        </defs>
-        <rect width="200" height="250" fill={`url(#hatch-${initials})`} />
-        {!src && <circle cx="100" cy="120" r="56" fill="none" stroke={p.fg} strokeWidth="0.8" opacity="0.4" />}
-        {!src && <circle cx="100" cy="120" r="40" fill="none" stroke={p.fg} strokeWidth="0.5" opacity="0.3" />}
-      </svg>
-      {src ?
-        <img src={src} alt={initials} style={{
-          position: 'relative', width: '100%', height: '100%',
-          objectFit: 'cover', objectPosition: 'center 20%',
-          mixBlendMode: 'multiply',
-        }} /> :
-        <div style={{ position: 'relative', textAlign: 'center' }}>
-          <div style={{ ...display, fontStyle: 'italic', fontSize: 64, lineHeight: 1, color: p.accent }}>{initials}</div>
-          <div style={{ ...lbl, opacity: 0.6, marginTop: 10, fontSize: 9 }}>PORTRAIT · TBD</div>
-        </div>
-      }
-    </div>;
+  const NavNew = window.NavNew;
+  const FooterNew = window.FooterNew;
+  const Eyebrow = window.Eyebrow;
 
-
-  // Tiny seed/leaf marker
-  const Seed = ({ size = 14, color }) =>
-  <svg width={size} height={size} viewBox="0 0 20 20" style={{ display: 'inline-block', verticalAlign: 'middle' }}>
-      <path d="M10 2 C 14 6, 14 14, 10 18 C 6 14, 6 6, 10 2 Z" fill={color || p.accent} />
-      <line x1="10" y1="2" x2="10" y2="18" stroke={p.cream} strokeWidth="0.6" opacity="0.6" />
-    </svg>;
-
-
-  // Editors / contributors. RES() prefers a bundled blob URL
-  // (standalone export) and falls back to the on-disk path live.
   const RES = (id, path) => (window.__resources && window.__resources[id]) || path;
   const editors = [
-  { i: 'OM', name: 'Owen McRann', role: 'Copi CEO', src: RES('owenPortrait', 'uploads/owen-mcrann-portrait.png'), bio: 'Green coffee importer. Founder of AIS, sourcing direct from Indonesian origins. 5 years in specialty coffee trade.' },
-  { i: 'MA', name: 'Miguel Arte', role: 'Curriculum Lead', src: RES('miguelPortrait', 'uploads/miguel-arte-portrait.png'), bio: '10 years across origin, roasting, and bar. Coffee grower, importer, roaster, and working barista.' }];
+    { initials: 'OM', name: 'Owen McRann', role: 'Copi CEO', src: RES('owenPortrait', 'uploads/owen-mcrann-portrait.png'), bio: 'Green coffee importer. Founder of AIS, sourcing direct from Indonesian origins. 5 years in specialty coffee trade.' },
+    { initials: 'MA', name: 'Miguel Arte', role: 'Curriculum Lead', src: RES('miguelPortrait', 'uploads/miguel-arte-portrait.png'), bio: '10 years across origin, roasting, and bar. Coffee grower, importer, roaster, and working barista.' }
+  ];
 
-
-  // Principles
   const principles = [
-  { n: '01', t: 'Education for everyone.', d: 'Coffee knowledge shouldn\'t sit behind a $1,500 course or a senior title. Everyone working in the industry deserves a real education, regardless of their role or what they can afford.' },
-  { n: '02', t: 'Built around your level.', d: 'No two employees start in the same place. Copi adapts to where each person is, what their role requires, and what their team actually needs to know.' },
-  { n: '03', t: 'Quality lives in every role.', d: 'Your reputation isn\'t built by your best barista alone. It\'s carried by everyone on the floor, from the front bar to the back of house. Every person needs to know their part.' },
-  { n: '04', t: 'Managers deserve breathing room.', d: 'The industry is demanding and managers carry most of that weight. Copi handles structured training so they can focus on running the business, not repeating themselves every six weeks.' },
-  { n: '05', t: 'Built by people who\'ve done it.', d: 'Every module is designed by certified Q-graders, working baristas, roasters, and importers — people who have worked every side of the industry, not just written about it.' },
-  { n: '06', t: 'Learning never stops.', d: 'The coffee industry evolves constantly. Education shouldn\'t have a finish line. Copi is built to grow with your team as the industry grows around you.' }];
+    { num: '01', title: 'Education for everyone', description: 'Coffee knowledge shouldn\'t sit behind a $1,500 course or a senior title. Everyone working in the industry deserves a real education, regardless of their role or what they can afford.' },
+    { num: '02', title: 'Built around your level', description: 'No two employees start in the same place. Copi adapts to where each person is, what their role requires, and what their team actually needs to know.' },
+    { num: '03', title: 'Quality lives in every role', description: 'Your reputation isn\'t built by your best barista alone. It\'s carried by everyone on the floor, from the front bar to the back of house. Every person needs to know their part.' },
+    { num: '04', title: 'Managers deserve breathing room', description: 'The industry is demanding and managers carry most of that weight. Copi handles structured training so they can focus on running the business, not repeating themselves every six weeks.' },
+    { num: '05', title: 'Built by people who\'ve done it', description: 'Every module is designed by certified Q-graders, working baristas, roasters, and importers — people who have worked every side of the industry, not just written about it.' },
+    { num: '06', title: 'Learning never stops', description: 'The coffee industry evolves constantly. Education shouldn\'t have a finish line. Copi is built to grow with your team as the industry grows around you.' }
+  ];
 
+  const container = { maxWidth: 1100, margin: '0 auto', padding: '0 24px' };
+  const sectionPad = { padding: '80px 24px' };
 
   return (
-    <div style={{ width: '100%', minHeight: '100%', background: p.bg, color: p.fg, position: 'relative', overflow: 'hidden' }}>
+    <div style={{ minHeight: '100vh', background: p.bg }}>
+      {NavNew && <NavNew theme={{ palette: p, typography: t }} />}
 
-      {/* NAV */}
-      <div style={{
-        display: 'grid', gridTemplateColumns: 'auto 1fr auto', gap: 32, alignItems: 'center',
-        padding: '20px 48px', borderBottom: `1.5px solid ${p.fg}`
-      }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-          <span style={{ ...display, fontStyle: 'italic', fontSize: 44, lineHeight: 1 }}>Copi</span>
-        </div>
-        <div style={{ display: 'flex', gap: 28, justifyContent: 'center', ...sans, fontSize: 13 }}>
-          {['Home', 'Curriculum', 'Pricing', 'About'].map((x) =>
-          <a key={x} style={{
-            opacity: x === 'About' ? 1 : 0.75,
-            fontWeight: x === 'About' ? 700 : 400,
-            borderBottom: x === 'About' ? `1.5px solid ${p.fg}` : 'none',
-            paddingBottom: 2
-          }}>{x}</a>
-          )}
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 22 }}>
-          <a style={{ ...sans, fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', opacity: 0.75 }}>
-            Log in
-          </a>
-          <button style={{
-            background: p.accent, color: p.cream, padding: '11px 22px', borderRadius: 0,
-            ...sans, fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase'
-          }}>
-            Start free trial →
-          </button>
-        </div>
-      </div>
-
-      {/* METADATA STRIP */}
-      <div style={{
-        ...lbl, opacity: 0.65, display: 'flex', justifyContent: 'space-between',
-        padding: '12px 48px', borderBottom: `1px solid ${p.fg}30`
-      }}>
-        <span>ABOUT · EDITION 001</span>
-        <span>COMPILED IN VANCOUVER · CANADA</span>
-        <span>MMXXVI</span>
-      </div>
-
-      {/* ORIGIN STORY — three-column editorial */}
-      <div style={{ padding: '120px 48px', background: p.cream, borderBottom: `1.5px solid ${p.fg}` }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: 80, alignItems: 'start', marginBottom: 80 }}>
-          <div>
-            <div style={{ ...lbl, color: p.accent, marginBottom: 16 }}>I. ORIGIN</div>
-            <h2 style={{ ...display, fontSize: 84, lineHeight: 0.95, letterSpacing: '-0.025em' }}>
-              How <em style={{ fontStyle: 'italic', color: p.accent }}>Copi</em><br />came to be.
-            </h2>
-            <div style={{ ...lbl, opacity: 0.55, marginTop: 28, display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ width: 18, height: 1, background: p.fg, opacity: 0.5 }} />
-              <span>THE EDITOR'S LETTER</span>
-            </div>
-          </div>
-          <div style={{ paddingTop: 24, borderTop: `2px solid ${p.fg}` }}>
-            {/* Lead — first line as a pull-quote */}
-            <p style={{ ...display, fontSize: 60, lineHeight: 1.12, fontStyle: 'italic', letterSpacing: '-0.02em', marginTop: 28, maxWidth: '20ch', fontWeight: 400 }}>
-              We believe everyone in coffee deserves a real <em style={{ fontStyle: 'italic', color: p.accent }}>education</em> — not passed-down knowledge from whoever was on shift.
-            </p>
-
-            {/* Section break */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14, margin: '56px 0 40px' }}>
-              <span style={{ flex: '0 0 auto', width: 28, height: 1, background: p.fg, opacity: 0.45 }} />
-              <span style={{ ...lbl, opacity: 0.5, fontSize: 9 }}>◆</span>
-              <span style={{ flex: '1 1 auto', height: 1, background: p.fg, opacity: 0.25 }} />
-            </div>
-
-            {/* Body — two paragraphs in Yrsa */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 56 }}>
-              <p style={{ ...sub, fontSize: 26, lineHeight: 1.45, fontWeight: 400, opacity: 0.9, letterSpacing: '-0.005em' }}>
-                The industry's biggest knowledge gap isn't at origin or in competition. It's inside the cafés and roasteries where most people actually work — the bars pouring eleven hundred drinks a week, the rooms where a new hire learns the craft from whoever happens to be on shift.
-              </p>
-              <p style={{ ...sub, fontSize: 26, lineHeight: 1.45, fontWeight: 400, opacity: 0.9, letterSpacing: '-0.005em' }}>
-                Copi is an AI-supplemented onboarding platform built for those teams — training every new employee to be competent and confident, regardless of where they're starting from, and giving managers their afternoons back.
-              </p>
-            </div>
-
-            {/* Signoff */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 40, ...lbl, opacity: 0.55 }}>
-              <Seed size={12} />
-              <span>SIGNED · OWEN McRANN · COPI CEO</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* PRINCIPLES — six entries, two-column ledger */}
-      <div style={{ padding: '120px 48px', borderBottom: `1.5px solid ${p.fg}` }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 56 }}>
-          <div>
-            <div style={{ ...lbl, color: p.accent, marginBottom: 16 }}>II. PRINCIPLES</div>
-            <h2 style={{ ...display, fontSize: 84, lineHeight: 0.95, letterSpacing: '-0.025em' }}>
-              Six things we<br />
-              <em style={{ fontStyle: 'italic', color: p.accent }}>believe,</em> in writing.
-            </h2>
-          </div>
-          <div style={{ ...lbl, opacity: 0.55 }}>SIGNED · THE EDITORS</div>
-        </div>
-
-        <div style={{
-          display: 'grid', gridTemplateColumns: '1fr 1fr',
-          borderTop: `1.5px solid ${p.fg}`, borderBottom: `1.5px solid ${p.fg}`
-        }}>
-          {principles.map((row, i) => {
-            const isLeft = i % 2 === 0;
-            const isLastRow = i >= principles.length - 2;
-            return (
-              <div key={i} style={{
-                display: 'grid', gridTemplateColumns: '110px 1fr', gap: 28,
-                padding: '44px 36px',
-                borderBottom: !isLastRow ? `1px dashed ${p.fg}30` : 'none',
-                borderRight: isLeft ? `1.5px solid ${p.fg}` : 'none',
-                alignItems: 'start'
-              }}>
-                <div style={{
-                  ...display, fontStyle: 'italic', fontSize: 76, lineHeight: 0.9, color: p.accent, fontWeight: 400
-                }}>
-                  {row.n}
-                </div>
-                <div>
-                  <div style={{ ...sub, fontSize: 34, letterSpacing: '-0.015em', fontWeight: 500, lineHeight: 1.15 }}>
-                    {row.t}
-                  </div>
-                  <p style={{ ...sans, fontSize: 17, lineHeight: 1.6, opacity: 0.82, marginTop: 16, fontWeight: 400 }}>
-                    {row.d}
-                  </p>
-                </div>
-              </div>);
-
-          })}
-        </div>
-      </div>
-
-      {/* EDITORS — masthead row */}
-      <div style={{ padding: '120px 48px', background: p.cream, borderBottom: `1.5px solid ${p.fg}` }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 56 }}>
-          <div>
-            <div style={{ ...lbl, color: p.accent, marginBottom: 16 }}>III. THE EDITORS</div>
-            <h2 style={{ ...display, fontSize: 84, lineHeight: 0.95, letterSpacing: '-0.025em' }}>
-              Who <em style={{ fontStyle: 'italic', color: p.accent }}>signs off</em><br />
-              every lesson.
-            </h2>
-          </div>
-          <p style={{ ...sans, fontSize: 14, lineHeight: 1.6, opacity: 0.75, maxWidth: 360 }}>
-            Every track in Copi is written, drilled, and signed by a working barista or licensed Q-grader. No anonymous curriculum. No black-box AI.
+      {/* Header */}
+      <section style={{ ...sectionPad, paddingTop: 80, paddingBottom: 64, textAlign: 'center' }}>
+        <div style={{ ...container, maxWidth: 800 }}>
+          {Eyebrow && <Eyebrow style={{ marginBottom: 16 }}>ABOUT COPI</Eyebrow>}
+          <h1 style={{ ...t.h1, color: p.textPrimary, margin: '0 0 24px 0', fontSize: 56 }}>
+            Built by people who've done it.
+          </h1>
+          <p style={{ ...t.bodyLarge, color: p.textMuted, margin: 0, lineHeight: 1.7, maxWidth: 680, marginLeft: 'auto', marginRight: 'auto' }}>
+            We believe everyone in coffee deserves a real education — not passed-down knowledge from whoever was on shift. Every module is designed by certified Q-graders, working baristas, roasters, and importers.
           </p>
         </div>
+      </section>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 56, maxWidth: 820, margin: '0 auto' }}>
-          {editors.map((e, i) =>
-          <div key={i}>
-              <Portrait initials={e.i} src={e.src} />
-              <div style={{ ...lbl, color: p.accent, marginTop: 18 }}>{e.role}</div>
-              <div style={{ ...display, fontSize: 32, lineHeight: 1.1, marginTop: 6, letterSpacing: '-0.01em' }}>{e.name}</div>
-              <p style={{ ...sans, fontSize: 13, lineHeight: 1.6, opacity: 0.78, marginTop: 12, fontWeight: 400 }}>
-                {e.bio}
-              </p>
-            </div>
-          )}
+      {/* Team */}
+      <section style={{ ...sectionPad }}>
+        <div style={{ ...container }}>
+          <div style={{ marginBottom: 48, textAlign: 'center' }}>
+            {Eyebrow && <Eyebrow style={{ marginBottom: 16 }}>THE TEAM</Eyebrow>}
+            <h2 style={{ ...t.h2, fontSize: 36, color: p.textPrimary, margin: 0 }}>Meet the editors</h2>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 32 }}>
+            {editors.map((editor, i) => (
+              <div key={i} style={{ background: p.bgCard, borderRadius: RADIUS.card, border: `1px solid ${p.tagBorder}`, padding: 32, display: 'flex', gap: 24 }}>
+                <div style={{ width: 100, height: 100, borderRadius: '50%', background: p.tagBg, flexShrink: 0, overflow: 'hidden', border: `2px solid ${p.accent}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {editor.src
+                    ? <img src={editor.src} alt={editor.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    : <span style={{ ...t.display, fontSize: 32, fontStyle: 'italic', color: p.accent }}>{editor.initials}</span>
+                  }
+                </div>
+                <div style={{ flex: 1 }}>
+                  <h3 style={{ ...t.h3, fontSize: 22, color: p.textPrimary, margin: '0 0 4px 0' }}>{editor.name}</h3>
+                  <div style={{ ...t.eyebrow, color: p.textMuted, marginBottom: 12 }}>{editor.role}</div>
+                  <p style={{ ...t.bodySmall, color: p.textMuted, lineHeight: 1.6, margin: 0 }}>{editor.bio}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
+      </section>
 
-        <div style={{ ...lbl, opacity: 0.5, marginTop: 48, textAlign: 'center' }}>── +7 MORE CONTRIBUTING EDITORS ──
+      {/* Principles */}
+      <section style={{ ...sectionPad }}>
+        <div style={{ ...container }}>
+          {Eyebrow && <Eyebrow style={{ textAlign: 'center', marginBottom: 16 }}>OUR PRINCIPLES</Eyebrow>}
+          <h2 style={{ ...t.h2, color: p.textPrimary, textAlign: 'center', margin: '0 0 48px 0' }}>What we believe</h2>
 
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 24 }}>
+            {principles.map((principle, i) => (
+              <div key={i} style={{ background: p.bgCard, borderRadius: RADIUS.card, border: `1px solid ${p.tagBorder}`, padding: 32 }}>
+                <div style={{ ...t.display, fontSize: 48, lineHeight: 1, color: p.accent, opacity: 0.3, marginBottom: 16 }}>{principle.num}</div>
+                <h3 style={{ ...t.body, fontSize: 18, fontWeight: 600, color: p.textPrimary, margin: '0 0 12px 0' }}>{principle.title}</h3>
+                <p style={{ ...t.bodySmall, color: p.textMuted, lineHeight: 1.6, margin: 0 }}>{principle.description}</p>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      </section>
 
-      <CopiFooter theme={theme} />
-    </div>);
-
+      {FooterNew && <FooterNew theme={{ palette: p, typography: t }} />}
+    </div>
+  );
 }
 
 Object.assign(window, { AboutPage });
 
 // ===== pricing-page.jsx =====
 // ═════════════════════════════════════════════════════════
-// PRICING PAGE — Almanac direction (Template 3)
-// Beige paper · Moss-green accent · Three subscription tiers
+// PRICING PAGE — Updated to match new design system
 // ═════════════════════════════════════════════════════════
 function PricingPage({ theme = {} }) {
-  const p = {
-    bg: '#E8DDC2',
-    fg: '#1A1410',
-    accent: '#3F5A3A', // moss
-    cream: '#F4EBD2',
-    sun: '#C68A3D',    // ochre
-    rule: '#7A6B4E',
-    ...(theme.palette || {}),
-  };
-  const display = { fontFamily: theme.displayFont || 'Unna' };
-  const sub = { fontFamily: 'Yrsa' };
-  const sans = { fontFamily: 'Lato' };
-  const lbl = { fontFamily: 'Lato', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
+  const p = { ...window.NEW_PALETTE, ...(theme.palette || {}) };
+  const t = { ...window.TYPOGRAPHY, ...(theme.typography || {}) };
+  const RADIUS = window.RADIUS || { card: 12, pill: 999 };
+  const SHADOW = window.SHADOW || { card: '0 1px 3px rgba(0,0,0,0.04)', cardHover: '0 4px 6px rgba(0,0,0,0.06)' };
+  const NavNew = window.NavNew;
+  const FooterNew = window.FooterNew;
+  const Eyebrow = window.Eyebrow;
 
   const tiers = [
     {
-      side: 'I',
       name: 'Trial',
       tagline: 'Trying Copi for FREE',
       price: '0',
-      unit: '/ month',
-      sub: 'for 30 days',
-      seats: '1 manager · unlimited baristas',
-      cta: 'Start free trial',
-      featured: false,
+      period: '30 days free',
+      description: '1 manager · unlimited baristas',
       features: [
         'Full Foundations track (12 entries)',
         'First two espresso drills',
@@ -2667,17 +2506,15 @@ function PricingPage({ theme = {} }) {
         'Email support, 1 business day',
         'No card required',
       ],
+      cta: 'Start free trial',
+      featured: false,
     },
     {
-      side: 'II',
       name: 'Studio',
-      tagline: 'For independent cafés.',
+      tagline: 'For independent cafés',
       price: '25',
-      unit: '/ month',
-      sub: 'billed monthly',
-      seats: '2–5 baristas',
-      cta: 'Start with Studio',
-      featured: true,
+      period: 'per month',
+      description: '2–5 baristas',
       features: [
         'Entire 50-entry almanac',
         'Calibrated rubrics + manager sign-off',
@@ -2685,17 +2522,15 @@ function PricingPage({ theme = {} }) {
         'Certification tracking',
         'Priority editor support',
       ],
+      cta: 'Start with Studio',
+      featured: true,
     },
     {
-      side: 'III',
       name: 'Roastery',
-      tagline: 'For multi-bar operations.',
+      tagline: 'For multi-bar operations',
       price: '50',
-      unit: '/ month',
-      sub: 'billed monthly',
-      seats: '5+ baristas · multi-location',
-      cta: 'Start with Roastery',
-      featured: false,
+      period: 'per month',
+      description: '5+ baristas · multi-location',
       features: [
         'Everything in Studio',
         'Multi-location dashboards',
@@ -2703,171 +2538,127 @@ function PricingPage({ theme = {} }) {
         'API access + roster sync',
         'Dedicated onboarding editor',
       ],
+      cta: 'Start with Roastery',
+      featured: false,
     },
   ];
 
-  // Tiny check glyph (almanac feel — small filled seed)
-  const Tick = () => (
-    <svg width="11" height="11" viewBox="0 0 12 12" style={{ flex: '0 0 11px', marginTop: 6 }}>
-      <path d="M6 1 C 9 4, 9 8, 6 11 C 3 8, 3 4, 6 1 Z" fill={p.accent} />
-    </svg>
-  );
+  const [hoveredTier, setHoveredTier] = React.useState(null);
+  const container = { maxWidth: 1100, margin: '0 auto', padding: '0 24px' };
 
   return (
-    <div style={{ width: '100%', minHeight: '100%', background: p.bg, color: p.fg, position: 'relative', overflow: 'hidden' }}>
+    <div style={{ minHeight: '100vh', background: p.bg }}>
+      {NavNew && <NavNew theme={{ palette: p, typography: t }} />}
 
-      {/* NAV */}
-      <div style={{
-        display: 'grid', gridTemplateColumns: 'auto 1fr auto', gap: 32, alignItems: 'center',
-        padding: '20px 48px', borderBottom: `1.5px solid ${p.fg}`,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-          <span style={{ ...display, fontStyle: 'italic', fontSize: 44, lineHeight: 1 }}>Copi</span>
+      {/* Header */}
+      <section style={{ padding: '80px 24px 64px', textAlign: 'center' }}>
+        <div style={{ ...container, maxWidth: 700 }}>
+          {Eyebrow && <Eyebrow style={{ marginBottom: 16 }}>PRICING</Eyebrow>}
+          <h1 style={{ ...t.h1, color: p.textPrimary, margin: '0 0 20px 0', fontSize: 56 }}>
+            Honest pricing, by the month.
+          </h1>
+          <p style={{ ...t.bodyLarge, color: p.textMuted, margin: 0, lineHeight: 1.6 }}>
+            Start with a free 30-day trial. No credit card required. Cancel anytime.
+          </p>
         </div>
-        <div style={{ display: 'flex', gap: 28, justifyContent: 'center', ...sans, fontSize: 13 }}>
-          {['Home', 'Curriculum', 'Pricing', 'About'].map((x) => (
-            <a key={x} style={{
-              opacity: x === 'Pricing' ? 1 : 0.75,
-              fontWeight: x === 'Pricing' ? 700 : 400,
-              borderBottom: x === 'Pricing' ? `1.5px solid ${p.fg}` : 'none',
-              paddingBottom: 2,
-            }}>{x}</a>
-          ))}
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 22 }}>
-          <a style={{ ...sans, fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', opacity: 0.75 }}>
-            Log in
-          </a>
-          <button style={{
-            background: p.accent, color: p.cream, padding: '11px 22px', borderRadius: 0,
-            ...sans, fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase',
-          }}>
-            Start free trial →
-          </button>
-        </div>
-      </div>
+      </section>
 
-      {/* METADATA STRIP */}
-      <div style={{
-        ...lbl, opacity: 0.65, display: 'flex', justifyContent: 'space-between',
-        padding: '12px 48px', borderBottom: `1px solid ${p.fg}30`,
-      }}>
-        <span>PRICING · EDITION 001</span>
-        <span>MONTHLY · NO CARD FOR TRIAL</span>
-        <span>USD · MMXXVI</span>
-      </div>
-
-      {/* HEADER */}
-      <div style={{ padding: '96px 48px 72px', borderBottom: `1.5px solid ${p.fg}` }}>
-        <div style={{ ...lbl, color: p.accent, marginBottom: 28 }}>◆ SUBSCRIPTIONS · THREE EDITIONS</div>
-        <h1 style={{
-          ...display, fontSize: 104, lineHeight: 0.95, letterSpacing: '-0.035em', fontWeight: 400,
-          whiteSpace: 'nowrap',
-        }}>
-          Honest <em style={{ fontStyle: 'italic', color: p.accent }}>pricing</em>, by the month.
-        </h1>
-      </div>
-
-      {/* TIERS */}
-      <div style={{ padding: '80px 48px 96px' }}>
-        <div style={{
-          display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 0,
-          border: `1.5px solid ${p.fg}`,
-        }}>
-          {tiers.map((t, i) => {
-            const featured = t.featured;
-            const fg = featured ? p.cream : p.fg;
-            const bg = featured ? p.accent : p.bg;
-            const dim = featured ? `${p.cream}55` : `${p.fg}30`;
+      {/* Pricing Tiers */}
+      <section style={{ padding: '0 24px 80px' }}>
+        <div style={{ ...container, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24, alignItems: 'start' }}>
+          {tiers.map((tier, i) => {
+            const isHovered = hoveredTier === i;
             return (
-              <div key={i} style={{
-                background: bg, color: fg, padding: '40px 32px 36px',
-                borderRight: i < 2 ? `1.5px solid ${p.fg}` : 'none',
-                display: 'flex', flexDirection: 'column', position: 'relative',
-              }}>
-                {featured && (
+              <div
+                key={i}
+                onMouseEnter={() => setHoveredTier(i)}
+                onMouseLeave={() => setHoveredTier(null)}
+                style={{
+                  background: tier.featured ? p.accent : p.bgCard,
+                  borderRadius: RADIUS.card,
+                  border: `1px solid ${tier.featured ? p.accent : p.tagBorder}`,
+                  padding: 32,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  position: 'relative',
+                  boxShadow: tier.featured || isHovered ? SHADOW.cardHover : SHADOW.card,
+                  transform: tier.featured ? 'translateY(-8px)' : 'none',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                {tier.featured && (
                   <div style={{
-                    position: 'absolute', top: -14, left: 24,
-                    background: p.sun, color: p.fg, padding: '5px 10px',
-                    ...lbl, fontSize: 9,
+                    position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)',
+                    background: p.progress, color: p.textPrimary,
+                    padding: '6px 14px', borderRadius: RADIUS.pill,
+                    ...t.label, fontSize: 10,
                   }}>
-                    ◆ MOST POPULAR
+                    MOST POPULAR
                   </div>
                 )}
 
-                {/* Side label + name */}
-                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 18 }}>
-                  <div style={{ ...lbl, opacity: featured ? 0.7 : 0.55, color: fg }}>{t.side} · {t.name.toUpperCase()}</div>
-                  <div style={{ ...lbl, opacity: featured ? 0.7 : 0.55, color: fg }}>{t.sub}</div>
+                <div style={{ ...t.eyebrow, color: tier.featured ? p.textOnDark : p.textMuted, opacity: tier.featured ? 0.9 : 1, marginBottom: 12 }}>
+                  {tier.name}
                 </div>
 
-                {/* Tagline */}
-                <div style={{ ...display, fontStyle: 'italic', fontSize: 40, lineHeight: 1.05, letterSpacing: '-0.015em', marginBottom: 32 }}>
-                  {t.tagline}
+                <h2 style={{ ...t.h3, fontSize: 26, fontStyle: 'italic', color: tier.featured ? p.textOnDark : p.textPrimary, margin: '0 0 24px 0', lineHeight: 1.2 }}>
+                  {tier.tagline}
+                </h2>
+
+                <div style={{ marginBottom: 16, paddingBottom: 20, borderBottom: `1px solid ${tier.featured ? 'rgba(255,255,255,0.2)' : p.tagBorder}` }}>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+                    <span style={{ ...t.display, fontSize: 28, color: tier.featured ? p.textOnDark : p.textPrimary, opacity: 0.7 }}>$</span>
+                    <span style={{ ...t.display, fontSize: 64, lineHeight: 1, color: tier.featured ? p.textOnDark : p.textPrimary }}>{tier.price}</span>
+                    <span style={{ ...t.bodySmall, color: tier.featured ? p.textOnDark : p.textMuted, opacity: tier.featured ? 0.8 : 1, marginLeft: 8 }}>{tier.period}</span>
+                  </div>
                 </div>
 
-                {/* Price block */}
-                <div style={{
-                  display: 'flex', alignItems: 'baseline', gap: 10,
-                  paddingBottom: 14, borderBottom: `1.5px solid ${dim}`,
-                }}>
-                  {t.price !== null && (
-                    <span style={{ ...display, fontSize: 56, lineHeight: 1, opacity: 0.7, fontWeight: 400 }}>$</span>
-                  )}
-                  <span style={{ ...display, fontSize: 132, lineHeight: 0.85, letterSpacing: '-0.04em', fontWeight: 400 }}>
-                    {t.price}
-                  </span>
-                  <span style={{ ...sans, fontSize: 14, opacity: 0.7, fontWeight: 400, marginLeft: 4 }}>{t.unit}</span>
+                <div style={{ ...t.bodySmall, color: tier.featured ? p.textOnDark : p.textMuted, opacity: tier.featured ? 0.9 : 1, marginBottom: 24 }}>
+                  {tier.description}
                 </div>
 
-                {/* Seats */}
-                <div style={{ ...sans, fontSize: 13, opacity: 0.78, marginTop: 14, marginBottom: 28, fontWeight: 400 }}>
-                  <span style={{ ...lbl, opacity: 0.6, marginRight: 6, color: fg }}>FOR</span>
-                  {t.seats}
-                </div>
-
-                {/* Features */}
-                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 36 }}>
-                  {t.features.map((f, j) => (
-                    <li key={j} style={{ display: 'flex', gap: 12, ...sans, fontSize: 14, lineHeight: 1.5, fontWeight: 400 }}>
-                      <svg width="11" height="11" viewBox="0 0 12 12" style={{ flex: '0 0 11px', marginTop: 6 }}>
-                        <path d="M6 1 C 9 4, 9 8, 6 11 C 3 8, 3 4, 6 1 Z" fill={featured ? p.sun : p.accent} />
-                      </svg>
-                      <span>{f}</span>
+                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 32px 0', display: 'flex', flexDirection: 'column', gap: 12, flex: 1 }}>
+                  {tier.features.map((feature, j) => (
+                    <li key={j} style={{ ...t.bodySmall, color: tier.featured ? p.textOnDark : p.textPrimary, display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                      <div style={{
+                        width: 18, height: 18, borderRadius: '50%',
+                        background: tier.featured ? p.progress : p.accent,
+                        color: '#FFFFFF',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 10, flexShrink: 0, marginTop: 2,
+                      }}>✓</div>
+                      <span>{feature}</span>
                     </li>
                   ))}
                 </ul>
 
-                {/* CTA */}
-                <button style={{
-                  marginTop: 'auto',
-                  background: featured ? p.cream : p.accent,
-                  color: featured ? p.accent : p.cream,
-                  padding: '16px 22px', borderRadius: 0,
-                  ...sans, fontSize: 13, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase',
-                  textAlign: 'left',
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                }}>
-                  <span>{t.cta}</span>
-                  <span>→</span>
+                <button
+                  onClick={() => { if (window.CopiActions && window.CopiActions.openTrial) window.CopiActions.openTrial(); }}
+                  style={{
+                    ...t.button,
+                    width: '100%',
+                    padding: '14px 24px',
+                    borderRadius: RADIUS.pill,
+                    border: 'none',
+                    cursor: 'pointer',
+                    background: tier.featured ? '#FFFFFF' : p.accent,
+                    color: tier.featured ? p.accent : '#FFFFFF',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  {tier.cta}
                 </button>
               </div>
             );
           })}
         </div>
 
-        {/* Fine print row */}
-        <div style={{
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          ...lbl, opacity: 0.55, marginTop: 24,
-        }}>
-          <span>NO PER-SEAT CHARGES · CANCEL ANY MONTH</span>
-          <span>ANNUAL PLANS −15% · TALK TO US</span>
-          <span>USD · TAXES NOT INCLUDED</span>
-        </div>
-      </div>
+        <p style={{ ...t.bodySmall, color: p.textMuted, textAlign: 'center', marginTop: 32 }}>
+          No per-seat charges · Cancel any month · Annual plans −15%
+        </p>
+      </section>
 
-      <CopiFooter theme={theme} />
+      {FooterNew && <FooterNew theme={{ palette: p, typography: t }} />}
     </div>
   );
 }
@@ -2877,31 +2668,16 @@ Object.assign(window, { PricingPage });
 
 // ===== curriculum-page.jsx =====
 // ═════════════════════════════════════════════════════════
-// CURRICULUM PAGE — Almanac direction (Template 3)
-// Beige paper · Moss-green accent · Three tracks
+// CURRICULUM PAGE — Updated to match new design system
 // ═════════════════════════════════════════════════════════
 function CurriculumPage({ theme = {} }) {
-  const p = {
-    bg: '#E8DDC2',
-    fg: '#1A1410',
-    accent: '#3F5A3A', // moss
-    cream: '#F4EBD2',
-    sun: '#C68A3D',    // ochre
-    rule: '#7A6B4E',
-    ...(theme.palette || {}),
-  };
-  const display = { fontFamily: theme.displayFont || 'Unna' };
-  const sub = { fontFamily: 'Yrsa' };
-  const sans = { fontFamily: 'Lato' };
-  const lbl = { fontFamily: 'Lato', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
-
-  // Seed glyph
-  const Seed = ({ size = 12, color }) => (
-    <svg width={size} height={size} viewBox="0 0 20 20" style={{ display: 'inline-block', verticalAlign: 'middle' }}>
-      <path d="M10 2 C 14 6, 14 14, 10 18 C 6 14, 6 6, 10 2 Z" fill={color || p.accent} />
-      <line x1="10" y1="2" x2="10" y2="18" stroke={p.cream} strokeWidth="0.6" opacity="0.6" />
-    </svg>
-  );
+  const p = { ...window.NEW_PALETTE, ...(theme.palette || {}) };
+  const t = { ...window.TYPOGRAPHY, ...(theme.typography || {}) };
+  const RADIUS = window.RADIUS || { card: 12, pill: 999 };
+  const SHADOW = window.SHADOW || { card: '0 1px 3px rgba(0,0,0,0.04)', cardHover: '0 4px 6px rgba(0,0,0,0.06)' };
+  const NavNew = window.NavNew;
+  const FooterNew = window.FooterNew;
+  const Eyebrow = window.Eyebrow;
 
   const tracks = window.COPI_VOLUMES = [
     {
@@ -2967,185 +2743,110 @@ function CurriculumPage({ theme = {} }) {
     },
   ];
 
+  const container = { maxWidth: 1100, margin: '0 auto', padding: '0 24px' };
+  const [hoveredCard, setHoveredCard] = React.useState(null);
+
   return (
-    <div style={{ width: '100%', minHeight: '100%', background: p.bg, color: p.fg, position: 'relative', overflow: 'hidden' }}>
+    <div style={{ minHeight: '100vh', background: p.bg }}>
+      {NavNew && <NavNew theme={{ palette: p, typography: t }} />}
 
-      {/* NAV */}
-      <div style={{
-        display: 'grid', gridTemplateColumns: 'auto 1fr auto', gap: 32, alignItems: 'center',
-        padding: '20px 48px', borderBottom: `1.5px solid ${p.fg}`,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-          <span style={{ ...display, fontStyle: 'italic', fontSize: 44, lineHeight: 1 }}>Copi</span>
+      {/* Header */}
+      <section style={{ padding: '80px 24px 64px', textAlign: 'center' }}>
+        <div style={{ ...container, maxWidth: 800 }}>
+          {Eyebrow && <Eyebrow style={{ marginBottom: 16 }}>THE CURRICULUM</Eyebrow>}
+          <h1 style={{ ...t.h1, color: p.textPrimary, margin: '0 0 20px 0', fontSize: 56 }}>
+            From the cherry to the cup.
+          </h1>
+          <p style={{ ...t.bodyLarge, color: p.textMuted, margin: 0, lineHeight: 1.6 }}>
+            Three volumes, signed off by working baristas and Q-graders. Every entry ends in a hands-on drill with a calibrated rubric.
+          </p>
         </div>
-        <div style={{ display: 'flex', gap: 28, justifyContent: 'center', ...sans, fontSize: 13 }}>
-          {['Home', 'Curriculum', 'Pricing', 'About'].map((x) => (
-            <a key={x} style={{
-              opacity: x === 'Curriculum' ? 1 : 0.75,
-              fontWeight: x === 'Curriculum' ? 700 : 400,
-              borderBottom: x === 'Curriculum' ? `1.5px solid ${p.fg}` : 'none',
-              paddingBottom: 2,
-            }}>{x}</a>
-          ))}
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 22 }}>
-          <a style={{ ...sans, fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', opacity: 0.75 }}>
-            Log in
-          </a>
-          <button style={{
-            background: p.accent, color: p.cream, padding: '11px 22px', borderRadius: 0,
-            ...sans, fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase',
-          }}>
-            Start free trial →
-          </button>
-        </div>
-      </div>
+      </section>
 
-      {/* METADATA STRIP */}
-      <div style={{
-        ...lbl, opacity: 0.65, display: 'flex', justifyContent: 'space-between',
-        padding: '12px 48px', borderBottom: `1px solid ${p.fg}30`,
-      }}>
-        <span>CURRICULUM · EDITION 001</span>
-        <span>THREE VOLUMES · 28 ENTRIES · 7h 28m</span>
-        <span>SIGNED BY THE EDITORS</span>
-      </div>
-
-      {/* HEADER */}
-      <div style={{ padding: '96px 48px 64px', borderBottom: `1.5px solid ${p.fg}`, textAlign: 'center' }}>
-        <div style={{ ...lbl, color: p.accent, marginBottom: 28 }}>◆ THE CURRICULUM · IN THREE VOLUMES</div>
-        <h1 style={{
-          ...display, fontSize: 108, lineHeight: 0.95, letterSpacing: '-0.035em', fontWeight: 400,
-          whiteSpace: 'nowrap',
-        }}>
-          From the cherry to the <em style={{ fontStyle: 'italic', color: p.accent }}>cup.</em>
-        </h1>
-        <p style={{ ...sub, fontSize: 22, lineHeight: 1.5, opacity: 0.82, maxWidth: 680, fontWeight: 400, marginTop: 32, marginInline: 'auto' }}>
-          Three volumes, signed off by working baristas and Q-graders. Every entry ends in a hands-on drill with a calibrated rubric.
-        </p>
-      </div>
-
-      {/* THREE VOLUMES — stacked horizontal cards (distinct from pricing's 3-up grid) */}
-      <div style={{ padding: '64px 48px 80px', display: 'flex', flexDirection: 'column', gap: 20 }}>
-        {tracks.map((t, i) => {
-          const featured = i === 1;
-          const cardBg = featured ? p.accent : p.cream;
-          const cardFg = featured ? p.cream : p.fg;
-          const dim    = featured ? `${p.cream}55` : `${p.fg}30`;
-          const numCol = featured ? p.sun : p.accent;
-          return (
-            <article key={i} style={{
-              background: cardBg, color: cardFg,
-              border: `1.5px solid ${p.fg}`,
-              display: 'grid',
-              gridTemplateColumns: '220px 1fr 320px',
-              alignItems: 'stretch',
-              position: 'relative',
-            }}>
-              {featured && (
+      {/* Volumes */}
+      <section style={{ padding: '0 24px 80px' }}>
+        <div style={{ ...container, display: 'flex', flexDirection: 'column', gap: 24 }}>
+          {tracks.map((track, i) => {
+            const isHovered = hoveredCard === i;
+            return (
+              <article
+                key={i}
+                onMouseEnter={() => setHoveredCard(i)}
+                onMouseLeave={() => setHoveredCard(null)}
+                style={{
+                  background: p.bgCard,
+                  borderRadius: RADIUS.card,
+                  border: `1px solid ${p.tagBorder}`,
+                  padding: 40,
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 280px',
+                  gap: 40,
+                  alignItems: 'center',
+                  position: 'relative',
+                  boxShadow: isHovered ? SHADOW.cardHover : SHADOW.card,
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                {/* Big ghost numeral */}
                 <div style={{
-                  position: 'absolute', top: -14, left: 24,
-                  background: p.sun, color: p.fg, padding: '5px 10px',
-                  ...lbl, fontSize: 9,
+                  ...t.display, fontSize: 120, lineHeight: 1, color: p.accent, fontStyle: 'italic',
+                  opacity: 0.1, position: 'absolute', left: 24, top: 16, fontWeight: 400, pointerEvents: 'none',
                 }}>
-                  ◆ EDITORS' PICK
+                  0{i + 1}
                 </div>
-              )}
 
-              {/* Left rail — big numeral, volume label */}
-              <div style={{
-                padding: '40px 32px',
-                borderRight: `1.5px solid ${featured ? `${p.cream}55` : p.fg}`,
-                display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-              }}>
-                <div style={{ ...lbl, opacity: featured ? 0.75 : 0.6, color: cardFg }}>{t.vol}</div>
-                <div style={{
-                  ...display, fontStyle: 'italic', fontSize: 156, lineHeight: 0.82,
-                  letterSpacing: '-0.04em', color: numCol, fontWeight: 400, marginTop: 14,
-                }}>
-                  {t.num}
+                {/* Left — content */}
+                <div style={{ position: 'relative' }}>
+                  <div style={{ ...t.eyebrow, color: p.textMuted, marginBottom: 12 }}>{track.vol}</div>
+                  <h2 style={{ ...t.h2, fontSize: 36, color: p.textPrimary, margin: '0 0 8px 0' }}>{track.name}</h2>
+                  <div style={{ ...t.body, fontSize: 15, fontStyle: 'italic', color: p.textMuted, margin: '0 0 16px 0' }}>{track.tag}</div>
+                  <p style={{ ...t.bodySmall, color: p.textMuted, lineHeight: 1.6, margin: 0 }}>{track.shortBlurb}</p>
                 </div>
-              </div>
 
-              {/* Middle — title + tagline + blurb */}
-              <div style={{
-                padding: '40px 40px',
-                display: 'flex', flexDirection: 'column', justifyContent: 'center',
-              }}>
-                <h2 style={{
-                  ...display, fontSize: 56, lineHeight: 0.98, letterSpacing: '-0.025em', fontWeight: 400, margin: 0,
-                }}>
-                  {t.name}.
-                </h2>
-                <div style={{
-                  ...sub, fontStyle: 'italic', fontSize: 22, opacity: 0.78, marginTop: 10, fontWeight: 400,
-                }}>
-                  {t.tag}
+                {/* Right — meta + CTA */}
+                <div>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 20px 0', display: 'flex', flexDirection: 'column', gap: 0 }}>
+                    {[
+                      ['Lessons', `${track.meta.entries}`],
+                      ['Duration', track.meta.time],
+                      ['Certification', track.meta.cert],
+                    ].map(([label, value], j) => (
+                      <li key={j} style={{
+                        ...t.bodySmall, color: p.textPrimary,
+                        display: 'flex', justifyContent: 'space-between',
+                        paddingBottom: 12, borderBottom: `1px solid ${p.tagBorder}`,
+                        marginBottom: 12,
+                      }}>
+                        <span style={{ color: p.textMuted }}>{label}</span>
+                        <span>{value}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <button
+                    data-volume-idx={i}
+                    style={{
+                      ...t.button,
+                      width: '100%',
+                      padding: '14px 24px',
+                      borderRadius: RADIUS.pill,
+                      border: 'none',
+                      background: p.accent,
+                      color: '#FFFFFF',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    View volume
+                  </button>
                 </div>
-                <p style={{
-                  ...sans, fontSize: 14, lineHeight: 1.6, opacity: 0.82, fontWeight: 400,
-                  marginTop: 18, maxWidth: 540,
-                }}>
-                  {t.shortBlurb}
-                </p>
-              </div>
-
-              {/* Right — meta + CTA */}
-              <div style={{
-                padding: '40px 32px',
-                borderLeft: `1.5px solid ${featured ? `${p.cream}55` : p.fg}`,
-                display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-                gap: 24,
-              }}>
-                <ul style={{ listStyle: 'none', padding: 0, margin: 0,
-                  borderTop: `1px solid ${dim}`,
-                }}>
-                  {[
-                    ['Entries',        `${t.meta.entries}`],
-                    ['Time on bar',    t.meta.time],
-                    ['Certification',  t.meta.cert],
-                    ['Sample',         'First 2 free'],
-                  ].map((row, j) => (
-                    <li key={j} style={{
-                      display: 'grid', gridTemplateColumns: '1fr auto', alignItems: 'baseline',
-                      padding: '11px 0', borderBottom: `1px dashed ${dim}`,
-                      ...sans, fontSize: 13, fontWeight: 400,
-                    }}>
-                      <span style={{ opacity: 0.7 }}>{row[0]}</span>
-                      <span style={{ ...sub, fontSize: 15, fontWeight: 500 }}>{row[1]}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <button
-                  data-volume-idx={i}
-                  style={{
-                    background: featured ? p.cream : p.accent,
-                    color: featured ? p.accent : p.cream,
-                    padding: '14px 18px', borderRadius: 0,
-                    ...sans, fontSize: 12, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase',
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12,
-                  }}>
-                  <span>Read the volume</span>
-                  <span>→</span>
-                </button>
-              </div>
-            </article>
-          );
-        })}
-
-        {/* Tally footer row */}
-        <div style={{
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          ...lbl, opacity: 0.55, marginTop: 16,
-        }}>
-          <span>◆ MORE VOLUMES IN PROGRESS</span>
-          <span>NEXT EDITION · ROASTING · SERVICE · CUPPING</span>
-          <span>ALL TRACKS · ALL TIERS · NO ADD-ONS</span>
+              </article>
+            );
+          })}
         </div>
-      </div>
+      </section>
 
-      <CopiFooter theme={theme} />
+      {FooterNew && <FooterNew theme={{ palette: p, typography: t }} />}
     </div>
   );
 }
@@ -6020,9 +5721,7 @@ const NAV_LABELS = ['Curriculum', 'Pricing', 'About'];
 // ────────────────────────────────────────────────────────────
 function TrialModal({ open, onClose }) {
   const [step, setStep] = React.useState(0);
-  const [form, setForm] = React.useState({
-    cafe: '', email: '', seats: 8, role: 'owner',
-  });
+  const [form, setForm] = React.useState({ cafe: '', email: '', seats: 8, role: 'owner' });
   const [closing, setClosing] = React.useState(false);
 
   React.useEffect(() => {
@@ -6039,9 +5738,7 @@ function TrialModal({ open, onClose }) {
 
   React.useEffect(() => {
     if (!open) return;
-    const onKey = (e) => {
-      if (e.key === 'Escape') handleClose();
-    };
+    const onKey = (e) => { if (e.key === 'Escape') handleClose(); };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [open]);
@@ -6053,11 +5750,9 @@ function TrialModal({ open, onClose }) {
     setTimeout(() => { setClosing(false); onClose(); }, 220);
   };
 
-  const p = PROTO_PALETTE;
-  const display = { fontFamily: 'Unna' };
-  const sub = { fontFamily: 'Yrsa' };
-  const sans = { fontFamily: 'Lato' };
-  const lbl = { fontFamily: 'Lato', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
+  const p = window.NEW_PALETTE || PROTO_PALETTE;
+  const t = window.TYPOGRAPHY || {};
+  const RADIUS = window.RADIUS || { card: 12, pill: 999 };
 
   const valid = {
     0: form.cafe.trim().length > 1 && /.+@.+\..+/.test(form.email),
@@ -6075,17 +5770,23 @@ function TrialModal({ open, onClose }) {
   const StepDot = ({ i }) => (
     <div style={{
       width: i === step ? 28 : 8, height: 8, borderRadius: 99,
-      background: i <= step ? p.accent : `${p.fg}30`,
+      background: i <= step ? p.accent : p.tagBorder,
       transition: 'all 240ms cubic-bezier(.2,.7,.2,1)',
     }} />
   );
 
   const inputStyle = {
-    ...sans, fontSize: 18, fontWeight: 400,
-    width: '100%', padding: '14px 16px',
-    background: p.bg, color: p.fg,
-    border: `1.5px solid ${p.fg}`, borderRadius: 0,
-    outline: 'none',
+    ...t.body, fontSize: 16,
+    width: '100%', padding: '14px 20px',
+    background: p.bg, color: p.textPrimary,
+    border: `1px solid ${p.tagBorder}`, borderRadius: RADIUS.pill,
+    outline: 'none', boxSizing: 'border-box',
+    transition: 'border-color 0.2s ease',
+  };
+
+  const labelStyle = {
+    ...t.eyebrow, color: p.textMuted,
+    display: 'block', marginBottom: 8,
   };
 
   return (
@@ -6093,123 +5794,97 @@ function TrialModal({ open, onClose }) {
       onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}
       style={{
         position: 'fixed', inset: 0, zIndex: 9000,
-        background: 'rgba(26,20,16,0.55)',
-        backdropFilter: 'blur(6px)',
-        WebkitBackdropFilter: 'blur(6px)',
-        display: 'grid', placeItems: 'center',
-        padding: 24,
-        opacity: closing ? 0 : 1,
-        transition: 'opacity 220ms ease',
+        background: 'rgba(28,28,26,0.6)',
+        backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+        display: 'grid', placeItems: 'center', padding: 24,
+        opacity: closing ? 0 : 1, transition: 'opacity 220ms ease',
       }}
     >
       <div style={{
-        width: 'min(680px, 100%)',
-        background: p.cream,
-        border: `1.5px solid ${p.fg}`,
-        boxShadow: '0 30px 80px rgba(0,0,0,0.35)',
-        position: 'relative',
+        width: 'min(600px, 100%)',
+        background: p.bgCard,
+        borderRadius: RADIUS.card * 2,
+        border: `1px solid ${p.tagBorder}`,
+        boxShadow: '0 24px 64px rgba(0,0,0,0.16)',
+        overflow: 'hidden',
         transform: closing ? 'translateY(8px) scale(0.98)' : 'translateY(0) scale(1)',
         opacity: closing ? 0 : 1,
         transition: 'transform 220ms cubic-bezier(.2,.7,.2,1), opacity 220ms ease',
       }}>
-        {/* Top metadata bar */}
+        {/* Header */}
         <div style={{
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          padding: '14px 24px', borderBottom: `1px solid ${p.fg}30`,
-          ...lbl, opacity: 0.7,
+          padding: '20px 28px', borderBottom: `1px solid ${p.tagBorder}`,
         }}>
-          <span>◆ COPI · TRIAL · STEP {step + 1} OF 3</span>
+          <div style={{ ...t.eyebrow, color: p.textMuted }}>Step {step + 1} of 3</div>
           <button
             onClick={handleClose}
-            style={{ ...lbl, opacity: 0.7, color: p.fg, padding: 4, cursor: 'pointer' }}
+            style={{ ...t.button, color: p.textMuted, background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: 6 }}
             aria-label="Close"
           >
-            ESC ✕
+            ✕
           </button>
         </div>
 
         {/* Body */}
-        <div style={{ padding: '48px 48px 36px', minHeight: 420 }}>
+        <div style={{ padding: '40px 40px 32px', minHeight: 380 }}>
           {step === 0 && (
             <div>
-              <div style={{ ...lbl, color: p.accent, marginBottom: 18 }}>I. YOUR CAFÉ</div>
-              <h2 style={{ ...display, fontSize: 56, lineHeight: 0.96, letterSpacing: '-0.025em', marginBottom: 14 }}>
-                Tell us where you <em style={{ fontStyle: 'italic', color: p.accent }}>pour.</em>
+              <div style={{ ...t.eyebrow, color: p.accent, marginBottom: 12 }}>YOUR CAFÉ</div>
+              <h2 style={{ ...t.h2, fontSize: 36, color: p.textPrimary, margin: '0 0 12px 0' }}>
+                Tell us where you pour.
               </h2>
-              <p style={{ ...sub, fontSize: 20, lineHeight: 1.4, opacity: 0.78, marginBottom: 36, fontWeight: 400 }}>
-                Copi reads your menu and current offerings on day one — no setup, no spreadsheets.
+              <p style={{ ...t.body, color: p.textMuted, margin: '0 0 32px 0', lineHeight: 1.5 }}>
+                Copi reads your menu and offerings on day one — no setup, no spreadsheets.
               </p>
 
-              <label style={{ display: 'block', marginBottom: 22 }}>
-                <div style={{ ...lbl, marginBottom: 8 }}>CAFÉ OR ROASTERY NAME</div>
-                <input
-                  autoFocus
-                  type="text"
-                  placeholder="Milano"
-                  value={form.cafe}
-                  onChange={(e) => setForm({ ...form, cafe: e.target.value })}
-                  style={inputStyle}
-                />
+              <label style={{ display: 'block', marginBottom: 20 }}>
+                <div style={labelStyle}>Café or roastery name</div>
+                <input autoFocus type="text" placeholder="Milano" value={form.cafe}
+                  onChange={(e) => setForm({ ...form, cafe: e.target.value })} style={inputStyle} />
               </label>
               <label style={{ display: 'block' }}>
-                <div style={{ ...lbl, marginBottom: 8 }}>WORK EMAIL</div>
-                <input
-                  type="email"
-                  placeholder="you@cafe.com"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  style={inputStyle}
-                />
+                <div style={labelStyle}>Work email</div>
+                <input type="email" placeholder="you@cafe.com" value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })} style={inputStyle} />
               </label>
             </div>
           )}
 
           {step === 1 && (
             <div>
-              <div style={{ ...lbl, color: p.accent, marginBottom: 18 }}>II. YOUR TEAM</div>
-              <h2 style={{ ...display, fontSize: 56, lineHeight: 0.96, letterSpacing: '-0.025em', marginBottom: 14 }}>
-                How many <em style={{ fontStyle: 'italic', color: p.accent }}>people</em><br />pour with you?
+              <div style={{ ...t.eyebrow, color: p.accent, marginBottom: 12 }}>YOUR TEAM</div>
+              <h2 style={{ ...t.h2, fontSize: 36, color: p.textPrimary, margin: '0 0 12px 0' }}>
+                How many people pour with you?
               </h2>
-              <p style={{ ...sub, fontSize: 20, lineHeight: 1.4, opacity: 0.78, marginBottom: 36, fontWeight: 400 }}>
-                Used only to scope the trial. You can change it any time later.
+              <p style={{ ...t.body, color: p.textMuted, margin: '0 0 28px 0', lineHeight: 1.5 }}>
+                Used only to scope the trial. You can change it any time.
               </p>
 
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 8 }}>
-                <div style={{ ...display, fontStyle: 'italic', fontSize: 96, lineHeight: 1, color: p.accent, fontWeight: 400 }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 12 }}>
+                <div style={{ ...t.display, fontStyle: 'italic', fontSize: 80, lineHeight: 1, color: p.accent }}>
                   {form.seats}
                 </div>
-                <div style={{ ...lbl, opacity: 0.6 }}>BARISTAS · INCL. MANAGERS</div>
+                <div style={{ ...t.eyebrow, color: p.textMuted }}>Baristas incl. managers</div>
               </div>
-              <input
-                type="range" min={1} max={40} step={1}
-                value={form.seats}
+              <input type="range" min={1} max={40} step={1} value={form.seats}
                 onChange={(e) => setForm({ ...form, seats: parseInt(e.target.value, 10) })}
-                style={{ width: '100%', accentColor: p.accent, marginBottom: 36 }}
-              />
+                style={{ width: '100%', accentColor: p.accent, marginBottom: 32 }} />
 
-              <div style={{ ...lbl, marginBottom: 12 }}>WHAT'S YOUR ROLE?</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 0, border: `1.5px solid ${p.fg}` }}>
-                {[
-                  { v: 'owner', l: 'Owner' },
-                  { v: 'manager', l: 'Manager' },
-                  { v: 'lead', l: 'Lead barista' },
-                ].map((opt, i) => {
+              <div style={{ ...t.eyebrow, color: p.textMuted, marginBottom: 12 }}>What's your role?</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+                {[{ v: 'owner', l: 'Owner' }, { v: 'manager', l: 'Manager' }, { v: 'lead', l: 'Lead barista' }].map((opt) => {
                   const active = form.role === opt.v;
                   return (
-                    <button
-                      key={opt.v}
-                      onClick={() => setForm({ ...form, role: opt.v })}
-                      style={{
-                        padding: '14px 12px',
-                        background: active ? p.accent : 'transparent',
-                        color: active ? p.cream : p.fg,
-                        borderRight: i < 2 ? `1.5px solid ${active ? p.accent : p.fg}` : 'none',
-                        ...sans, fontSize: 13, fontWeight: 600,
-                        letterSpacing: '0.08em', textTransform: 'uppercase',
-                        cursor: 'pointer',
-                        transition: 'background 160ms ease, color 160ms ease',
-                      }}
-                    >
+                    <button key={opt.v} onClick={() => setForm({ ...form, role: opt.v })} style={{
+                      padding: '12px 8px',
+                      background: active ? p.accent : p.bg,
+                      color: active ? '#FFFFFF' : p.textPrimary,
+                      border: `1px solid ${active ? p.accent : p.tagBorder}`,
+                      borderRadius: RADIUS.pill,
+                      ...t.button, cursor: 'pointer',
+                      transition: 'all 160ms ease',
+                    }}>
                       {opt.l}
                     </button>
                   );
@@ -6219,31 +5894,26 @@ function TrialModal({ open, onClose }) {
           )}
 
           {step === 2 && (
-            <div style={{ textAlign: 'center', paddingTop: 12 }}>
-              <div style={{ ...lbl, color: p.accent, marginBottom: 18 }}>◆ TRIAL · CONFIRMED</div>
-              <h2 style={{ ...display, fontSize: 72, lineHeight: 0.95, letterSpacing: '-0.03em', marginBottom: 18 }}>
-                Welcome to <em style={{ fontStyle: 'italic', color: p.accent }}>Copi.</em>
+            <div style={{ textAlign: 'center', paddingTop: 8 }}>
+              <div style={{ ...t.eyebrow, color: p.accent, marginBottom: 16 }}>Trial confirmed</div>
+              <h2 style={{ ...t.h2, fontSize: 40, color: p.textPrimary, margin: '0 0 16px 0' }}>
+                Welcome to Copi.
               </h2>
-              <p style={{ ...sub, fontSize: 22, lineHeight: 1.4, opacity: 0.82, marginBottom: 32, fontWeight: 400, maxWidth: 460, marginInline: 'auto' }}>
-                We sent a setup link to <strong>{form.email || 'you'}</strong>. Your <strong>{form.cafe || 'café'}</strong> workspace is being built right now.
+              <p style={{ ...t.bodyLarge, color: p.textMuted, margin: '0 0 28px 0', lineHeight: 1.5, maxWidth: 420, marginInline: 'auto' }}>
+                We sent a setup link to <strong style={{ color: p.textPrimary }}>{form.email || 'you'}</strong>. Your <strong style={{ color: p.textPrimary }}>{form.cafe || 'café'}</strong> workspace is being built now.
               </p>
 
               <div style={{
-                display: 'inline-grid', gridTemplateColumns: 'auto auto', gap: '14px 32px',
-                padding: '24px 36px', background: p.bg,
-                border: `1.5px solid ${p.fg}`, textAlign: 'left',
-                marginBottom: 28,
+                display: 'inline-grid', gridTemplateColumns: 'auto auto', gap: '12px 28px',
+                padding: '20px 28px', background: p.bg, borderRadius: RADIUS.card,
+                border: `1px solid ${p.tagBorder}`, textAlign: 'left',
               }}>
-                <div style={{ ...lbl, opacity: 0.65 }}>CAFÉ</div>
-                <div style={{ ...sub, fontSize: 18 }}>{form.cafe || '—'}</div>
-                <div style={{ ...lbl, opacity: 0.65 }}>SEATS</div>
-                <div style={{ ...sub, fontSize: 18 }}>{form.seats} baristas</div>
-                <div style={{ ...lbl, opacity: 0.65 }}>TRIAL</div>
-                <div style={{ ...sub, fontSize: 18 }}>30 days · no card</div>
-              </div>
-
-              <div style={{ ...lbl, opacity: 0.55, marginTop: 4 }}>
-                ── DAY ONE · BEGINS NOW ──
+                <div style={{ ...t.eyebrow, color: p.textMuted }}>Café</div>
+                <div style={{ ...t.body, color: p.textPrimary }}>{form.cafe || '—'}</div>
+                <div style={{ ...t.eyebrow, color: p.textMuted }}>Seats</div>
+                <div style={{ ...t.body, color: p.textPrimary }}>{form.seats} baristas</div>
+                <div style={{ ...t.eyebrow, color: p.textMuted }}>Trial</div>
+                <div style={{ ...t.body, color: p.textPrimary }}>30 days · no card</div>
               </div>
             </div>
           )}
@@ -6252,39 +5922,27 @@ function TrialModal({ open, onClose }) {
         {/* Footer */}
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '20px 24px', borderTop: `1px solid ${p.fg}30`, gap: 16,
+          padding: '20px 28px', borderTop: `1px solid ${p.tagBorder}`, gap: 16,
         }}>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
             <StepDot i={0} /><StepDot i={1} /><StepDot i={2} />
           </div>
 
           <div style={{ display: 'flex', gap: 10 }}>
             {step > 0 && step < 2 && (
-              <button
-                onClick={back}
-                style={{
-                  padding: '12px 20px', background: 'transparent',
-                  border: `1.5px solid ${p.fg}`,
-                  ...sans, fontSize: 12, fontWeight: 600,
-                  letterSpacing: '0.1em', textTransform: 'uppercase',
-                  cursor: 'pointer', color: p.fg,
-                }}
-              >
+              <button onClick={back} style={{
+                ...t.button, padding: '12px 20px', borderRadius: RADIUS.pill,
+                background: 'transparent', border: `1px solid ${p.tagBorder}`,
+                color: p.textPrimary, cursor: 'pointer',
+              }}>
                 ← Back
               </button>
             )}
-            <button
-              onClick={next}
-              disabled={!valid}
-              style={{
-                padding: '12px 22px', background: valid ? p.accent : `${p.fg}40`,
-                color: p.cream, border: 'none',
-                ...sans, fontSize: 12, fontWeight: 600,
-                letterSpacing: '0.1em', textTransform: 'uppercase',
-                cursor: valid ? 'pointer' : 'not-allowed',
-                transition: 'background 160ms ease',
-              }}
-            >
+            <button onClick={next} disabled={!valid} style={{
+              ...t.button, padding: '12px 24px', borderRadius: RADIUS.pill, border: 'none',
+              background: valid ? p.accent : p.tagBg, color: valid ? '#FFFFFF' : p.textMuted,
+              cursor: valid ? 'pointer' : 'not-allowed', transition: 'all 160ms ease',
+            }}>
               {step === 0 && 'Continue →'}
               {step === 1 && 'Start my trial →'}
               {step === 2 && 'Done'}
@@ -6330,11 +5988,9 @@ function LoginModal({ open, onClose, onSwitchToTrial, onAuth }) {
     setTimeout(() => { setClosing(false); onClose(); }, 220);
   };
 
-  const p = PROTO_PALETTE;
-  const display = { fontFamily: 'Unna' };
-  const sub = { fontFamily: 'Yrsa' };
-  const sans = { fontFamily: 'Lato' };
-  const lbl = { fontFamily: 'Lato', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
+  const p = window.NEW_PALETTE || PROTO_PALETTE;
+  const t = window.TYPOGRAPHY || {};
+  const RADIUS = window.RADIUS || { card: 12, pill: 999 };
 
   const valid = /.+@.+\..+/.test(email) && password.length >= 4;
 
@@ -6345,19 +6001,16 @@ function LoginModal({ open, onClose, onSwitchToTrial, onAuth }) {
     setTimeout(() => {
       setSubmitting(false);
       setDone(true);
-      // Hand off to dashboard after a beat
-      setTimeout(() => {
-        if (onAuth) onAuth({ email, password });
-      }, 700);
+      setTimeout(() => { if (onAuth) onAuth({ email, password }); }, 700);
     }, 700);
   };
 
   const inputStyle = {
-    ...sans, fontSize: 18, fontWeight: 400,
-    width: '100%', padding: '14px 16px',
-    background: p.bg, color: p.fg,
-    border: `1.5px solid ${p.fg}`, borderRadius: 0,
-    outline: 'none',
+    ...t.body, fontSize: 16,
+    width: '100%', padding: '14px 20px',
+    background: p.bg, color: p.textPrimary,
+    border: `1px solid ${p.tagBorder}`, borderRadius: RADIUS.pill,
+    outline: 'none', boxSizing: 'border-box',
   };
 
   return (
@@ -6365,129 +6018,102 @@ function LoginModal({ open, onClose, onSwitchToTrial, onAuth }) {
       onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}
       style={{
         position: 'fixed', inset: 0, zIndex: 9000,
-        background: 'rgba(26,20,16,0.55)',
-        backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)',
+        background: 'rgba(28,28,26,0.6)',
+        backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
         display: 'grid', placeItems: 'center', padding: 24,
         opacity: closing ? 0 : 1, transition: 'opacity 220ms ease',
       }}
     >
       <div style={{
-        width: 'min(520px, 100%)', background: p.cream,
-        border: `1.5px solid ${p.fg}`, boxShadow: '0 30px 80px rgba(0,0,0,0.35)',
+        width: 'min(480px, 100%)',
+        background: p.bgCard,
+        borderRadius: RADIUS.card * 2,
+        border: `1px solid ${p.tagBorder}`,
+        boxShadow: '0 24px 64px rgba(0,0,0,0.16)',
+        overflow: 'hidden',
         transform: closing ? 'translateY(8px) scale(0.98)' : 'translateY(0) scale(1)',
         opacity: closing ? 0 : 1,
         transition: 'transform 220ms cubic-bezier(.2,.7,.2,1), opacity 220ms ease',
       }}>
+        {/* Header */}
         <div style={{
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          padding: '14px 24px', borderBottom: `1px solid ${p.fg}30`, ...lbl, opacity: 0.7,
+          padding: '20px 28px', borderBottom: `1px solid ${p.tagBorder}`,
         }}>
-          <span>◆ COPI · LOG IN</span>
-          <button onClick={handleClose} style={{ ...lbl, opacity: 0.7, color: p.fg, padding: 4, cursor: 'pointer' }}>
-            ESC ✕
+          <div style={{ ...t.display, fontSize: 18, fontStyle: 'italic', color: p.textPrimary }}>Copi.</div>
+          <button onClick={handleClose} style={{ ...t.button, color: p.textMuted, background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px' }}>
+            ✕
           </button>
         </div>
 
-        <div style={{ padding: '40px 40px 28px' }}>
+        <div style={{ padding: '32px 28px 24px' }}>
           {!done ? (
             <form onSubmit={submit}>
-              <div style={{ ...lbl, color: p.accent, marginBottom: 16 }}>WELCOME BACK</div>
-              {/* Demo credentials hint */}
-              <div style={{
-                marginBottom: 18,
-                display: 'grid', gap: 6,
-              }}>
+              {/* Demo credential buttons */}
+              <div style={{ marginBottom: 24, display: 'grid', gap: 8 }}>
                 {[
-                  { l: 'ADMIN',   email: PROTO_ADMIN.email,   pw: PROTO_ADMIN.password   },
-                  { l: 'BARISTA', email: PROTO_BARISTA.email, pw: PROTO_BARISTA.password },
+                  { l: 'Admin demo', email: PROTO_ADMIN.email, pw: PROTO_ADMIN.password },
+                  { l: 'Barista demo', email: PROTO_BARISTA.email, pw: PROTO_BARISTA.password },
                 ].map((row, i) => (
-                  <button
-                    key={i}
-                    type="button"
+                  <button key={i} type="button"
                     onClick={() => { setEmail(row.email); setPassword(row.pw); }}
                     style={{
-                      ...lbl, fontSize: 9, opacity: 0.75,
-                      padding: '8px 10px', textAlign: 'left',
-                      background: p.bg, border: `1px dashed ${p.fg}40`,
+                      ...t.bodySmall, padding: '10px 14px', textAlign: 'left',
+                      background: p.bg, border: `1px dashed ${p.tagBorder}`,
+                      borderRadius: RADIUS.card, cursor: 'pointer', color: p.textMuted,
                       display: 'flex', justifyContent: 'space-between', gap: 12,
-                      cursor: 'pointer',
                     }}
                   >
-                    <span>◆ DEMO · {row.l}</span>
-                    <span style={{ ...sans, textTransform: 'none', letterSpacing: 0, fontSize: 11, opacity: 0.9 }}>
-                      {row.email} · {row.pw}
-                    </span>
+                    <span style={{ fontWeight: 500, color: p.accent }}>{row.l}</span>
+                    <span>{row.email}</span>
                   </button>
                 ))}
               </div>
-              <h2 style={{ ...display, fontSize: 52, lineHeight: 0.96, letterSpacing: '-0.025em', marginBottom: 12 }}>
-                Sign <em style={{ fontStyle: 'italic', color: p.accent }}>in.</em>
-              </h2>
-              <p style={{ ...sub, fontSize: 18, lineHeight: 1.4, opacity: 0.78, marginBottom: 30, fontWeight: 400 }}>
-                Pick up where your team left off.
-              </p>
 
-              <label style={{ display: 'block', marginBottom: 18 }}>
-                <div style={{ ...lbl, marginBottom: 8 }}>WORK EMAIL</div>
-                <input
-                  autoFocus type="email" placeholder="you@cafe.com"
-                  value={email} onChange={(e) => setEmail(e.target.value)}
-                  style={inputStyle}
-                />
+              <h2 style={{ ...t.h2, fontSize: 32, color: p.textPrimary, margin: '0 0 8px 0' }}>Sign in</h2>
+              <p style={{ ...t.body, color: p.textMuted, margin: '0 0 24px 0' }}>Pick up where your team left off.</p>
+
+              <label style={{ display: 'block', marginBottom: 16 }}>
+                <div style={{ ...t.eyebrow, color: p.textMuted, marginBottom: 8 }}>Work email</div>
+                <input autoFocus type="email" placeholder="you@cafe.com"
+                  value={email} onChange={(e) => setEmail(e.target.value)} style={inputStyle} />
               </label>
-              <label style={{ display: 'block', marginBottom: 8 }}>
-                <div style={{ ...lbl, marginBottom: 8, display: 'flex', justifyContent: 'space-between' }}>
-                  <span>PASSWORD</span>
-                  <a style={{ opacity: 0.55, cursor: 'pointer' }}>FORGOT?</a>
+              <label style={{ display: 'block', marginBottom: 4 }}>
+                <div style={{ ...t.eyebrow, color: p.textMuted, marginBottom: 8, display: 'flex', justifyContent: 'space-between' }}>
+                  <span>Password</span>
+                  <a style={{ color: p.accent, cursor: 'pointer' }}>Forgot?</a>
                 </div>
-                <input
-                  type="password" placeholder="••••••••"
-                  value={password} onChange={(e) => setPassword(e.target.value)}
-                  style={inputStyle}
-                />
+                <input type="password" placeholder="••••••••"
+                  value={password} onChange={(e) => setPassword(e.target.value)} style={inputStyle} />
               </label>
 
-              <button
-                type="submit"
-                disabled={!valid || submitting}
-                style={{
-                  width: '100%', marginTop: 22,
-                  padding: '14px 22px',
-                  background: valid ? p.accent : `${p.fg}40`,
-                  color: p.cream, border: 'none',
-                  ...sans, fontSize: 12, fontWeight: 600,
-                  letterSpacing: '0.1em', textTransform: 'uppercase',
-                  cursor: valid ? 'pointer' : 'not-allowed',
-                  transition: 'background 160ms ease',
-                }}
-              >
+              <button type="submit" disabled={!valid || submitting} style={{
+                ...t.button, width: '100%', marginTop: 20,
+                padding: '14px 24px', borderRadius: RADIUS.pill, border: 'none',
+                background: valid ? p.accent : p.tagBg, color: valid ? '#FFFFFF' : p.textMuted,
+                cursor: valid ? 'pointer' : 'not-allowed', transition: 'all 160ms ease',
+              }}>
                 {submitting ? 'Signing in…' : 'Sign in →'}
               </button>
             </form>
           ) : (
-            <div style={{ textAlign: 'center', padding: '12px 0 8px' }}>
-              <div style={{ ...lbl, color: p.accent, marginBottom: 16 }}>◆ SIGNED IN</div>
-              <h2 style={{ ...display, fontSize: 56, lineHeight: 0.96, letterSpacing: '-0.025em', marginBottom: 14 }}>
-                Welcome <em style={{ fontStyle: 'italic', color: p.accent }}>back.</em>
-              </h2>
-              <p style={{ ...sub, fontSize: 18, lineHeight: 1.4, opacity: 0.78, marginBottom: 4, fontWeight: 400 }}>
-                Loading your workspace…
-              </p>
-              <div style={{ ...lbl, opacity: 0.5, marginTop: 24 }}>── {email} ──</div>
+            <div style={{ textAlign: 'center', padding: '16px 0' }}>
+              <div style={{ ...t.eyebrow, color: p.accent, marginBottom: 16 }}>Signed in</div>
+              <h2 style={{ ...t.h2, fontSize: 36, color: p.textPrimary, margin: '0 0 12px 0' }}>Welcome back.</h2>
+              <p style={{ ...t.body, color: p.textMuted, margin: 0 }}>Loading your workspace…</p>
+              <div style={{ ...t.bodySmall, color: p.textMuted, marginTop: 20 }}>{email}</div>
             </div>
           )}
         </div>
 
         <div style={{
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          padding: '16px 24px', borderTop: `1px solid ${p.fg}30`, ...lbl, opacity: 0.75,
+          padding: '16px 28px', borderTop: `1px solid ${p.tagBorder}`,
         }}>
-          <span>NEW TO COPI?</span>
-          <button
-            onClick={() => { handleClose(); setTimeout(onSwitchToTrial, 260); }}
-            style={{ ...lbl, color: p.accent, cursor: 'pointer' }}
-          >
-            START A FREE TRIAL →
+          <span style={{ ...t.bodySmall, color: p.textMuted }}>New to Copi?</span>
+          <button onClick={() => { handleClose(); setTimeout(onSwitchToTrial, 260); }}
+            style={{ ...t.button, color: p.accent, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+            Start a free trial →
           </button>
         </div>
       </div>
@@ -6527,186 +6153,141 @@ function VolumeModal({ open, volume, onClose, onTrial }) {
     setTimeout(() => { setClosing(false); onClose(); }, 260);
   };
 
-  const p = PROTO_PALETTE;
-  const display = { fontFamily: 'Unna' };
-  const sub = { fontFamily: 'Yrsa' };
-  const sans = { fontFamily: 'Lato' };
-  const lbl = { fontFamily: 'Lato', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
+  const p = window.NEW_PALETTE || PROTO_PALETTE;
+  const t = window.TYPOGRAPHY || {};
+  const RADIUS = window.RADIUS || { card: 12, pill: 999 };
 
   return (
     <div
       onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}
       style={{
         position: 'fixed', inset: 0, zIndex: 9000,
-        background: 'rgba(26,20,16,0.55)',
-        backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)',
+        background: 'rgba(28,28,26,0.6)',
+        backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
         display: 'grid', placeItems: 'center', padding: 24,
-        opacity: closing ? 0 : 1,
-        transition: 'opacity 220ms ease',
+        opacity: closing ? 0 : 1, transition: 'opacity 220ms ease',
       }}
     >
       <aside style={{
-        width: 'min(720px, 100%)',
+        width: 'min(680px, 100%)',
         maxHeight: 'calc(100vh - 48px)',
-        background: p.cream,
-        border: `1.5px solid ${p.fg}`,
-        boxShadow: '0 30px 80px rgba(0,0,0,0.35)',
+        background: p.bgCard,
+        borderRadius: RADIUS.card * 2,
+        border: `1px solid ${p.tagBorder}`,
+        boxShadow: '0 24px 64px rgba(0,0,0,0.16)',
         display: 'flex', flexDirection: 'column',
         overflow: 'hidden',
         transform: closing ? 'translateY(8px) scale(0.98)' : 'translateY(0) scale(1)',
         opacity: closing ? 0 : 1,
         transition: 'transform 220ms cubic-bezier(.2,.7,.2,1), opacity 220ms ease',
       }}>
-        {/* Top metadata bar */}
+        {/* Header bar */}
         <div style={{
-          flex: '0 0 auto', background: p.cream,
+          flex: '0 0 auto',
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          padding: '14px 28px', borderBottom: `1px solid ${p.fg}30`,
-          ...lbl, opacity: 0.85,
+          padding: '20px 28px', borderBottom: `1px solid ${p.tagBorder}`,
         }}>
-          <span>◆ COPI · {volume.vol}</span>
-          <button onClick={handleClose} style={{ ...lbl, color: p.fg, cursor: 'pointer' }}>
-            ESC ✕
+          <div style={{ ...t.eyebrow, color: p.textMuted }}>{volume.vol}</div>
+          <button onClick={handleClose} style={{ ...t.button, color: p.textMuted, background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px' }}>
+            ✕
           </button>
         </div>
 
         {/* Scroll body */}
         <div style={{ flex: '1 1 auto', overflowY: 'auto' }}>
 
-        {/* Header — big numeral + title */}
-        <div style={{
-          padding: '40px 36px 32px',
-          borderBottom: `1.5px solid ${p.fg}`,
-          display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 28, alignItems: 'end',
-          background: p.bg,
-        }}>
-          <div style={{
-            ...display, fontStyle: 'italic', fontSize: 168, lineHeight: 0.78,
-            letterSpacing: '-0.04em', color: p.accent, fontWeight: 400,
-          }}>
-            {volume.num}
+          {/* Hero section */}
+          <div style={{ padding: '32px 28px', background: p.bg, borderBottom: `1px solid ${p.tagBorder}` }}>
+            <div style={{ ...t.eyebrow, color: p.accent, marginBottom: 12 }}>{volume.vol}</div>
+            <h2 style={{ ...t.h2, fontSize: 40, color: p.textPrimary, margin: '0 0 8px 0' }}>{volume.name}</h2>
+            <div style={{ ...t.body, fontStyle: 'italic', color: p.textMuted, marginBottom: 0 }}>{volume.tag}</div>
           </div>
-          <div style={{ paddingBottom: 8 }}>
-            <div style={{ ...lbl, color: p.accent, marginBottom: 10 }}>{volume.vol}</div>
-            <h2 style={{
-              ...display, fontSize: 56, lineHeight: 0.96, letterSpacing: '-0.025em', fontWeight: 400, margin: 0,
-            }}>
-              {volume.name}.
-            </h2>
-            <div style={{ ...sub, fontStyle: 'italic', fontSize: 22, opacity: 0.78, marginTop: 8, fontWeight: 400 }}>
-              {volume.tag}
+
+          {/* Blurb + meta */}
+          <div style={{ padding: '28px', borderBottom: `1px solid ${p.tagBorder}` }}>
+            <p style={{ ...t.bodyLarge, color: p.textMuted, lineHeight: 1.6, margin: '0 0 24px 0' }}>{volume.blurb}</p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 0, borderRadius: RADIUS.card, border: `1px solid ${p.tagBorder}`, overflow: 'hidden' }}>
+              {[
+                ['Entries', String(volume.meta.entries)],
+                ['Duration', volume.meta.time],
+                ['Certification', volume.meta.cert],
+                ['Sample', 'First 2 free'],
+              ].map(([label, value], i) => (
+                <div key={i} style={{
+                  padding: '16px', borderRight: i < 3 ? `1px solid ${p.tagBorder}` : 'none',
+                  background: p.bgCard,
+                }}>
+                  <div style={{ ...t.eyebrow, color: p.textMuted, marginBottom: 6 }}>{label}</div>
+                  <div style={{ ...t.body, fontWeight: 500, color: p.textPrimary }}>{value}</div>
+                </div>
+              ))}
             </div>
           </div>
-        </div>
 
-        {/* Blurb + meta grid */}
-        <div style={{ padding: '32px 36px', borderBottom: `1px solid ${p.fg}30` }}>
-          <p style={{
-            ...sub, fontSize: 20, lineHeight: 1.45, opacity: 0.88, fontWeight: 400,
-            marginBottom: 28,
-          }}>
-            {volume.blurb}
-          </p>
+          {/* Table of contents */}
+          <div style={{ padding: '28px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <div style={{ ...t.eyebrow, color: p.textMuted }}>Table of contents</div>
+              <div style={{ ...t.bodySmall, color: p.textMuted }}>{volume.lessons.length} entries</div>
+            </div>
 
-          <div style={{
-            display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
-            border: `1.5px solid ${p.fg}`,
-          }}>
-            {[
-              ['Entries',       String(volume.meta.entries)],
-              ['Time on bar',   volume.meta.time],
-              ['Certification', volume.meta.cert],
-              ['Sample',        'First 2 free'],
-            ].map((row, i) => (
-              <div key={i} style={{
-                padding: '14px 14px',
-                borderRight: i < 3 ? `1px solid ${p.fg}30` : 'none',
-              }}>
-                <div style={{ ...lbl, opacity: 0.6, marginBottom: 6 }}>{row[0]}</div>
-                <div style={{ ...sub, fontSize: 18, fontWeight: 500 }}>{row[1]}</div>
-              </div>
-            ))}
+            <ol style={{ listStyle: 'none', padding: 0, margin: 0, borderTop: `1px solid ${p.tagBorder}` }}>
+              {volume.lessons.map(([n, name], i) => {
+                const free = i < 2;
+                return (
+                  <li key={i} style={{
+                    display: 'grid', gridTemplateColumns: 'auto 1fr auto auto', gap: 16,
+                    alignItems: 'center', padding: '14px 0',
+                    borderBottom: `1px solid ${p.tagBorder}`,
+                  }}>
+                    <span style={{ ...t.caption, color: p.textMuted, fontVariantNumeric: 'tabular-nums', minWidth: 24 }}>{n}</span>
+                    <span style={{ ...t.body, color: p.textPrimary }}>{name}</span>
+                    {free && (
+                      <span style={{
+                        ...t.label, fontSize: 10, color: p.accent,
+                        border: `1px solid ${p.accent}`, padding: '3px 8px', borderRadius: RADIUS.tag,
+                      }}>Free</span>
+                    )}
+                    <span style={{ ...t.caption, color: p.textMuted, fontVariantNumeric: 'tabular-nums' }}>
+                      {Math.floor(8 + (i * 1.7) % 9)}m
+                    </span>
+                  </li>
+                );
+              })}
+            </ol>
           </div>
-        </div>
-
-        {/* Table of contents */}
-        <div style={{ padding: '32px 36px 28px' }}>
-          <div style={{
-            display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
-            marginBottom: 14,
-          }}>
-            <div style={{ ...lbl, color: p.accent }}>◆ TABLE OF CONTENTS</div>
-            <div style={{ ...lbl, opacity: 0.55 }}>{volume.lessons.length} ENTRIES</div>
-          </div>
-
-          <ol style={{ listStyle: 'none', padding: 0, margin: 0, borderTop: `1px solid ${p.fg}30` }}>
-            {volume.lessons.map(([n, name], i) => {
-              const free = i < 2;
-              return (
-                <li key={i} style={{
-                  display: 'grid', gridTemplateColumns: 'auto 1fr auto auto', gap: 16,
-                  alignItems: 'baseline',
-                  padding: '14px 0',
-                  borderBottom: `1px dashed ${p.fg}25`,
-                }}>
-                  <span style={{
-                    ...sans, fontSize: 11, fontWeight: 700, letterSpacing: '0.1em',
-                    opacity: 0.5, fontVariantNumeric: 'tabular-nums', minWidth: 22,
-                  }}>{n}</span>
-                  <span style={{ ...sub, fontSize: 18, fontWeight: 400 }}>{name}</span>
-                  {free && (
-                    <span style={{
-                      ...lbl, fontSize: 9, color: p.accent,
-                      border: `1px solid ${p.accent}`, padding: '2px 6px',
-                    }}>FREE PREVIEW</span>
-                  )}
-                  <span style={{ ...sans, fontSize: 12, opacity: 0.5, fontVariantNumeric: 'tabular-nums' }}>
-                    {Math.floor(8 + (i * 1.7) % 9)}m
-                  </span>
-                </li>
-              );
-            })}
-          </ol>
-        </div>
         </div>
 
         {/* Footer CTAs */}
         <div style={{
-          flex: '0 0 auto', background: p.cream,
-          padding: '20px 28px', borderTop: `1.5px solid ${p.fg}`,
-          display: 'flex', gap: 12, alignItems: 'center',
+          flex: '0 0 auto',
+          padding: '20px 28px', borderTop: `1px solid ${p.tagBorder}`,
+          display: 'flex', gap: 12, alignItems: 'center', background: p.bgCard,
         }}>
           {enrolled ? (
             <div style={{
-              flex: 1, padding: '14px 18px',
-              background: p.bg, border: `1.5px solid ${p.accent}`,
-              ...sans, fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase',
-              color: p.accent, textAlign: 'center',
+              flex: 1, padding: '14px 20px', borderRadius: RADIUS.pill,
+              background: p.tagBg, border: `1px solid ${p.accent}`,
+              ...t.button, color: p.accent, textAlign: 'center',
             }}>
-              ◆ ADDED TO YOUR SHELF · CHECK YOUR EMAIL
+              Added to your shelf · Check your email
             </div>
           ) : (
             <React.Fragment>
-              <button
-                onClick={() => setEnrolled(true)}
-                style={{
-                  flex: 1, background: p.accent, color: p.cream,
-                  padding: '14px 18px', border: 'none',
-                  ...sans, fontSize: 12, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase',
-                  cursor: 'pointer',
-                }}
-              >
+              <button onClick={() => setEnrolled(true)} style={{
+                flex: 1, ...t.button, padding: '14px 20px', borderRadius: RADIUS.pill,
+                background: p.accent, color: '#FFFFFF', border: 'none', cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}>
                 Preview the first 2 entries →
               </button>
-              <button
-                onClick={() => { handleClose(); setTimeout(onTrial, 280); }}
-                style={{
-                  background: 'transparent', color: p.fg,
-                  padding: '14px 18px', border: `1.5px solid ${p.fg}`,
-                  ...sans, fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase',
-                  cursor: 'pointer',
-                }}
-              >
+              <button onClick={() => { handleClose(); setTimeout(onTrial, 280); }} style={{
+                ...t.button, padding: '14px 20px', borderRadius: RADIUS.pill,
+                background: 'transparent', color: p.textPrimary,
+                border: `1px solid ${p.tagBorder}`, cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}>
                 Start trial
               </button>
             </React.Fragment>
@@ -6884,20 +6465,20 @@ function CopiPrototype() {
       openFinal:  (volId) => setLessonTarget({ kind: 'final', volId }),
       openAssign: (volId) => setAssignVolId(volId),
       openBarista: (email) => setDetailEmail(email),
+      openTrial: () => setTrial(true),
+      openLogin: () => setLogin(true),
       navigate,
     };
   });
 
   const onPageClick = (e) => {
-    // Logo wordmark — italic span "Copi" in the top-left nav slot.
-    const span = e.target.closest('span');
-    if (span && span.textContent.trim() === 'Copi') {
-      const cs = window.getComputedStyle(span);
-      const fontSize = parseFloat(cs.fontSize);
-      // Big italic "Copi" in nav is 44px; footer copies are smaller / different weight
-      if (fontSize >= 30 && cs.fontStyle === 'italic') {
-        const nearestNav = span.closest('div');
-        if (nearestNav) {
+    // Logo wordmark — <a> or <span> "Copi." in NavNew / old nav
+    const logoEl = e.target.closest('a, span');
+    if (logoEl) {
+      const text = (logoEl.textContent || '').trim();
+      if (text === 'Copi.' || text === 'Copi') {
+        const cs = window.getComputedStyle(logoEl);
+        if (cs.fontStyle === 'italic' && parseFloat(cs.fontSize) >= 18) {
           e.preventDefault();
           navigate('home');
           return;
@@ -6962,7 +6543,7 @@ function CopiPrototype() {
     }
 
     // ── CTAs ─────────────────────────────────────────
-    if (/start free trial/i.test(text)) {
+    if (/start free trial/i.test(text) || /join the waitlist/i.test(text)) {
       e.preventDefault();
       setTrial(true);
       return;
@@ -7002,7 +6583,7 @@ function CopiPrototype() {
       onClickCapture={onPageClick}
       style={{
         minHeight: '100vh', position: 'relative',
-        background: PROTO_PALETTE.bg,
+        background: (window.NEW_PALETTE || PROTO_PALETTE).bg,
       }}
     >
       <div
