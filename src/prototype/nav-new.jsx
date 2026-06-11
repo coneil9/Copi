@@ -121,10 +121,18 @@ function NavNew({ theme = {} }) {
           <li>
             <a
               onClick={() => {
-                // Scroll to how-it-works section if on home page
                 const section = document.getElementById('how-it-works');
                 if (section) {
                   section.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                  // Not on home page — navigate home then scroll
+                  if (window.CopiActions && window.CopiActions.navigate) {
+                    window.CopiActions.navigate('home');
+                    setTimeout(() => {
+                      const s = document.getElementById('how-it-works');
+                      if (s) s.scrollIntoView({ behavior: 'smooth' });
+                    }, 400);
+                  }
                 }
               }}
               style={{
