@@ -13,9 +13,18 @@ body,
 }
 
 body {
-  background: #F0EDE4;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Lato', sans-serif;
-  color: #1C1C1A;
+  background: #EFE9DA;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #1F1B14;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
 button,

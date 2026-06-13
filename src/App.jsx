@@ -1,7 +1,23 @@
 import React from 'react';
+import './store/copi-store.js';
 
 // Import new design system and components
 import './prototype/design-system.jsx';
+
+// New pages
+import './pages/signup-page.jsx';
+import './pages/cafe-setup-page.jsx';
+import './pages/invite-accept-page.jsx';
+import './pages/staff-page.jsx';
+import './pages/manager-dashboard.jsx';
+import './pages/ai-review-page.jsx';
+import './pages/owner-dashboard.jsx';
+import './pages/blocks/FlashcardBlock.jsx';
+import './pages/blocks/DragDropBlock.jsx';
+import './pages/lesson-player-new.jsx';
+import './pages/cms-page.jsx';
+import './pages/billing-page.jsx';
+import './pages/barista-profile-new.jsx';
 import './prototype/coffee-mascot.jsx';
 import './prototype/ui-components.jsx';
 import './prototype/nav-new.jsx';
@@ -53,7 +69,7 @@ function ImagePlaceholder({ label, bg, fg, height = 280 }) {
       </svg>
       <div style={{ position: 'relative', textAlign: 'center' }}>
         <div style={{
-          fontFamily: 'Lato', fontSize: 11, letterSpacing: '0.18em',
+          fontFamily: '"Inter", sans-serif', fontSize: 11, letterSpacing: '0.18em',
           textTransform: 'uppercase', opacity: 0.7, marginBottom: 6,
         }}>
           {label}
@@ -558,340 +574,10 @@ window.COPI_VOL3 = {
 };
 
 
-// ===== copi-store.jsx =====
-// ═════════════════════════════════════════════════════════
-// COPI STORE — the single source of truth for the whole app.
-//
-// Assembles the curriculum (from copi-content-*.jsx), holds the
-// canonical team roster, and runs the progress engine: who is
-// assigned what, which lessons are done, quiz scores, final
-// tests, certifications. Everything persists to localStorage so
-// a demo survives refreshes and login switches.
-//
-// Surfaces never invent their own numbers — they read CopiStore
-// and subscribe via useCopiStore().
-// ═════════════════════════════════════════════════════════
+// Assemble curriculum now that all three volumes are defined above
+window.COPI_CURRICULUM = [window.COPI_VOL1, window.COPI_VOL2, window.COPI_VOL3].filter(Boolean);
+// window.CopiStore / window.useCopiStore are set by src/store/copi-store.js (imported at top)
 
-// ── Canonical curriculum (order matters) ────────────────────
-const COPI_CURRICULUM = [window.COPI_VOL1, window.COPI_VOL2, window.COPI_VOL3].filter(Boolean);
-window.COPI_CURRICULUM = COPI_CURRICULUM;
-
-function volById(id) { return COPI_CURRICULUM.find((v) => v.id === id); }
-function lessonById(lessonId) {
-  for (const v of COPI_CURRICULUM) {
-    const l = v.lessons.find((x) => x.id === lessonId);
-    if (l) return { vol: v, lesson: l };
-  }
-  return null;
-}
-
-// ── Canonical team roster (shared by every admin surface) ───
-const COPI_TEAM = [
-  { name: 'Linda Turko', email: 'linda@milano.coffee', role: 'Lead barista', joined: 'Mar 2025' },
-  { name: 'Reza Mehta',  email: 'reza@milano.coffee',  role: 'Lead barista', joined: 'May 2025' },
-  { name: 'Pia Olsen',   email: 'pia@milano.coffee',   role: 'Barista',      joined: 'Sep 2025' },
-  { name: 'Lili Turko',  email: 'lili@milano.coffee',  role: 'Barista',      joined: 'Aug 2025' },
-  { name: 'Jules Patel', email: 'jules@milano.coffee', role: 'Barista',      joined: 'Jul 2025' },
-  { name: 'Devi Shah',   email: 'devi@milano.coffee',  role: 'New hire',     joined: 'Oct 2025' },
-];
-
-const STORE_KEY = 'copi.progress.v3';
-
-// ── Seed a believable baseline ──────────────────────────────
-// Vol I + II assigned to everyone with a spread of progress.
-// Vol III (Bar certified) is deliberately NOT assigned — the
-// admin demo is to assign it and watch completion land.
-function seedState() {
-  const state = { assignments: {}, users: {}, activity: [], seeded: true };
-
-  // Assign Vol I and Vol II to the whole team.
-  state.assignments['vol-1'] = COPI_TEAM.map((t) => t.email);
-  state.assignments['vol-2'] = COPI_TEAM.map((t) => t.email);
-  state.assignments['vol-3'] = []; // unassigned on purpose
-
-  // How far each person got: [vol1 lessons done, vol1 final?, vol2 lessons done, vol2 final?]
-  const plan = {
-    'linda@milano.coffee': [9, true,  7, true],
-    'reza@milano.coffee':  [9, true,  7, false],
-    'pia@milano.coffee':   [7, false, 2, false],
-    'lili@milano.coffee':  [6, false, 1, false],
-    'jules@milano.coffee': [5, false, 0, false],
-    'devi@milano.coffee':  [2, false, 0, false],
-  };
-
-  const vol1 = volById('vol-1');
-  const vol2 = volById('vol-2');
-  let seedClock = Date.now() - 1000 * 60 * 60 * 24 * 9; // 9 days ago, marching forward
-
-  COPI_TEAM.forEach((t) => {
-    const [n1, f1, n2, f2] = plan[t.email] || [0, false, 0, false];
-    const u = { lessons: {}, finals: {} };
-    const mark = (vol, count) => {
-      for (let i = 0; i < count; i++) {
-        const lesson = vol.lessons[i];
-        const total = lesson.quiz.length;
-        // believable score: mostly full marks, occasional miss
-        const score = (i % 4 === 3) ? total - 1 : total;
-        seedClock += 1000 * 60 * 60 * 3;
-        u.lessons[lesson.id] = { done: true, score, total, ts: seedClock };
-      }
-    };
-    mark(vol1, n1);
-    mark(vol2, n2);
-    if (f1) u.finals['vol-1'] = { passed: true, score: 6, total: 6, ts: seedClock };
-    if (f2) u.finals['vol-2'] = { passed: true, score: 5, total: 6, ts: seedClock };
-    state.users[t.email] = u;
-  });
-
-  // A little recent activity for "lessons in motion".
-  state.activity = [
-    { who: 'Reza Mehta',  action: 'completed', label: 'II-05 Anaerobic and experimental', kind: 'complete', ts: Date.now() - 1000 * 60 * 60 * 2 },
-    { who: 'Pia Olsen',   action: 'completed', label: 'II-02 Washed process',              kind: 'complete', ts: Date.now() - 1000 * 60 * 60 * 6 },
-    { who: 'Lili Turko',  action: 'completed', label: 'II-01 The cherry, anatomy of',      kind: 'complete', ts: Date.now() - 1000 * 60 * 60 * 26 },
-    { who: 'Jules Patel', action: 'completed', label: 'I-05 Plantations and empire',       kind: 'complete', ts: Date.now() - 1000 * 60 * 60 * 30 },
-  ];
-
-  return state;
-}
-
-function loadState() {
-  try {
-    const raw = JSON.parse(localStorage.getItem(STORE_KEY));
-    if (raw && raw.seeded) return raw;
-  } catch (_e) {}
-  const fresh = seedState();
-  try { localStorage.setItem(STORE_KEY, JSON.stringify(fresh)); } catch (_e) {}
-  return fresh;
-}
-
-// ── The store singleton ─────────────────────────────────────
-const CopiStore = (function () {
-  let state = loadState();
-  const subs = new Set();
-
-  function persist() {
-    try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (_e) {}
-  }
-  function emit() { persist(); subs.forEach((fn) => fn()); }
-
-  function userRec(email) {
-    if (!state.users[email]) state.users[email] = { lessons: {}, finals: {} };
-    return state.users[email];
-  }
-
-  function nameFor(email) {
-    const t = COPI_TEAM.find((x) => x.email === email);
-    return t ? t.name : (email || 'Someone');
-  }
-
-  return {
-    team: COPI_TEAM,
-    curriculum: COPI_CURRICULUM,
-    volById, lessonById,
-
-    subscribe(fn) { subs.add(fn); return () => subs.delete(fn); },
-    raw() { return state; },
-
-    // ── Assignment ──────────────────────────────────────────
-    isAssigned(email, volId) {
-      return (state.assignments[volId] || []).includes(email);
-    },
-    assignedVolumes(email) {
-      return COPI_CURRICULUM.filter((v) => (state.assignments[v.id] || []).includes(email));
-    },
-    assignedEmails(volId) {
-      return (state.assignments[volId] || []).slice();
-    },
-    assignVolume(volId, emails) {
-      const set = new Set(state.assignments[volId] || []);
-      let added = 0;
-      emails.forEach((e) => { if (!set.has(e)) { set.add(e); added++; } });
-      state.assignments[volId] = Array.from(set);
-      if (added) {
-        const v = volById(volId);
-        state.activity.unshift({
-          who: 'Brian Turko', action: 'assigned', label: `${v.vol} ${v.name} \u2192 ${added} barista${added > 1 ? 's' : ''}`,
-          kind: 'assign', ts: Date.now(),
-        });
-      }
-      emit();
-      return added;
-    },
-    unassignVolume(volId, emails) {
-      const set = new Set(state.assignments[volId] || []);
-      emails.forEach((e) => set.delete(e));
-      state.assignments[volId] = Array.from(set);
-      emit();
-    },
-
-    // ── Lesson / final progress ─────────────────────────────
-    lessonRecord(email, lessonId) {
-      return userRec(email).lessons[lessonId] || null;
-    },
-    finalRecord(email, volId) {
-      return userRec(email).finals[volId] || null;
-    },
-
-    // status of lesson at index i within a volume for a user
-    lessonStatus(email, volId, idx) {
-      if (!this.isAssigned(email, volId)) return 'locked';
-      const v = volById(volId);
-      const lesson = v.lessons[idx];
-      const rec = userRec(email).lessons[lesson.id];
-      if (rec && rec.done) return 'done';
-      if (idx === 0) return 'current';
-      const prev = v.lessons[idx - 1];
-      const prevRec = userRec(email).lessons[prev.id];
-      return (prevRec && prevRec.done) ? 'current' : 'locked';
-    },
-    finalStatus(email, volId) {
-      if (!this.isAssigned(email, volId)) return 'locked';
-      const fin = userRec(email).finals[volId];
-      if (fin && fin.passed) return 'done';
-      const v = volById(volId);
-      const allDone = v.lessons.every((l) => (userRec(email).lessons[l.id] || {}).done);
-      return allDone ? 'current' : 'locked';
-    },
-
-    completeLesson(email, lessonId, score, total) {
-      const found = lessonById(lessonId);
-      if (!found) return;
-      const u = userRec(email);
-      const already = u.lessons[lessonId] && u.lessons[lessonId].done;
-      u.lessons[lessonId] = { done: true, score, total, ts: Date.now() };
-      if (!already) {
-        state.activity.unshift({
-          who: nameFor(email), action: 'completed',
-          label: `${found.vol.num === '01' ? 'I' : found.vol.num === '02' ? 'II' : 'III'}-${found.lesson.num} ${found.lesson.title}`,
-          kind: 'complete', ts: Date.now(),
-        });
-        state.activity = state.activity.slice(0, 30);
-      }
-      emit();
-    },
-    completeFinal(email, volId, score, total) {
-      const v = volById(volId);
-      const passed = score / total >= (v.finalTest.passMark || 0.7);
-      userRec(email).finals[volId] = { passed, score, total, ts: Date.now() };
-      state.activity.unshift({
-        who: nameFor(email), action: passed ? 'passed' : 'attempted',
-        label: `${v.vol} final test \u2014 ${score}/${total}`,
-        kind: passed ? 'cert' : 'review', ts: Date.now(),
-      });
-      state.activity = state.activity.slice(0, 30);
-      emit();
-      return passed;
-    },
-
-    // ── Stats ───────────────────────────────────────────────
-    volumeStats(email, volId) {
-      const v = volById(volId);
-      const u = userRec(email);
-      const done = v.lessons.filter((l) => (u.lessons[l.id] || {}).done).length;
-      const total = v.lessons.length;
-      const fin = u.finals[volId];
-      const certified = !!(fin && fin.passed);
-      return { done, total, pct: total ? done / total : 0, certified, assigned: this.isAssigned(email, volId) };
-    },
-
-    // overall completion across a user's assigned volumes (0..1)
-    overallPct(email) {
-      const vols = COPI_CURRICULUM.filter((v) => this.isAssigned(email, v.id));
-      if (!vols.length) return 0;
-      let done = 0, total = 0;
-      vols.forEach((v) => { const s = this.volumeStats(email, v.id); done += s.done; total += s.total; });
-      return total ? done / total : 0;
-    },
-
-    // the next lesson a barista should do (first current across assigned vols)
-    currentLesson(email) {
-      for (const v of COPI_CURRICULUM) {
-        if (!this.isAssigned(email, v.id)) continue;
-        for (let i = 0; i < v.lessons.length; i++) {
-          if (this.lessonStatus(email, v.id, i) === 'current') {
-            return { vol: v, lesson: v.lessons[i], idx: i };
-          }
-        }
-        if (this.finalStatus(email, v.id) === 'current') {
-          return { vol: v, lesson: null, idx: -1, isFinal: true };
-        }
-      }
-      return null;
-    },
-
-    // team rollup for one volume
-    teamVolumeStats(volId) {
-      const assigned = this.assignedEmails(volId);
-      let completed = 0, inProgress = 0;
-      assigned.forEach((e) => {
-        const s = this.volumeStats(e, volId);
-        if (s.certified || (s.done === s.total && s.total > 0)) completed++;
-        else if (s.done > 0) inProgress++;
-      });
-      return { assigned: assigned.length, completed, inProgress };
-    },
-
-    // team-wide average completion across assigned volumes (0..1)
-    teamCompletion() {
-      const vals = COPI_TEAM.map((t) => this.overallPct(t.email));
-      const active = vals.filter((_v, i) => COPI_CURRICULUM.some((v) => this.isAssigned(COPI_TEAM[i].email, v.id)));
-      if (!active.length) return 0;
-      return active.reduce((a, b) => a + b, 0) / active.length;
-    },
-
-    // per-barista snapshot for analytics table
-    teamSnapshot() {
-      return COPI_TEAM.map((t) => {
-        const pct = Math.round(this.overallPct(t.email) * 100);
-        // highest cert earned
-        let cert = '\u2014';
-        if (this.volumeStats(t.email, 'vol-3').certified) cert = 'Bar certified';
-        else if (this.volumeStats(t.email, 'vol-1').certified || this.volumeStats(t.email, 'vol-2').certified) cert = 'Foundations';
-        return { ...t, pct, cert };
-      });
-    },
-
-    activity(limit = 8) { return (state.activity || []).slice(0, limit); },
-
-    // lessons completed in the last 7 days, across the team
-    lessonsThisWeek() {
-      const weekAgo = Date.now() - 1000 * 60 * 60 * 24 * 7;
-      let n = 0;
-      COPI_TEAM.forEach((t) => {
-        const u = state.users[t.email];
-        if (!u) return;
-        Object.values(u.lessons).forEach((r) => { if (r.done && r.ts >= weekAgo) n++; });
-      });
-      return n;
-    },
-
-    // average first-attempt quiz pass rate across all recorded lessons (0..1)
-    avgScore() {
-      let score = 0, total = 0;
-      COPI_TEAM.forEach((t) => {
-        const u = state.users[t.email];
-        if (!u) return;
-        Object.values(u.lessons).forEach((r) => { score += r.score; total += r.total; });
-      });
-      return total ? score / total : 0;
-    },
-
-    resetAll() {
-      state = seedState();
-      emit();
-    },
-  };
-})();
-
-window.CopiStore = CopiStore;
-
-// React hook — re-render any component on store change.
-function useCopiStore() {
-  const [, force] = React.useState(0);
-  React.useEffect(() => CopiStore.subscribe(() => force((n) => n + 1)), []);
-  return CopiStore;
-}
-window.useCopiStore = useCopiStore;
 
 
 // ===== lesson-player.jsx =====
@@ -906,14 +592,13 @@ window.useCopiStore = useCopiStore;
 // ═════════════════════════════════════════════════════════
 
 function LessonPlayer({ open, email, target, onClose }) {
-  const p = {
-    bg: '#E8DDC2', fg: '#1A1410', accent: '#3F5A3A',
-    cream: '#F4EBD2', sun: '#C68A3D', cherry: '#7A2B1F',
-  };
-  const display = { fontFamily: 'Unna' };
-  const sub = { fontFamily: 'Yrsa' };
-  const sans = { fontFamily: 'Lato' };
-  const lbl = { fontFamily: 'Lato', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', fontSize: 10 };
+  const _th = window.THEME || {};
+  const _ty = window.TYPOGRAPHY || {};
+  const p = { bg: _th.bg||'#EFE9DA', fg: _th.ink||'#1F1B14', accent: _th.accent||'#44704B', cream: _th.bgCard||'#FBF8F0', sun: _th.gold||'#C49455', cherry: _th.danger||'#7A2B1F', rule: _th.line||'#D5CDBA', muted: _th.muted||'#6E675A' };
+  const display = _ty.displayItalic || { fontFamily: '"DM Serif Display", Georgia, serif', fontStyle: 'italic' };
+  const sub = _ty.body || { fontFamily: '"Inter", sans-serif' };
+  const sans = _ty.button || { fontFamily: '"Inter", sans-serif' };
+  const lbl = { fontFamily: '"Inter", sans-serif', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', fontSize: 10 };
 
   const store = window.CopiStore;
   const [phase, setPhase] = React.useState('read'); // read | quiz | result
@@ -1277,14 +962,13 @@ window.LessonPlayer = LessonPlayer;
 // ═════════════════════════════════════════════════════════
 
 function AssignModal({ open, volId, onClose }) {
-  const p = {
-    bg: '#E8DDC2', fg: '#1A1410', accent: '#3F5A3A',
-    cream: '#F4EBD2', sun: '#C68A3D', cherry: '#7A2B1F',
-  };
-  const display = { fontFamily: 'Unna' };
-  const sub = { fontFamily: 'Yrsa' };
-  const sans = { fontFamily: 'Lato' };
-  const lbl = { fontFamily: 'Lato', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
+  const _th = window.THEME || {};
+  const _ty = window.TYPOGRAPHY || {};
+  const p = { bg: _th.bg||'#EFE9DA', fg: _th.ink||'#1F1B14', accent: _th.accent||'#44704B', cream: _th.bgCard||'#FBF8F0', sun: _th.gold||'#C49455', cherry: _th.danger||'#7A2B1F', rule: _th.line||'#D5CDBA', muted: _th.muted||'#6E675A' };
+  const display = _ty.displayItalic || { fontFamily: '"DM Serif Display", Georgia, serif', fontStyle: 'italic' };
+  const sub = _ty.body || { fontFamily: '"Inter", sans-serif' };
+  const sans = _ty.button || { fontFamily: '"Inter", sans-serif' };
+  const lbl = { fontFamily: '"Inter", sans-serif', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
 
   const store = window.CopiStore;
   const vol = volId ? store.volById(volId) : null;
@@ -1500,15 +1184,14 @@ window.AssignModal = AssignModal;
 // ═════════════════════════════════════════════════════════
 
 function BaristaDetailModal({ open, email, onClose }) {
-  const p = {
-    bg: '#E8DDC2', fg: '#1A1410', accent: '#3F5A3A',
-    cream: '#F4EBD2', sun: '#C68A3D', cherry: '#7A2B1F',
-  };
-  const display = { fontFamily: 'Unna' };
-  const sub = { fontFamily: 'Yrsa' };
-  const sans = { fontFamily: 'Lato' };
-  const lbl = { fontFamily: 'Lato', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
-  const mono = { fontFamily: 'Lato', fontVariantNumeric: 'tabular-nums' };
+  const _th = window.THEME || {};
+  const _ty = window.TYPOGRAPHY || {};
+  const p = { bg: _th.bg||'#EFE9DA', fg: _th.ink||'#1F1B14', accent: _th.accent||'#44704B', cream: _th.bgCard||'#FBF8F0', sun: _th.gold||'#C49455', cherry: _th.danger||'#7A2B1F', rule: _th.line||'#D5CDBA', muted: _th.muted||'#6E675A' };
+  const display = _ty.displayItalic || { fontFamily: '"DM Serif Display", Georgia, serif', fontStyle: 'italic' };
+  const sub = _ty.body || { fontFamily: '"Inter", sans-serif' };
+  const sans = _ty.button || { fontFamily: '"Inter", sans-serif' };
+  const lbl = { fontFamily: '"Inter", sans-serif', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
+  const mono = { fontFamily: '"Inter", sans-serif', fontVariantNumeric: 'tabular-nums' };
 
   const store = window.useCopiStore();
   const [closing, setClosing] = React.useState(false);
@@ -1536,7 +1219,9 @@ function BaristaDetailModal({ open, email, onClose }) {
   const cert = snap.cert || '—';
 
   // last active
-  const u = store.raw().users[email] || { lessons: {}, finals: {} };
+  const _dbU1 = store.getUserByEmail ? store.getUserByEmail(email) : null;
+  const _prog1 = _dbU1 ? (store.raw().progress[_dbU1.id] || {}) : {};
+  const u = { lessons: _prog1.lessons || {}, finals: _prog1.finals || {} };
   let lastTs = 0;
   Object.values(u.lessons).forEach((r) => { if (r.ts > lastTs) lastTs = r.ts; });
   Object.values(u.finals || {}).forEach((r) => { if (r.ts > lastTs) lastTs = r.ts; });
@@ -1760,10 +1445,10 @@ function PourOver({
 
       {/* FIG label — top right */}
       <g transform={`translate(${w - 140}, 28)`}>
-        <text style={{ fontFamily: 'Lato', fontSize: 10, fontWeight: 600, letterSpacing: '0.28em', fill: ink, opacity: 0.6 }}>
+        <text style={{ fontFamily: '"Inter", sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.28em', fill: ink, opacity: 0.6 }}>
           FIG. I
         </text>
-        <text y="18" style={{ fontFamily: 'Yrsa', fontStyle: 'italic', fontSize: 16, fill: ink }}>
+        <text y="18" style={{ fontFamily: '"Inter", sans-serif', fontStyle: 'italic', fontSize: 16, fill: ink }}>
           The pour-over
         </text>
         <line x1="0" y1="26" x2="110" y2="26" stroke={ink} strokeWidth="0.6" opacity="0.5" />
@@ -1777,7 +1462,7 @@ function PourOver({
       <rect x={cx - 110} y="510" width="220" height="30" fill={paper} stroke={ink} strokeWidth="1.3" />
       <rect x={cx + 50} y="518" width="50" height="14" fill="none" stroke={ink} strokeWidth="0.6" opacity="0.7" />
       <text x={cx + 75} y="530" textAnchor="middle"
-      style={{ fontFamily: 'Lato', fontSize: 9, fontWeight: 700, letterSpacing: '0.15em', fill: ink, fontVariantNumeric: 'tabular-nums' }}>
+      style={{ fontFamily: '"Inter", sans-serif', fontSize: 9, fontWeight: 700, letterSpacing: '0.15em', fill: ink, fontVariantNumeric: 'tabular-nums' }}>
         324 g
       </text>
       {/* scale platform line */}
@@ -1903,11 +1588,11 @@ function PourOver({
         <line x1={cx + 100} y1="278" x2={cx + 165} y2="252" stroke={ink} strokeWidth="0.5" opacity="0.7" />
         <circle cx={cx + 100} cy="278" r="1.6" fill={ink} opacity="0.7" />
         <text x={cx + 168} y="244"
-        style={{ fontFamily: 'Lato', fontSize: 9, fontWeight: 700, letterSpacing: '0.22em', fill: ink, opacity: 0.8 }}>
+        style={{ fontFamily: '"Inter", sans-serif', fontSize: 9, fontWeight: 700, letterSpacing: '0.22em', fill: ink, opacity: 0.8 }}>
           60° CONE
         </text>
         <text x={cx + 168} y="259"
-        style={{ fontFamily: 'Yrsa', fontStyle: 'italic', fontSize: 12, fill: ink, opacity: 0.7 }}>
+        style={{ fontFamily: '"Inter", sans-serif', fontStyle: 'italic', fontSize: 12, fill: ink, opacity: 0.7 }}>
           bloom 45 s
         </text>
       </g>
@@ -1917,11 +1602,11 @@ function PourOver({
         <line x1="158" y1="262" x2="60" y2="200" stroke={ink} strokeWidth="0.5" opacity="0.7" />
         <circle cx="158" cy="262" r="1.6" fill={ink} opacity="0.7" />
         <text x="22" y="188"
-        style={{ fontFamily: 'Lato', fontSize: 9, fontWeight: 700, letterSpacing: '0.22em', fill: ink, opacity: 0.8 }}>
+        style={{ fontFamily: '"Inter", sans-serif', fontSize: 9, fontWeight: 700, letterSpacing: '0.22em', fill: ink, opacity: 0.8 }}>
           GOOSENECK · 94°C
         </text>
         <text x="22" y="203"
-        style={{ fontFamily: 'Yrsa', fontStyle: 'italic', fontSize: 12, fill: ink, opacity: 0.7 }}>
+        style={{ fontFamily: '"Inter", sans-serif', fontStyle: 'italic', fontSize: 12, fill: ink, opacity: 0.7 }}>
           steady, slow pour
         </text>
       </g>
@@ -1933,11 +1618,11 @@ function PourOver({
         <circle cx={cx - 78} cy="455" r="3.5" fill={spark} stroke={ink} strokeWidth="0.5" /> :
         <circle cx={cx - 78} cy="455" r="1.6" fill={ink} opacity="0.7" />}
         <text x="22" y="476"
-        style={{ fontFamily: 'Lato', fontSize: 9, fontWeight: 700, letterSpacing: '0.22em', fill: ink, opacity: 0.8 }}>
+        style={{ fontFamily: '"Inter", sans-serif', fontSize: 9, fontWeight: 700, letterSpacing: '0.22em', fill: ink, opacity: 0.8 }}>
           RATIO 1 : 16
         </text>
         <text x="22" y="491"
-        style={{ fontFamily: 'Yrsa', fontStyle: 'italic', fontSize: 12, fill: ink, opacity: 0.7 }}>
+        style={{ fontFamily: '"Inter", sans-serif', fontStyle: 'italic', fontSize: 12, fill: ink, opacity: 0.7 }}>
           20 g coffee · 320 g water
         </text>
       </g>
@@ -1960,10 +1645,10 @@ function CopiFooter({ theme = {} }) {
     sun: '#C68A3D',
     ...(theme.palette || {}),
   };
-  const display = { fontFamily: theme.displayFont || 'Unna' };
-  const sub = { fontFamily: 'Yrsa' };
-  const sans = { fontFamily: 'Lato' };
-  const lbl = { fontFamily: 'Lato', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
+  const display = { fontFamily: theme.displayFont || '"DM Serif Display", Georgia, serif' };
+  const sub = { fontFamily: '"Inter", sans-serif' };
+  const sans = { fontFamily: '"Inter", sans-serif' };
+  const lbl = { fontFamily: '"Inter", sans-serif', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
 
   const columns = [
     {
@@ -2072,17 +1757,17 @@ Object.assign(window, { CopiFooter });
 // ═════════════════════════════════════════════════════════
 function BrandingTemplate3() {
   const p = {
-    bg: '#E8DDC2',
+    bg: (window.THEME||{}).bg||'#EFE9DA',
     fg: '#1A1410',
     accent: '#3F5A3A', // moss
     cream: '#F4EBD2',
     sun: '#C68A3D', // ochre
     rule: '#7A6B4E'
   };
-  const display = { fontFamily: 'Unna' };
-  const sub = { fontFamily: 'Yrsa' };
-  const sans = { fontFamily: 'Lato' };
-  const lbl = { fontFamily: 'Lato', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
+  const display = { fontFamily: '"DM Serif Display", Georgia, serif' };
+  const sub = { fontFamily: '"Inter", sans-serif' };
+  const sans = { fontFamily: '"Inter", sans-serif' };
+  const lbl = { fontFamily: '"Inter", sans-serif', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
 
   // Almanac wheel — concentric ring of "months" / chapters
   const AlmanacWheel = ({ size = 520 }) => {
@@ -2126,7 +1811,7 @@ function BrandingTemplate3() {
         })}
         {/* arc labels */}
         {months.map((m, i) =>
-        <text key={i} style={{ fontFamily: 'Lato', fontSize: 11, fontWeight: 600, letterSpacing: '0.2em', fill: p.fg }}>
+        <text key={i} style={{ fontFamily: '"Inter", sans-serif', fontSize: 11, fontWeight: 600, letterSpacing: '0.2em', fill: p.fg }}>
             <textPath href={`#arc-${i}`} startOffset="20%">{m.l} · {m.t.toUpperCase()}</textPath>
           </text>
         )}
@@ -2143,9 +1828,9 @@ function BrandingTemplate3() {
         <circle cx={cx} cy={cy} r={rHub} fill={p.accent} />
         <circle cx={cx} cy={cy} r={rHub - 8} fill="none" stroke={p.cream} strokeWidth="0.8" opacity="0.6" />
         <text x={cx} y={cy - 6} textAnchor="middle"
-        style={{ fontFamily: 'Unna', fontStyle: 'italic', fontSize: 28, fill: p.cream }}>Copi</text>
+        style={{ fontFamily: '"DM Serif Display", Georgia, serif', fontStyle: 'italic', fontSize: 28, fill: p.cream }}>Copi</text>
         <text x={cx} y={cy + 14} textAnchor="middle"
-        style={{ fontFamily: 'Lato', fontSize: 9, fontWeight: 600, letterSpacing: '0.25em', fill: p.cream, opacity: 0.8 }}>
+        style={{ fontFamily: '"Inter", sans-serif', fontSize: 9, fontWeight: 600, letterSpacing: '0.25em', fill: p.cream, opacity: 0.8 }}>
           ALMANAC · MMXXVI
         </text>
         {/* "now" indicator — a small sun at JUN */}
@@ -3808,18 +3493,18 @@ Object.assign(window, { AdminTeamPage });
 
 function AdminCurriculumPage({ user = {} }) {
   const p = {
-    bg: '#E8DDC2',
+    bg: (window.THEME||{}).bg||'#EFE9DA',
     fg: '#1A1410',
     accent: '#3F5A3A',
     cream: '#F4EBD2',
     sun: '#C68A3D',
     cherry: '#7A2B1F'
   };
-  const display = { fontFamily: 'Unna' };
-  const sub = { fontFamily: 'Yrsa' };
-  const sans = { fontFamily: 'Lato' };
-  const lbl = { fontFamily: 'Lato', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
-  const mono = { fontFamily: 'Lato', fontVariantNumeric: 'tabular-nums' };
+  const display = { fontFamily: '"DM Serif Display", Georgia, serif' };
+  const sub = { fontFamily: '"Inter", sans-serif' };
+  const sans = { fontFamily: '"Inter", sans-serif' };
+  const lbl = { fontFamily: '"Inter", sans-serif', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
+  const mono = { fontFamily: '"Inter", sans-serif', fontVariantNumeric: 'tabular-nums' };
 
   const name = user.name || 'Brian Turko';
   const cafe = user.cafe || 'Milano';
@@ -4279,17 +3964,17 @@ Object.assign(window, { AdminCurriculumPage });
 
 function AdminSettingsPage({ user = {} }) {
   const p = {
-    bg: '#E8DDC2',
+    bg: (window.THEME||{}).bg||'#EFE9DA',
     fg: '#1A1410',
     accent: '#3F5A3A',
     cream: '#F4EBD2',
     sun: '#C68A3D',
     cherry: '#7A2B1F',
   };
-  const display = { fontFamily: 'Unna' };
-  const sub     = { fontFamily: 'Yrsa' };
-  const sans    = { fontFamily: 'Lato' };
-  const lbl     = { fontFamily: 'Lato', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
+  const display = { fontFamily: '"DM Serif Display", Georgia, serif' };
+  const sub     = { fontFamily: '"Inter", sans-serif' };
+  const sans    = { fontFamily: '"Inter", sans-serif' };
+  const lbl     = { fontFamily: '"Inter", sans-serif', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
 
   const name = user.name || 'Brian Turko';
   const cafe = user.cafe || 'Milano';
@@ -4591,18 +4276,18 @@ Object.assign(window, { AdminSettingsPage });
 
 function AdminAnalyticsPage({ user = {} }) {
   const p = {
-    bg: '#E8DDC2',
+    bg: (window.THEME||{}).bg||'#EFE9DA',
     fg: '#1A1410',
     accent: '#3F5A3A',
     cream: '#F4EBD2',
     sun: '#C68A3D',
     cherry: '#7A2B1F',
   };
-  const display = { fontFamily: 'Unna' };
-  const sub     = { fontFamily: 'Yrsa' };
-  const sans    = { fontFamily: 'Lato' };
-  const lbl     = { fontFamily: 'Lato', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
-  const mono    = { fontFamily: 'Lato', fontVariantNumeric: 'tabular-nums' };
+  const display = { fontFamily: '"DM Serif Display", Georgia, serif' };
+  const sub     = { fontFamily: '"Inter", sans-serif' };
+  const sans    = { fontFamily: '"Inter", sans-serif' };
+  const lbl     = { fontFamily: '"Inter", sans-serif', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
+  const mono    = { fontFamily: '"Inter", sans-serif', fontVariantNumeric: 'tabular-nums' };
 
   const name = user.name || 'Brian Turko';
   const cafe = user.cafe || 'Milano';
@@ -4619,7 +4304,9 @@ function AdminAnalyticsPage({ user = {} }) {
     return d <= 1 ? 'yesterday' : d + ' days ago';
   };
   const lastActive = (email) => {
-    const u = store.raw().users[email];
+    const _dbUser = store.getUserByEmail ? store.getUserByEmail(email) : null;
+    const _uprog = _dbUser ? (store.raw().progress[_dbUser.id] || {}) : null;
+    const u = _uprog ? { lessons: _uprog.lessons || {}, finals: _uprog.finals || {} } : null;
     if (!u) return 0;
     let m = 0;
     Object.values(u.lessons).forEach((r) => { if (r.ts > m) m = r.ts; });
@@ -4911,14 +4598,12 @@ Object.assign(window, { AdminAnalyticsPage });
 // ═════════════════════════════════════════════════════════
 
 function BaristaDashboard({ user = {} }) {
-  const p = {
-    bg: '#E8DDC2', fg: '#1A1410', accent: '#3F5A3A',
-    cream: '#F4EBD2', sun: '#C68A3D', cherry: '#7A2B1F',
-  };
-  const display = { fontFamily: 'Unna' };
-  const sub     = { fontFamily: 'Yrsa' };
-  const sans    = { fontFamily: 'Lato' };
-  const lbl     = { fontFamily: 'Lato', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', fontSize: 10 };
+  const _th = window.THEME || {};
+  const p = { bg: _th.bg||'#EFE9DA', fg: _th.ink||'#1F1B14', accent: _th.accent||'#44704B', cream: _th.bgCard||'#FBF8F0', sun: _th.gold||'#C49455', cherry: _th.danger||'#7A2B1F', rule: _th.line||'#D5CDBA', muted: _th.muted||'#6E675A' };
+  const display = { fontFamily: '"DM Serif Display", Georgia, serif' };
+  const sub     = { fontFamily: '"Inter", sans-serif' };
+  const sans    = { fontFamily: '"Inter", sans-serif' };
+  const lbl     = { fontFamily: '"Inter", sans-serif', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', fontSize: 10 };
 
   const store = window.useCopiStore();
   const email = user.email || 'lili@milano.coffee';
@@ -4928,11 +4613,33 @@ function BaristaDashboard({ user = {} }) {
   const current = store.currentLesson(email);
   const overall = Math.round(store.overallPct(email) * 100);
 
-  // this week (per user)
+  // this week (per user) — look up progress by userId now
   const weekAgo = Date.now() - 1000 * 60 * 60 * 24 * 7;
-  const raw = store.raw().users[email] || { lessons: {}, finals: {} };
-  const thisWeek = Object.values(raw.lessons).filter((r) => r.done && r.ts >= weekAgo).length;
+  const dbUser = store.getUserByEmail ? store.getUserByEmail(email) : null;
+  const rawProg = dbUser ? (store.raw().progress[dbUser.id] || {}) : {};
+  const rawLessons = rawProg.lessons || {};
+  const thisWeek = Object.values(rawLessons).filter((r) => r.done && r.ts >= weekAgo).length;
   const badges = ['vol-1', 'vol-2', 'vol-3'].filter((v) => store.volumeStats(email, v).certified).length;
+
+  // Product update modules assigned to this user
+  const productUpdates = dbUser
+    ? store.getAssignments(dbUser.id).filter((a) => {
+        const mod = store.raw().modules[a.moduleId];
+        return mod && mod.type === 'product_update' && mod.status === 'published' && a.status !== 'completed';
+      }).map((a) => ({ assignment: a, module: store.raw().modules[a.moduleId] }))
+    : [];
+
+  // Product update modal state
+  const [puModal, setPuModal] = React.useState(null); // { assignment, module }
+  const [puComplete, setPuComplete] = React.useState(false);
+
+  const openProductUpdate = (pu) => { setPuModal(pu); setPuComplete(false); };
+  const completeProductUpdate = () => {
+    if (!puModal) return;
+    store.updateAssignmentStatus(puModal.assignment.id, 'completed');
+    setPuComplete(true);
+    setTimeout(() => setPuModal(null), 1400);
+  };
 
   const act = window.CopiActions || {};
 
@@ -5138,6 +4845,34 @@ function BaristaDashboard({ user = {} }) {
           </div>
         )}
 
+        {/* ── PRODUCT UPDATES ──────────────────────────────── */}
+        {productUpdates.length > 0 && (
+          <div style={{ marginTop: 32 }}>
+            <div style={{ ...lbl, color: p.muted, marginBottom: 12 }}>UPDATES REQUIRED</div>
+            {productUpdates.map(({ assignment, module }) => {
+              const hoursLeft = assignment.deadline ? Math.max(0, Math.round((assignment.deadline - Date.now()) / 3600000)) : null;
+              const urgent = hoursLeft !== null && hoursLeft <= 48;
+              return (
+                <div key={assignment.id} style={{ background: urgent ? `${p.cherry}0d` : p.cream, border: `1.5px solid ${urgent ? p.cherry : p.rule}`, borderRadius: 16, padding: '16px 20px', marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div>
+                    <p style={{ ...sans, fontWeight: 600, color: p.fg, margin: '0 0 3px' }}>{module.title}</p>
+                    {hoursLeft !== null && (
+                      <p style={{ ...sans, fontSize: 12, color: urgent ? p.cherry : p.muted, margin: 0 }}>
+                        {urgent ? '⚡ Urgent — ' : ''}{hoursLeft}h left to complete
+                      </p>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => openProductUpdate({ assignment, module })}
+                    style={{ ...sans, fontWeight: 600, fontSize: 13, padding: '7px 18px', borderRadius: 999, background: urgent ? p.cherry : p.accent, color: p.cream, border: 'none', cursor: 'pointer' }}>
+                    Start →
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
         {/* ── STAT CHIPS ─────────────────────────────────────── */}
         <div style={{ marginTop: 64, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
           {[
@@ -5156,6 +4891,60 @@ function BaristaDashboard({ user = {} }) {
           <span data-app-action="logout" style={{ ...lbl, opacity: 0.4, cursor: 'pointer', fontSize: 9 }}>LOG OUT</span>
         </div>
       </div>
+
+      {/* ── Product update modal ──────────────────────────── */}
+      {puModal && (
+        <div
+          style={{ position: 'fixed', inset: 0, zIndex: 9000, background: 'rgba(31,27,20,0.5)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}
+          onClick={(e) => { if (e.target === e.currentTarget) setPuModal(null); }}
+        >
+          <div style={{ background: p.cream, borderRadius: 20, maxWidth: 460, width: '100%', overflow: 'hidden', boxShadow: '0 20px 60px rgba(31,27,20,0.22)' }}>
+            {/* Header */}
+            <div style={{ background: p.accent, color: p.cream, padding: '22px 24px' }}>
+              <p style={{ ...lbl, opacity: 0.75, margin: '0 0 6px' }}>◆ Product Update</p>
+              <h2 style={{ ...display, fontSize: 26, fontWeight: 400, margin: 0, lineHeight: 1.2 }}>{puModal.module.title}</h2>
+              {puModal.assignment.deadline && (
+                <p style={{ ...sans, fontSize: 12, opacity: 0.8, margin: '8px 0 0' }}>
+                  {Math.max(0, Math.round((puModal.assignment.deadline - Date.now()) / 3600000))}h left to complete
+                </p>
+              )}
+            </div>
+
+            {/* Content */}
+            <div style={{ padding: '24px' }}>
+              {!puComplete ? (
+                <>
+                  <p style={{ ...sub, fontSize: 16, color: p.fg, lineHeight: 1.65, margin: '0 0 10px' }}>
+                    Your manager has pushed a product update for your team to review. Go through the key points below, then mark it complete.
+                  </p>
+                  <ul style={{ margin: '0 0 20px', paddingLeft: 20 }}>
+                    {[
+                      'Review the new ' + puModal.module.title.toLowerCase() + ' changes',
+                      'Understand how it affects your daily workflow',
+                      'Ask your manager if anything is unclear',
+                    ].map((point, i) => (
+                      <li key={i} style={{ ...sans, fontSize: 14, color: p.fg, marginBottom: 6, lineHeight: 1.5 }}>{point}</li>
+                    ))}
+                  </ul>
+                  <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+                    <button onClick={() => setPuModal(null)} style={{ ...sans, fontSize: 13, fontWeight: 500, padding: '9px 18px', borderRadius: 999, background: 'transparent', border: `1.5px solid ${p.rule}`, color: p.muted, cursor: 'pointer' }}>
+                      Close
+                    </button>
+                    <button onClick={completeProductUpdate} style={{ ...sans, fontSize: 13, fontWeight: 600, padding: '9px 22px', borderRadius: 999, background: p.accent, color: p.cream, border: 'none', cursor: 'pointer' }}>
+                      Mark complete ✓
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '12px 0' }}>
+                  <p style={{ fontSize: 36, margin: '0 0 10px' }}>✓</p>
+                  <p style={{ ...display, fontSize: 22, color: p.accent, margin: 0 }}>Update complete!</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -5171,14 +4960,12 @@ Object.assign(window, { BaristaDashboard });
 // ═════════════════════════════════════════════════════════
 
 function BaristaLibrary({ user = {} }) {
-  const p = {
-    bg: '#E8DDC2', fg: '#1A1410', accent: '#3F5A3A',
-    cream: '#F4EBD2', sun: '#C68A3D', cherry: '#7A2B1F',
-  };
-  const display = { fontFamily: 'Unna' };
-  const sub     = { fontFamily: 'Yrsa' };
-  const sans    = { fontFamily: 'Lato' };
-  const lbl     = { fontFamily: 'Lato', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', fontSize: 10 };
+  const _th = window.THEME || {};
+  const p = { bg: _th.bg||'#EFE9DA', fg: _th.ink||'#1F1B14', accent: _th.accent||'#44704B', cream: _th.bgCard||'#FBF8F0', sun: _th.gold||'#C49455', cherry: _th.danger||'#7A2B1F', rule: _th.line||'#D5CDBA', muted: _th.muted||'#6E675A' };
+  const display = { fontFamily: '"DM Serif Display", Georgia, serif' };
+  const sub     = { fontFamily: '"Inter", sans-serif' };
+  const sans    = { fontFamily: '"Inter", sans-serif' };
+  const lbl     = { fontFamily: '"Inter", sans-serif', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', fontSize: 10 };
 
   const store = window.useCopiStore();
   const email = user.email || 'lili@milano.coffee';
@@ -5191,8 +4978,9 @@ function BaristaLibrary({ user = {} }) {
   const pct = totalLessons ? Math.round((totalDone / totalLessons) * 100) : 0;
 
   // Refreshers — most recently completed lessons.
-  const raw = store.raw().users[email] || { lessons: {} };
-  const refreshers = Object.entries(raw.lessons)
+  const _dbU2 = store.getUserByEmail ? store.getUserByEmail(email) : null;
+  const _prog2 = _dbU2 ? (store.raw().progress[_dbU2.id] || {}) : {};
+  const refreshers = Object.entries(_prog2.lessons || {})
     .filter(([, r]) => r.done)
     .sort((a, b) => b[1].ts - a[1].ts)
     .slice(0, 3)
@@ -5363,7 +5151,7 @@ function BaristaLibrary({ user = {} }) {
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ ...sub, fontSize: 19, fontWeight: 500, lineHeight: 1.1 }}>
-                      <span style={{ opacity: 0.5, fontFamily: 'Lato', fontWeight: 700, fontSize: 13, marginRight: 8 }}>{vol.vol}</span>
+                      <span style={{ opacity: 0.5, fontFamily: '"Inter", sans-serif', fontWeight: 700, fontSize: 13, marginRight: 8 }}>{vol.vol}</span>
                       {lesson.title}
                     </div>
                     <div style={{ ...sans, fontSize: 12, opacity: 0.55, marginTop: 3 }}>passed · tap to review</div>
@@ -5400,10 +5188,10 @@ function BaristaProfile({ user = {} }) {
     sun:    '#C68A3D',
     cherry: '#7A2B1F',
   };
-  const display = { fontFamily: 'Unna' };
-  const sub     = { fontFamily: 'Yrsa' };
-  const sans    = { fontFamily: 'Lato' };
-  const lbl     = { fontFamily: 'Lato', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', fontSize: 10 };
+  const display = { fontFamily: '"DM Serif Display", Georgia, serif' };
+  const sub     = { fontFamily: '"Inter", sans-serif' };
+  const sans    = { fontFamily: '"Inter", sans-serif' };
+  const lbl     = { fontFamily: '"Inter", sans-serif', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', fontSize: 10 };
 
   const name = user.name || 'Lili Turko';
   const cafe = user.cafe || 'Milano';
@@ -5672,12 +5460,8 @@ const PROTO_BARISTA = {
   role: 'Barista',
 };
 
-const PROTO_PALETTE = {
-  bg:     '#E8DDC2',
-  fg:     '#1A1410',
-  accent: '#3F5A3A',
-  cream:  '#F4EBD2',
-  sun:    '#C68A3D',
+const PROTO_PALETTE = window.NEW_PALETTE || {
+  bg: '#EFE9DA', fg: '#1F1B14', accent: '#44704B', cream: '#FBF8F0', sun: '#C49455'
 };
 
 // Match the trio inside the page nav. We intercept clicks on these by
@@ -6269,22 +6053,49 @@ function VolumeModal({ open, volume, onClose, onTrial }) {
 // ────────────────────────────────────────────────────────────
 // Route → page
 // ────────────────────────────────────────────────────────────
-function PageFor({ route, user }) {
-  // Pull new landing page component from window
-  const LandingPageNew = window.LandingPageNew;
+function PageFor({ route, user, inviteToken, onSignup, onCafeSetupComplete, onInviteAccepted, onLogin }) {
+  const LandingPageNew    = window.LandingPageNew;
+  const SignupPage        = window.SignupPage;
+  const CafeSetupPage     = window.CafeSetupPage;
+  const InviteAcceptPage  = window.InviteAcceptPage;
+  const ManagerDashboard  = window.ManagerDashboard;
+  const BillingPage       = window.BillingPage;
+  const CmsPage           = window.CmsPage;
+  const OwnerDashboard    = window.OwnerDashboard;
+  const StaffPage         = window.StaffPage;
+  const AiReviewPage      = window.AiReviewPage;
 
-  if (route === 'dashboard') return <RoasterDashboard user={user || {}} />;
-  if (route === 'team')      return <AdminTeamPage user={user || {}} />;
+  // New authenticated pages (pick new over legacy when available)
+  if (route === 'dashboard')  {
+    if (OwnerDashboard) return <OwnerDashboard user={user || {}} />;
+    return <RoasterDashboard user={user || {}} />;
+  }
+  if (route === 'team') {
+    if (StaffPage) return <StaffPage user={user || {}} />;
+    return <AdminTeamPage user={user || {}} />;
+  }
   if (route === 'admin-curriculum') return <AdminCurriculumPage user={user || {}} />;
   if (route === 'settings')  return <AdminSettingsPage user={user || {}} />;
   if (route === 'analytics') return <AdminAnalyticsPage user={user || {}} />;
+  if (route === 'manager-dashboard') return ManagerDashboard ? <ManagerDashboard user={user || {}} /> : <RoasterDashboard user={user || {}} />;
+  if (route === 'billing')   return BillingPage ? <BillingPage user={user || {}} /> : <AdminSettingsPage user={user || {}} />;
+  if (route === 'cms')       return CmsPage ? <CmsPage user={user || {}} /> : null;
+  if (route === 'ai-review') return AiReviewPage ? <AiReviewPage user={user || {}} /> : <AdminCurriculumPage user={user || {}} />;
   if (route === 'today')     return <BaristaDashboard user={user || {}} />;
   if (route === 'barista-library') return <BaristaLibrary user={user || {}} />;
-  if (route === 'barista-profile') return <BaristaProfile user={user || {}} />;
+  if (route === 'barista-profile') {
+    const BaristaProfileNew = window.BaristaProfileNew;
+    return BaristaProfileNew ? <BaristaProfileNew user={user || {}} /> : <BaristaProfile user={user || {}} />;
+  }
   if (route === 'curriculum') return <CurriculumPage />;
   if (route === 'pricing')    return <PricingPage />;
   if (route === 'about')      return <AboutPage />;
-  // Use new landing page for home route (default)
+
+  // Unauthenticated flows
+  if (route === 'signup') return SignupPage ? <SignupPage onSignup={onSignup} onLogin={onLogin} /> : null;
+  if (route === 'cafe-setup') return CafeSetupPage && onSignup ? <CafeSetupPage pendingUser={user || {}} onComplete={onCafeSetupComplete} /> : null;
+  if (route === 'invite-accept') return InviteAcceptPage ? <InviteAcceptPage token={inviteToken} onAccepted={onInviteAccepted} onExpired={onLogin} /> : null;
+
   return LandingPageNew ? <LandingPageNew /> : <BrandingTemplate3 />;
 }
 
@@ -6293,18 +6104,16 @@ function PageFor({ route, user }) {
 // ────────────────────────────────────────────────────────────
 function RouteBadge({ route, onHome }) {
   const labelFor = {
-    home: 'HOME · LANDING',
-    curriculum: 'CURRICULUM',
-    pricing: 'PRICING',
-    about: 'ABOUT',
-    dashboard: 'WORKSPACE · ADMIN',
-    team: 'TEAM · ADMIN',
-    'admin-curriculum': 'CURRICULUM · ADMIN',
-    settings: 'SETTINGS · ADMIN',
-    analytics: 'ANALYTICS · ADMIN',
-    today: 'TODAY · BARISTA',
-    'barista-library': 'LIBRARY · BARISTA',
+    home: 'HOME · LANDING', signup: 'SIGN UP', 'cafe-setup': 'SETUP',
+    curriculum: 'CURRICULUM', pricing: 'PRICING', about: 'ABOUT',
+    dashboard: 'WORKSPACE · OWNER', team: 'TEAM · OWNER',
+    'admin-curriculum': 'CURRICULUM · OWNER', settings: 'SETTINGS',
+    analytics: 'ANALYTICS', billing: 'BILLING',
+    'manager-dashboard': 'DASHBOARD · MANAGER', 'manager-team': 'TEAM · MANAGER',
+    'ai-review': 'AI SETUP',
+    today: 'TODAY · BARISTA', 'barista-library': 'LIBRARY · BARISTA',
     'barista-profile': 'PROFILE · BARISTA',
+    cms: 'CMS · INTERNAL', 'invite-accept': 'JOIN',
   };
   const [show, setShow] = React.useState(false);
   React.useEffect(() => {
@@ -6317,8 +6126,8 @@ function RouteBadge({ route, onHome }) {
       position: 'fixed', left: 20, bottom: 20, zIndex: 8000,
       display: 'flex', gap: 8, alignItems: 'center',
       padding: '10px 14px',
-      background: 'rgba(26,20,16,0.86)', color: PROTO_PALETTE.cream,
-      fontFamily: 'Lato', fontWeight: 600, letterSpacing: '0.18em',
+      background: 'rgba(26,20,16,0.86)', color: (window.THEME||{}).onDark||'#EFE9DA',
+      fontFamily: '"Inter", sans-serif', fontWeight: 600, letterSpacing: '0.18em',
       textTransform: 'uppercase', fontSize: 10,
       backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)',
       transform: show ? 'translateY(0)' : 'translateY(8px)',
@@ -6331,7 +6140,7 @@ function RouteBadge({ route, onHome }) {
     onMouseEnter={() => setShow(true)}
     onMouseLeave={() => setShow(false)}
     >
-      <span style={{ width: 6, height: 6, borderRadius: 99, background: PROTO_PALETTE.sun }} />
+      <span style={{ width: 6, height: 6, borderRadius: 99, background: (window.THEME||{}).gold||'#C49455' }} />
       {labelFor[route]}
       {route !== 'home' && <span style={{ opacity: 0.6, marginLeft: 8 }}>← HOME</span>}
     </div>
@@ -6341,8 +6150,25 @@ function RouteBadge({ route, onHome }) {
 // ────────────────────────────────────────────────────────────
 // The shell
 // ────────────────────────────────────────────────────────────
+function routeFromHash() {
+  const hash = window.location.hash;
+  if (hash.startsWith('#/invite/')) return { route: 'invite-accept', token: hash.slice(9) };
+  if (hash === '#/cms') return { route: 'cms', token: null };
+  return null;
+}
+
+function routeForRole(role) {
+  if (['owner','admin'].includes(role)) return 'dashboard';
+  if (role === 'manager') return 'manager-dashboard';
+  if (role === 'cms') return 'cms';
+  return 'today';
+}
+
 function CopiPrototype() {
+  const hashInfo = routeFromHash();
+  const [inviteToken, setInviteToken] = React.useState(hashInfo?.token || null);
   const [route, setRoute] = React.useState(() => {
+    if (hashInfo) return hashInfo.route;
     return localStorage.getItem('copi.route') || 'home';
   });
   const [trial, setTrial] = React.useState(false);
@@ -6352,16 +6178,15 @@ function CopiPrototype() {
   const [assignVolId, setAssignVolId] = React.useState(null);
   const [detailEmail, setDetailEmail] = React.useState(null);
   const [fading, setFading] = React.useState(false);
+  const [pendingSignupUser, setPendingSignupUser] = React.useState(null);
+
   const [user, setUser] = React.useState(() => {
     try {
       const raw = JSON.parse(localStorage.getItem('copi.user') || 'null');
       if (!raw) return null;
-      // Migration: refresh stale cached users from before the Brian Turko / Milano rename.
-      // We detect by old café name and re-map to the matching new identity.
-      if (raw.cafe === 'Mortar Coffee' || (raw.email || '').endsWith('@mortar.coffee')) {
-        if (raw.kind === 'admin') return { ...PROTO_ADMIN, kind: 'admin' };
-        if (raw.kind === 'barista') return { ...PROTO_BARISTA, kind: 'barista' };
-      }
+      // Migrate old sessions that used email-based kind instead of role
+      if (raw.kind === 'admin' && !raw.role) return { ...raw, role: 'owner' };
+      if (raw.kind === 'barista' && !raw.role) return { ...raw, role: 'barista' };
       return raw;
     } catch (_e) { return null; }
   });
@@ -6372,55 +6197,73 @@ function CopiPrototype() {
   }, [user]);
 
   const handleAuth = ({ email, password }) => {
-    const e = email.trim().toLowerCase();
-    let u;
-    let nextRoute;
-    if (e === PROTO_ADMIN.email && password === PROTO_ADMIN.password) {
-      u = { ...PROTO_ADMIN, email, kind: 'admin' };
-      nextRoute = 'dashboard';
-    } else if (e === PROTO_BARISTA.email && password === PROTO_BARISTA.password) {
-      u = { ...PROTO_BARISTA, email, kind: 'barista' };
-      nextRoute = 'today';
-    } else {
-      u = { name: 'Guest', cafe: 'Your café', role: 'Barista', email, kind: 'barista' };
-      nextRoute = 'today';
+    const store = window.CopiStore;
+    // CMS team login
+    if (email.trim().toLowerCase() === 'team@copi.app' && password === 'copi2026') {
+      const cmsUser = { id: 'cms', name: 'Copi Team', email: 'team@copi.app', role: 'cms', kind: 'admin' };
+      setUser(cmsUser);
+      setLogin(false);
+      goTo('cms');
+      return;
     }
+    // DB auth
+    const dbUser = store ? store.authenticate(email, password) : null;
+    if (dbUser) {
+      const u = { ...dbUser, kind: ['owner','admin'].includes(dbUser.role) ? 'admin' : dbUser.role === 'manager' ? 'manager' : 'barista', cafe: 'Milano' };
+      setUser(u);
+      setLogin(false);
+      goTo(routeForRole(dbUser.role));
+      return;
+    }
+    // Legacy fallback for dev
+    const e = email.trim().toLowerCase();
+    if (e === PROTO_ADMIN.email && password === PROTO_ADMIN.password) {
+      setUser({ ...PROTO_ADMIN, email, kind: 'admin', role: 'owner' });
+      setLogin(false); goTo('dashboard'); return;
+    }
+    if (e === PROTO_BARISTA.email && password === PROTO_BARISTA.password) {
+      setUser({ ...PROTO_BARISTA, email, kind: 'barista', role: 'barista' });
+      setLogin(false); goTo('today'); return;
+    }
+    // Unknown user — show error (handled by LoginModal)
+  };
+
+  const handleSignup = (userData) => {
+    setPendingSignupUser(userData);
+    goTo('cafe-setup');
+  };
+
+  const handleCafeSetupComplete = (newUser) => {
+    const u = { ...newUser, kind: 'admin', cafe: window.CopiStore?.getCafe(newUser.cafeId)?.name || 'My Cafe' };
     setUser(u);
-    setLogin(false);
-    setFading(true);
-    setTimeout(() => {
-      setRoute(nextRoute);
-      window.scrollTo(0, 0);
-      requestAnimationFrame(() => setFading(false));
-    }, 180);
+    setPendingSignupUser(null);
+    goTo('dashboard');
+  };
+
+  const handleInviteAccepted = (dbUser) => {
+    const u = { ...dbUser, kind: ['owner','admin'].includes(dbUser.role) ? 'admin' : dbUser.role === 'manager' ? 'manager' : 'barista', cafe: 'Milano' };
+    setUser(u);
+    setInviteToken(null);
+    window.location.hash = '';
+    goTo(routeForRole(dbUser.role));
   };
 
   const handleLogout = () => {
     setUser(null);
-    setFading(true);
-    setTimeout(() => {
-      setRoute('home');
-      window.scrollTo(0, 0);
-      requestAnimationFrame(() => setFading(false));
-    }, 180);
+    goTo('home');
   };
 
   React.useEffect(() => {
     localStorage.setItem('copi.route', route);
   }, [route]);
 
-  const navigate = (next) => {
-    if (next === route) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      return;
-    }
+  const goTo = React.useCallback((next) => {
+    if (next === route) { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
     setFading(true);
-    setTimeout(() => {
-      setRoute(next);
-      window.scrollTo(0, 0);
-      requestAnimationFrame(() => setFading(false));
-    }, 180);
-  };
+    setTimeout(() => { setRoute(next); window.scrollTo(0, 0); requestAnimationFrame(() => setFading(false)); }, 180);
+  }, [route]);
+
+  const navigate = goTo;
 
   // ─────────────────────────────────────────────────────────
   // Click delegation: read text content of clicked link/button
@@ -6485,27 +6328,26 @@ function CopiPrototype() {
     const text = raw.replace(/\s+/g, ' ');
 
     // ── Nav primary links ────────────────────────────
-    if (text === 'Home')              { e.preventDefault(); navigate('home');       return; }
-    if (text === 'Team')              { e.preventDefault(); navigate('team');       return; }
-    if (text === 'Dashboard')         { e.preventDefault(); navigate('dashboard');  return; }
+    if (text === 'Home')              { e.preventDefault(); navigate('home');             return; }
+    if (text === 'Team')              { e.preventDefault(); navigate('team');             return; }
+    if (text === 'Dashboard')         { e.preventDefault(); navigate(user?.role === 'manager' ? 'manager-dashboard' : 'dashboard'); return; }
+    if (text === 'Billing')           { e.preventDefault(); navigate('billing');          return; }
     if (text === 'Curriculum')        {
       e.preventDefault();
-      // Admin users in the workspace land on the operational curriculum view;
-      // guests / baristas / unauthenticated visitors get the marketing page.
-      const inAdminSurface = user && user.kind === 'admin' && ['dashboard', 'team', 'admin-curriculum'].includes(route);
+      const inAdminSurface = user && user.kind === 'admin' && ['dashboard','team','admin-curriculum'].includes(route);
       navigate(inAdminSurface ? 'admin-curriculum' : 'curriculum');
       return;
     }
-    if (text === 'Pricing')           { e.preventDefault(); navigate('pricing');    return; }
-    if (text === 'About')             { e.preventDefault(); navigate('about');      return; }
-    if (text === 'Settings')          { e.preventDefault(); navigate('settings');   return; }
-    if (text === 'Analytics')         { e.preventDefault(); navigate('analytics');  return; }
-    if (text === 'Today')             { e.preventDefault(); navigate('today');      return; }
-    if (text === 'Profile')           { e.preventDefault(); navigate('barista-profile'); return; }
+    if (text === 'Pricing')           { e.preventDefault(); navigate('pricing');          return; }
+    if (text === 'About')             { e.preventDefault(); navigate('about');            return; }
+    if (text === 'Settings')          { e.preventDefault(); navigate('settings');         return; }
+    if (text === 'Analytics')         { e.preventDefault(); navigate('analytics');        return; }
+    if (text === 'Today')             { e.preventDefault(); navigate('today');            return; }
+    if (text === 'Profile')           { e.preventDefault(); navigate('barista-profile');  return; }
+    if (text === 'Log in')            { e.preventDefault(); setLogin(true);               return; }
+    if (text === 'Sign up')           { e.preventDefault(); navigate('signup');           return; }
     if (text === 'Library')           {
       e.preventDefault();
-      // Barista nav → the barista library. Admins no longer have a Library tab
-      // (it became Analytics), but keep this as a safe fallback.
       navigate(user && user.kind === 'admin' ? 'analytics' : 'barista-library');
       return;
     }
@@ -6551,7 +6393,7 @@ function CopiPrototype() {
       onClickCapture={onPageClick}
       style={{
         minHeight: '100vh', position: 'relative',
-        background: (window.NEW_PALETTE || PROTO_PALETTE).bg,
+        background: (window.THEME || window.NEW_PALETTE || {}).bg || '#EFE9DA',
       }}
     >
       <div
@@ -6562,7 +6404,14 @@ function CopiPrototype() {
           transition: 'opacity 180ms ease, transform 240ms cubic-bezier(.2,.7,.2,1)',
         }}
       >
-        <PageFor route={route} user={user} />
+        <PageFor
+          route={route} user={route === 'cafe-setup' ? pendingSignupUser : user}
+          inviteToken={inviteToken}
+          onSignup={handleSignup}
+          onCafeSetupComplete={handleCafeSetupComplete}
+          onInviteAccepted={handleInviteAccepted}
+          onLogin={() => setLogin(true)}
+        />
       </div>
 
       <div data-proto-ui>
@@ -6580,12 +6429,20 @@ function CopiPrototype() {
           onClose={() => setVolumeIdx(null)}
           onTrial={() => setTrial(true)}
         />
-        <LessonPlayer
-          open={!!lessonTarget}
-          email={(user && user.email) || 'lili@milano.coffee'}
-          target={lessonTarget}
-          onClose={() => setLessonTarget(null)}
-        />
+        {window.NewLessonPlayer
+          ? React.createElement(window.NewLessonPlayer, {
+              open: !!lessonTarget,
+              email: (user && user.email) || 'lili@milano.coffee',
+              target: lessonTarget,
+              onClose: () => setLessonTarget(null),
+            })
+          : React.createElement(LessonPlayer, {
+              open: !!lessonTarget,
+              email: (user && user.email) || 'lili@milano.coffee',
+              target: lessonTarget,
+              onClose: () => setLessonTarget(null),
+            })
+        }
         <AssignModal
           open={!!assignVolId}
           volId={assignVolId}
