@@ -7,7 +7,7 @@ import React from 'react';
 
 // ── Evolved THEME ────────────────────────────────────────
 // Warmer than the old Figma (#F0EDE4) but cleaner than the
-// almanac (#E8DDC2). DM Serif Display + Inter throughout.
+// almanac (#E8DDC2). Fredoka (display) + Inter (body) throughout.
 export const THEME = {
   // Backgrounds
   bg:       '#EFE9DA',   // page background (warm parchment)
@@ -66,14 +66,16 @@ export const NEW_PALETTE = {
 };
 
 // ── Typography ───────────────────────────────────────────
+// Display: Fredoka (chunky rounded sans, weight 700) — used for h1/h2/h3/h4 and hero display text.
+// Body: Inter — labels, paragraphs, captions.
 export const TYPOGRAPHY = {
-  display:      { fontFamily: '"DM Serif Display", Georgia, serif', fontWeight: 400, fontStyle: 'normal' },
-  displayItalic:{ fontFamily: '"DM Serif Display", Georgia, serif', fontWeight: 400, fontStyle: 'italic' },
+  display:      { fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontWeight: 700, fontStyle: 'normal' },
+  displayItalic:{ fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontWeight: 700, fontStyle: 'normal' },
 
-  h1: { fontFamily: '"DM Serif Display", Georgia, serif', fontSize: 56, fontWeight: 400, lineHeight: 1.1, letterSpacing: '-0.02em' },
-  h2: { fontFamily: '"DM Serif Display", Georgia, serif', fontSize: 42, fontWeight: 400, lineHeight: 1.2, letterSpacing: '-0.01em' },
-  h3: { fontFamily: '"DM Serif Display", Georgia, serif', fontSize: 28, fontWeight: 400, lineHeight: 1.3 },
-  h4: { fontFamily: '"DM Serif Display", Georgia, serif', fontSize: 22, fontWeight: 400, lineHeight: 1.3 },
+  h1: { fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontSize: 56, fontWeight: 700, lineHeight: 1.05, letterSpacing: '-0.01em' },
+  h2: { fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontSize: 42, fontWeight: 700, lineHeight: 1.15, letterSpacing: '-0.005em' },
+  h3: { fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontSize: 28, fontWeight: 700, lineHeight: 1.25 },
+  h4: { fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontSize: 22, fontWeight: 600, lineHeight: 1.3 },
 
   body:      { fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif', fontSize: 16, fontWeight: 400, lineHeight: 1.6 },
   bodyLarge: { fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif', fontSize: 18, fontWeight: 400, lineHeight: 1.6 },

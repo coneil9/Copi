@@ -87,7 +87,7 @@ function BaristaProfileNew({ user = {} }) {
 
       {/* ── Nav (matches BaristaDashboard) ─────────────────── */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 48px', height: 64, borderBottom: `1px solid ${th.line}`, background: th.bgCard, position: 'sticky', top: 0, zIndex: 100 }}>
-        <span style={{ fontFamily: '"DM Serif Display", Georgia, serif', fontStyle: 'italic', fontSize: 26, color: th.accent, lineHeight: 1 }}>Copi.</span>
+        <span style={{ fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontStyle: 'italic', fontSize: 26, color: th.accent, lineHeight: 1 }}>Copi.</span>
         <div style={{ display: 'flex', gap: 28 }}>
           {[{ l: 'Today', active: false }, { l: 'Library', active: false }, { l: 'Profile', active: true }].map(x => (
             <a key={x.l} style={{
@@ -115,7 +115,7 @@ function BaristaProfileNew({ user = {} }) {
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 18 }}>
             <Mono name={fullName} size={100} />
           </div>
-          <h1 style={{ fontFamily: '"DM Serif Display", Georgia, serif', fontSize: 48, fontWeight: 400, letterSpacing: '-0.02em', color: th.ink, margin: '0 0 8px' }}>{fullName}</h1>
+          <h1 style={{ fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontSize: 48, fontWeight: 400, letterSpacing: '-0.02em', color: th.ink, margin: '0 0 8px' }}>{fullName}</h1>
           <p style={{ fontFamily: '"Inter", sans-serif', fontSize: 17, color: th.muted, margin: 0, fontStyle: 'italic' }}>
             Barista at {locName} · joined {joinedDate}
           </p>
@@ -129,7 +129,7 @@ function BaristaProfileNew({ user = {} }) {
             { big: String(certifiedCount + (lessonsDone >= 1 ? 1 : 0) + (lessonsDone >= 7 ? 1 : 0)), label: 'badges',  color: th.ink },
           ].map((s, i) => (
             <div key={i} style={{ background: th.bgCard, borderRadius: th.card, padding: '22px 16px', textAlign: 'center', border: `1px solid ${th.line}`, boxShadow: sh.card }}>
-              <div style={{ fontFamily: '"DM Serif Display", Georgia, serif', fontStyle: 'italic', fontSize: 46, lineHeight: 1, color: s.color, fontWeight: 400 }}>{s.big}</div>
+              <div style={{ fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontStyle: 'italic', fontSize: 46, lineHeight: 1, color: s.color, fontWeight: 400 }}>{s.big}</div>
               <div style={{ fontFamily: '"Inter", sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: th.muted, marginTop: 8 }}>{s.label}</div>
             </div>
           ))}
@@ -140,21 +140,21 @@ function BaristaProfileNew({ user = {} }) {
           <div style={{ background: th.accentDeep || '#34503A', color: th.onDark, borderRadius: th.card + 2, padding: '24px 26px', marginBottom: 32, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 20 }}>
             <div>
               <p style={{ fontFamily: '"Inter", sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', opacity: 0.75, margin: '0 0 10px' }}>◆ Certification</p>
-              <p style={{ fontFamily: '"DM Serif Display", Georgia, serif', fontSize: 28, fontWeight: 400, lineHeight: 1.2, margin: '0 0 8px' }}>
+              <p style={{ fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontSize: 28, fontWeight: 400, lineHeight: 1.2, margin: '0 0 8px' }}>
                 Working toward <em style={{ fontStyle: 'italic', color: th.gold }}>{certLabel}.</em>
               </p>
               <p style={{ fontFamily: '"Inter", sans-serif', fontSize: 14, opacity: 0.8, margin: 0 }}>
                 {lessonsLeft > 0 ? `${lessonsLeft} lesson${lessonsLeft !== 1 ? 's' : ''} left in ${nextVol.vol} ${nextVol.name}.` : 'Take the final test to certify.'}
               </p>
             </div>
-            <div style={{ fontFamily: '"DM Serif Display", Georgia, serif', fontStyle: 'italic', fontSize: 26, fontWeight: 400, background: th.bgCard, color: th.accent, borderRadius: '50%', width: 80, height: 80, display: 'grid', placeItems: 'center', flexShrink: 0, border: `2px solid ${th.line}`, boxShadow: sh.card }}>
+            <div style={{ fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontStyle: 'italic', fontSize: 26, fontWeight: 400, background: th.bgCard, color: th.accent, borderRadius: '50%', width: 80, height: 80, display: 'grid', placeItems: 'center', flexShrink: 0, border: `2px solid ${th.line}`, boxShadow: sh.card }}>
               {certPct}%
             </div>
           </div>
         )}
         {!nextVol && assignedVols.length > 0 && (
           <div style={{ background: th.accent, color: th.onDark, borderRadius: th.card + 2, padding: '20px 24px', marginBottom: 32, textAlign: 'center' }}>
-            <p style={{ fontFamily: '"DM Serif Display", Georgia, serif', fontSize: 24, margin: 0 }}>All tracks certified. 🏅</p>
+            <p style={{ fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontSize: 24, margin: 0 }}>All tracks certified. 🏅</p>
           </div>
         )}
 

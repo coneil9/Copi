@@ -87,7 +87,7 @@ function AdminAnalyticsNew({ user = {} }) {
         {/* Header */}
         <div style={{ marginBottom: 28 }}>
           <p style={{ fontFamily: '"Inter", sans-serif', fontSize: 11, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: th.accent, margin: '0 0 4px' }}>Owner · Analytics</p>
-          <h1 style={{ fontFamily: '"DM Serif Display", Georgia, serif', fontSize: 38, fontWeight: 400, color: th.ink, margin: 0 }}>Team performance</h1>
+          <h1 style={{ fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontSize: 38, fontWeight: 400, color: th.ink, margin: 0 }}>Team performance</h1>
         </div>
 
         {/* Summary stats */}
@@ -95,7 +95,7 @@ function AdminAnalyticsNew({ user = {} }) {
           {summaryStats.map(s => (
             <div key={s.label} style={{ background: th.bgCard, borderRadius: th.card, padding: '18px 20px', border: `1px solid ${th.line}`, boxShadow: sh.card }}>
               <p style={{ fontFamily: '"Inter", sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.13em', textTransform: 'uppercase', color: th.muted, margin: '0 0 4px' }}>{s.label}</p>
-              <p style={{ fontFamily: '"DM Serif Display", Georgia, serif', fontStyle: 'italic', fontSize: 34, color: s.color, margin: '0 0 2px', lineHeight: 1 }}>{s.value}</p>
+              <p style={{ fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontStyle: 'italic', fontSize: 34, color: s.color, margin: '0 0 2px', lineHeight: 1 }}>{s.value}</p>
               <p style={{ fontFamily: '"Inter", sans-serif', fontSize: 11, color: th.muted, margin: 0 }}>{s.sub}</p>
             </div>
           ))}
@@ -161,7 +161,7 @@ function AdminAnalyticsNew({ user = {} }) {
             <p style={{ fontFamily: '"Inter", sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: th.muted, marginBottom: 12 }}>Knowledge gaps</p>
             {gaps.length === 0 ? (
               <div style={{ background: th.bgCard, borderRadius: th.card, padding: '24px', border: `1px solid ${th.line}`, textAlign: 'center' }}>
-                <p style={{ fontFamily: '"DM Serif Display", Georgia, serif', fontSize: 18, color: th.accent, margin: '0 0 4px' }}>Looking strong.</p>
+                <p style={{ fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontSize: 18, color: th.accent, margin: '0 0 4px' }}>Looking strong.</p>
                 <p style={{ fontFamily: '"Inter", sans-serif', fontSize: 13, color: th.muted, margin: 0 }}>No significant gaps detected.</p>
               </div>
             ) : gaps.map((g, i) => {

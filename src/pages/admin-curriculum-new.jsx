@@ -54,7 +54,7 @@ function AdminCurriculumNew({ user = {} }) {
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 28, flexWrap: 'wrap', gap: 12 }}>
           <div>
             <p style={{ fontFamily: '"Inter", sans-serif', fontSize: 11, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: th.accent, margin: '0 0 4px' }}>Owner · Curriculum</p>
-            <h1 style={{ fontFamily: '"DM Serif Display", Georgia, serif', fontSize: 38, fontWeight: 400, color: th.ink, margin: 0 }}>What your team is learning</h1>
+            <h1 style={{ fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontSize: 38, fontWeight: 400, color: th.ink, margin: 0 }}>What your team is learning</h1>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <button onClick={() => act.navigate && act.navigate('ai-review')}
@@ -78,7 +78,7 @@ function AdminCurriculumNew({ user = {} }) {
           ].map((s) => (
             <div key={s.label} style={{ background: th.bgCard, borderRadius: th.card, padding: '18px 20px', border: `1px solid ${th.line}`, boxShadow: sh.card }}>
               <p style={{ fontFamily: '"Inter", sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.13em', textTransform: 'uppercase', color: th.muted, margin: '0 0 4px' }}>{s.label}</p>
-              <p style={{ fontFamily: '"DM Serif Display", Georgia, serif', fontStyle: 'italic', fontSize: 32, color: s.color, margin: '0 0 2px', lineHeight: 1 }}>{s.value}</p>
+              <p style={{ fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontStyle: 'italic', fontSize: 32, color: s.color, margin: '0 0 2px', lineHeight: 1 }}>{s.value}</p>
               <p style={{ fontFamily: '"Inter", sans-serif', fontSize: 11, color: th.muted, margin: 0 }}>{s.sub}</p>
             </div>
           ))}
@@ -118,7 +118,7 @@ function AdminCurriculumNew({ user = {} }) {
                             <span style={{ fontFamily: '"Inter", sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: th.accent, background: `${th.accent}15`, padding: '2px 8px', borderRadius: 999 }}>Onboarding</span>
                             <span style={{ fontFamily: '"Inter", sans-serif', fontSize: 10, color: th.muted }}>Cafe-specific</span>
                           </div>
-                          <p style={{ fontFamily: '"DM Serif Display", Georgia, serif', fontSize: 20, fontWeight: 400, color: th.ink, margin: '0 0 4px' }}>{mod.title}</p>
+                          <p style={{ fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontSize: 20, fontWeight: 400, color: th.ink, margin: '0 0 4px' }}>{mod.title}</p>
                           <p style={{ fontFamily: '"Inter", sans-serif', fontSize: 12, color: th.muted, margin: 0 }}>
                             {(mod.lessonIds || []).length} milestones · {assignments.length} staff assigned · {done} completed
                           </p>
@@ -153,7 +153,7 @@ function AdminCurriculumNew({ user = {} }) {
                           <span style={{ fontFamily: '"Inter", sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: th.muted, background: th.bgInset, padding: '2px 8px', borderRadius: 999 }}>{v.vol}</span>
                           {v.cert && <span style={{ fontFamily: '"Inter", sans-serif', fontSize: 10, color: th.gold, background: `${th.gold}18`, padding: '2px 8px', borderRadius: 999 }}>→ {v.cert}</span>}
                         </div>
-                        <p style={{ fontFamily: '"DM Serif Display", Georgia, serif', fontSize: 20, fontWeight: 400, color: th.ink, margin: '0 0 4px' }}>{v.name}</p>
+                        <p style={{ fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontSize: 20, fontWeight: 400, color: th.ink, margin: '0 0 4px' }}>{v.name}</p>
                         <p style={{ fontFamily: '"Inter", sans-serif', fontSize: 12, color: th.muted, margin: '0 0 10px' }}>
                           {v.lessonCount} lessons · {v.duration} · {v.assigned} assigned · {certifiedCount} certified
                         </p>

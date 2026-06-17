@@ -34,7 +34,7 @@ export function AdminNav({ current, user, cafe }) {
         {/* Logo + cafe */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginRight: 36, flexShrink: 0 }}>
           <span onClick={() => act.navigate && act.navigate('dashboard')}
-            style={{ fontFamily: '"DM Serif Display", Georgia, serif', fontStyle: 'italic', fontSize: 24, color: th.accent, cursor: 'pointer', lineHeight: 1 }}>
+            style={{ fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontStyle: 'italic', fontSize: 24, color: th.accent, cursor: 'pointer', lineHeight: 1 }}>
             Copi.
           </span>
           <span style={{ fontFamily: '"Inter", sans-serif', fontSize: 11, fontWeight: 500, color: th.muted, background: th.bgInset, padding: '2px 8px', borderRadius: 999 }}>

@@ -1,5 +1,5 @@
-/* Primary fonts: DM Serif Display (headings), Inter (body/UI), plus legacy fonts */
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600&family=Lato:wght@300;400;700;900&family=Unna:ital,wght@0,400;0,700;1,400;1,700&family=Yrsa:wght@400;500;600;700&display=swap');
+/* Primary fonts: Fredoka (chunky rounded display headings), Inter (body/UI), plus legacy fonts */
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600&family=Lato:wght@300;400;700;900&family=Unna:ital,wght@0,400;0,700;1,400;1,700&family=Yrsa:wght@400;500;600;700&display=swap');
 
 * {
   box-sizing: border-box;

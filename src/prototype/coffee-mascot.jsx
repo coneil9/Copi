@@ -1,25 +1,27 @@
 // ═════════════════════════════════════════════════════════
-// COFFEE MASCOT — SVG illustration of friendly coffee cup character
+// COFFEE MASCOT (Cupper) — SVG illustration of friendly coffee cup character
+// Updated design: green to-go cup, beige lid + lower sleeve, single steam squiggle,
+// two dot eyes + simple smile, thin black stick arms and legs with round feet.
 // Two variants: 'hero' (full body, standing) and 'cta' (upper body, waving)
 // ═════════════════════════════════════════════════════════
 
 import React from 'react';
 
 function CoffeeMascot({ variant = 'hero', size = 300, ...props }) {
-  const cupColor = '#4A7C59';      // Mid forest green
-  const lidColor = '#F0EDE4';      // Cream
-  const sleeveColor = '#E8E4D8';   // Light beige
-  const faceColor = '#1C1C1A';     // Dark for eyes/smile
-  const steamColor = '#B8AFA0';    // Light brown for steam
+  const cupColor = '#6F8E5A';      // warm muted green (matches new Cupper)
+  const cupShade = '#5B7748';      // subtle shading on cup edges
+  const lidColor = '#D9CBAE';      // beige lid / sleeve
+  const lidShade = '#C3B496';      // beige shading
+  const limbColor = '#1C1A17';     // near-black for arms, legs, eyes, mouth
 
-  // Scale factor for CTA variant (smaller, upper body only)
+  const isHero = variant === 'hero';
+  const viewBoxHeight = isHero ? 420 : 300;
   const ctaScale = 0.85;
-  const viewBoxHeight = variant === 'cta' ? 300 : 400;
 
   return (
     <svg
-      viewBox={`0 0 300 ${viewBoxHeight}`}
-      width={variant === 'cta' ? size * ctaScale : size}
+      viewBox={`0 0 320 ${viewBoxHeight}`}
+      width={isHero ? size : size * ctaScale}
       style={{
         maxWidth: '100%',
         height: 'auto',
@@ -27,190 +29,161 @@ function CoffeeMascot({ variant = 'hero', size = 300, ...props }) {
       }}
       {...props}
     >
-      {/* Steam wisps */}
-      <g opacity="0.6">
+      {/* Single steam squiggle rising from lid */}
+      <g>
         <path
-          d="M 120 30 Q 115 15 110 5"
-          stroke={steamColor}
-          strokeWidth="2"
+          d="M 175 55 C 195 40, 145 30, 165 15 C 180 5, 155 -2, 170 -10"
+          stroke={limbColor}
+          strokeWidth="3.5"
           fill="none"
           strokeLinecap="round"
+          strokeLinejoin="round"
+          opacity="0.85"
         >
-          <animate
-            attributeName="d"
-            values="M 120 30 Q 115 15 110 5; M 120 30 Q 118 15 115 5; M 120 30 Q 115 15 110 5"
+          <animateTransform
+            attributeName="transform"
+            type="translate"
+            values="0 0; 2 -2; 0 0"
             dur="3s"
-            repeatCount="indefinite"
-          />
-        </path>
-        <path
-          d="M 150 25 Q 150 10 150 0"
-          stroke={steamColor}
-          strokeWidth="2.5"
-          fill="none"
-          strokeLinecap="round"
-        >
-          <animate
-            attributeName="d"
-            values="M 150 25 Q 150 10 150 0; M 150 25 Q 152 10 155 0; M 150 25 Q 150 10 150 0"
-            dur="2.5s"
-            repeatCount="indefinite"
-          />
-        </path>
-        <path
-          d="M 180 30 Q 185 15 190 5"
-          stroke={steamColor}
-          strokeWidth="2"
-          fill="none"
-          strokeLinecap="round"
-        >
-          <animate
-            attributeName="d"
-            values="M 180 30 Q 185 15 190 5; M 180 30 Q 182 15 185 5; M 180 30 Q 185 15 190 5"
-            dur="3.5s"
             repeatCount="indefinite"
           />
         </path>
       </g>
 
-      {/* Lid */}
-      <ellipse cx="150" cy="45" rx="75" ry="20" fill={lidColor} />
-      <ellipse cx="150" cy="45" rx="70" ry="15" fill={lidColor} />
-      {/* Lid rim shadow */}
-      <ellipse cx="150" cy="48" rx="72" ry="18" fill="rgba(0,0,0,0.05)" />
-
-      {/* Cup body - main green cup */}
+      {/* Lid — beige cap that wraps the top of the cup */}
+      <ellipse cx="160" cy="72" rx="78" ry="12" fill={lidShade} />
       <path
-        d="M 80 50 L 90 200 Q 90 215 105 215 L 195 215 Q 210 215 210 200 L 220 50 Z"
+        d="M 82 72 Q 82 50 160 50 Q 238 50 238 72 Q 238 88 160 88 Q 82 88 82 72 Z"
+        fill={lidColor}
+      />
+      {/* lid sip hole hint */}
+      <ellipse cx="160" cy="60" rx="14" ry="3" fill={lidShade} opacity="0.6" />
+
+      {/* Cup body — green to-go cup, slightly tapered */}
+      <path
+        d="M 92 80 L 100 240 Q 100 252 112 252 L 208 252 Q 220 252 220 240 L 228 80 Z"
         fill={cupColor}
       />
-
-      {/* Cup sleeve - textured band */}
+      {/* subtle right-side shading on cup */}
       <path
-        d="M 82 110 L 86 150 L 214 150 L 218 110 Z"
-        fill={sleeveColor}
-        opacity="0.9"
+        d="M 215 82 L 220 240 Q 220 248 212 250 L 210 250 L 215 82 Z"
+        fill={cupShade}
+        opacity="0.55"
       />
-      {/* Sleeve texture lines */}
-      <line x1="85" y1="120" x2="88" y2="145" stroke={cupColor} strokeWidth="1.5" opacity="0.3" />
-      <line x1="95" y1="118" x2="98" y2="145" stroke={cupColor} strokeWidth="1.5" opacity="0.3" />
-      <line x1="105" y1="117" x2="108" y2="145" stroke={cupColor} strokeWidth="1.5" opacity="0.3" />
-      <line x1="150" y1="116" x2="150" y2="145" stroke={cupColor} strokeWidth="1.5" opacity="0.3" />
-      <line x1="195" y1="117" x2="192" y2="145" stroke={cupColor} strokeWidth="1.5" opacity="0.3" />
-      <line x1="205" y1="118" x2="202" y2="145" stroke={cupColor} strokeWidth="1.5" opacity="0.3" />
-      <line x1="215" y1="120" x2="212" y2="145" stroke={cupColor} strokeWidth="1.5" opacity="0.3" />
-
-      {/* Cup highlights */}
+      {/* subtle left-side highlight */}
       <path
-        d="M 85 60 Q 95 70 95 100 Q 95 140 90 180"
-        stroke="rgba(255,255,255,0.15)"
-        strokeWidth="8"
+        d="M 100 90 Q 96 160 102 230"
+        stroke="rgba(255,255,255,0.18)"
+        strokeWidth="6"
         fill="none"
         strokeLinecap="round"
       />
 
-      {/* Face - friendly eyes */}
-      <circle cx="125" cy="110" r="6" fill={faceColor} />
-      <circle cx="175" cy="110" r="6" fill={faceColor} />
-      {/* Eye highlights */}
-      <circle cx="127" cy="108" r="2" fill="rgba(255,255,255,0.9)" />
-      <circle cx="177" cy="108" r="2" fill="rgba(255,255,255,0.9)" />
-
-      {/* Smile */}
+      {/* Lower beige sleeve band */}
       <path
-        d="M 130 135 Q 150 150 170 135"
-        stroke={faceColor}
-        strokeWidth="4"
+        d="M 100 195 L 220 195 L 218 215 L 102 215 Z"
+        fill={lidColor}
+      />
+      <path
+        d="M 100 195 L 220 195 L 219 200 L 101 200 Z"
+        fill={lidShade}
+        opacity="0.7"
+      />
+
+      {/* Face — two dot eyes */}
+      <ellipse cx="138" cy="140" rx="6" ry="6.5" fill={limbColor} />
+      <ellipse cx="182" cy="140" rx="6" ry="6.5" fill={limbColor} />
+
+      {/* Simple smile */}
+      <path
+        d="M 142 165 Q 160 178 178 165"
+        stroke={limbColor}
+        strokeWidth="3.5"
         fill="none"
         strokeLinecap="round"
       />
 
-      {/* Arms */}
-      {variant === 'hero' ? (
-        // Hero variant - arms at sides
+      {/* Arms — thin black sticks */}
+      {isHero ? (
         <>
-          {/* Left arm */}
+          {/* Left arm: down at side */}
           <path
-            d="M 75 100 Q 60 110 55 130 L 50 145"
-            stroke={faceColor}
-            strokeWidth="5"
+            d="M 95 145 Q 78 165 72 195"
+            stroke={limbColor}
+            strokeWidth="3.5"
             fill="none"
             strokeLinecap="round"
           />
-          {/* Left hand */}
-          <circle cx="50" cy="148" r="7" fill={faceColor} />
+          {/* Left hand dot */}
+          <circle cx="71" cy="198" r="4" fill={limbColor} />
 
-          {/* Right arm */}
+          {/* Right arm: extended slightly out, holding something / relaxed */}
           <path
-            d="M 225 100 Q 240 110 245 130 L 250 145"
-            stroke={faceColor}
-            strokeWidth="5"
+            d="M 225 145 Q 248 158 258 188"
+            stroke={limbColor}
+            strokeWidth="3.5"
             fill="none"
             strokeLinecap="round"
           />
-          {/* Right hand */}
-          <circle cx="250" cy="148" r="7" fill={faceColor} />
+          {/* Right hand dot */}
+          <circle cx="259" cy="191" r="4" fill={limbColor} />
         </>
       ) : (
-        // CTA variant - right arm waving
         <>
-          {/* Left arm (lower) */}
+          {/* Left arm: down */}
           <path
-            d="M 75 100 Q 60 110 55 130"
-            stroke={faceColor}
-            strokeWidth="5"
+            d="M 95 145 Q 80 160 76 180"
+            stroke={limbColor}
+            strokeWidth="3.5"
             fill="none"
             strokeLinecap="round"
           />
-          <circle cx="55" cy="133" r="7" fill={faceColor} />
+          <circle cx="75" cy="183" r="4" fill={limbColor} />
 
-          {/* Right arm (waving up) */}
+          {/* Right arm: waving up */}
           <path
-            d="M 225 100 Q 240 85 260 70"
-            stroke={faceColor}
-            strokeWidth="5"
+            d="M 225 145 Q 250 120 268 95"
+            stroke={limbColor}
+            strokeWidth="3.5"
             fill="none"
             strokeLinecap="round"
           />
-          <circle cx="262" cy="68" r="7" fill={faceColor} />
+          <circle cx="270" cy="92" r="4" fill={limbColor} />
         </>
       )}
 
-      {/* Legs and feet (hero variant only) */}
-      {variant === 'hero' && (
+      {/* Legs and feet — thin black sticks with round shoes */}
+      {isHero && (
         <>
           {/* Left leg */}
           <path
-            d="M 115 215 L 115 260"
-            stroke={faceColor}
-            strokeWidth="6"
+            d="M 130 252 L 128 320"
+            stroke={limbColor}
+            strokeWidth="4"
             fill="none"
             strokeLinecap="round"
           />
-          {/* Left foot */}
-          <ellipse cx="120" cy="265" rx="18" ry="10" fill={faceColor} />
+          {/* Left shoe — round black foot */}
+          <ellipse cx="124" cy="335" rx="20" ry="13" fill={limbColor} />
+          <ellipse cx="118" cy="332" rx="6" ry="3" fill="rgba(255,255,255,0.18)" />
 
           {/* Right leg */}
           <path
-            d="M 185 215 L 185 260"
-            stroke={faceColor}
-            strokeWidth="6"
+            d="M 190 252 L 192 320"
+            stroke={limbColor}
+            strokeWidth="4"
             fill="none"
             strokeLinecap="round"
           />
-          {/* Right foot */}
-          <ellipse cx="180" cy="265" rx="18" ry="10" fill={faceColor} />
-
-          {/* Foot highlights */}
-          <ellipse cx="122" cy="263" rx="6" ry="3" fill="rgba(255,255,255,0.2)" />
-          <ellipse cx="182" cy="263" rx="6" ry="3" fill="rgba(255,255,255,0.2)" />
+          {/* Right shoe */}
+          <ellipse cx="196" cy="335" rx="20" ry="13" fill={limbColor} />
+          <ellipse cx="202" cy="332" rx="6" ry="3" fill="rgba(255,255,255,0.18)" />
         </>
       )}
     </svg>
   );
 }
 
-// Export to window
 window.CoffeeMascot = CoffeeMascot;
 
 export default CoffeeMascot;

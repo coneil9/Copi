@@ -598,7 +598,7 @@ function LessonPlayer({ open, email, target, onClose }) {
   const _th = window.THEME || {};
   const _ty = window.TYPOGRAPHY || {};
   const p = { bg: _th.bg||'#EFE9DA', fg: _th.ink||'#1F1B14', accent: _th.accent||'#44704B', cream: _th.bgCard||'#FBF8F0', sun: _th.gold||'#C49455', cherry: _th.danger||'#7A2B1F', rule: _th.line||'#D5CDBA', muted: _th.muted||'#6E675A' };
-  const display = _ty.displayItalic || { fontFamily: '"DM Serif Display", Georgia, serif', fontStyle: 'italic' };
+  const display = _ty.displayItalic || { fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontStyle: 'italic' };
   const sub = _ty.body || { fontFamily: '"Inter", sans-serif' };
   const sans = _ty.button || { fontFamily: '"Inter", sans-serif' };
   const lbl = { fontFamily: '"Inter", sans-serif', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', fontSize: 10 };
@@ -968,7 +968,7 @@ function AssignModal({ open, volId, onClose }) {
   const _th = window.THEME || {};
   const _ty = window.TYPOGRAPHY || {};
   const p = { bg: _th.bg||'#EFE9DA', fg: _th.ink||'#1F1B14', accent: _th.accent||'#44704B', cream: _th.bgCard||'#FBF8F0', sun: _th.gold||'#C49455', cherry: _th.danger||'#7A2B1F', rule: _th.line||'#D5CDBA', muted: _th.muted||'#6E675A' };
-  const display = _ty.displayItalic || { fontFamily: '"DM Serif Display", Georgia, serif', fontStyle: 'italic' };
+  const display = _ty.displayItalic || { fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontStyle: 'italic' };
   const sub = _ty.body || { fontFamily: '"Inter", sans-serif' };
   const sans = _ty.button || { fontFamily: '"Inter", sans-serif' };
   const lbl = { fontFamily: '"Inter", sans-serif', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
@@ -1190,7 +1190,7 @@ function BaristaDetailModal({ open, email, onClose }) {
   const _th = window.THEME || {};
   const _ty = window.TYPOGRAPHY || {};
   const p = { bg: _th.bg||'#EFE9DA', fg: _th.ink||'#1F1B14', accent: _th.accent||'#44704B', cream: _th.bgCard||'#FBF8F0', sun: _th.gold||'#C49455', cherry: _th.danger||'#7A2B1F', rule: _th.line||'#D5CDBA', muted: _th.muted||'#6E675A' };
-  const display = _ty.displayItalic || { fontFamily: '"DM Serif Display", Georgia, serif', fontStyle: 'italic' };
+  const display = _ty.displayItalic || { fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontStyle: 'italic' };
   const sub = _ty.body || { fontFamily: '"Inter", sans-serif' };
   const sans = _ty.button || { fontFamily: '"Inter", sans-serif' };
   const lbl = { fontFamily: '"Inter", sans-serif', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
@@ -1648,7 +1648,7 @@ function CopiFooter({ theme = {} }) {
     sun: '#C68A3D',
     ...(theme.palette || {}),
   };
-  const display = { fontFamily: theme.displayFont || '"DM Serif Display", Georgia, serif' };
+  const display = { fontFamily: theme.displayFont || '"Fredoka", "Nunito", system-ui, sans-serif' };
   const sub = { fontFamily: '"Inter", sans-serif' };
   const sans = { fontFamily: '"Inter", sans-serif' };
   const lbl = { fontFamily: '"Inter", sans-serif', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
@@ -1767,7 +1767,7 @@ function BrandingTemplate3() {
     sun: '#C68A3D', // ochre
     rule: '#7A6B4E'
   };
-  const display = { fontFamily: '"DM Serif Display", Georgia, serif' };
+  const display = { fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif' };
   const sub = { fontFamily: '"Inter", sans-serif' };
   const sans = { fontFamily: '"Inter", sans-serif' };
   const lbl = { fontFamily: '"Inter", sans-serif', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
@@ -1831,7 +1831,7 @@ function BrandingTemplate3() {
         <circle cx={cx} cy={cy} r={rHub} fill={p.accent} />
         <circle cx={cx} cy={cy} r={rHub - 8} fill="none" stroke={p.cream} strokeWidth="0.8" opacity="0.6" />
         <text x={cx} y={cy - 6} textAnchor="middle"
-        style={{ fontFamily: '"DM Serif Display", Georgia, serif', fontStyle: 'italic', fontSize: 28, fill: p.cream }}>Copi</text>
+        style={{ fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontStyle: 'italic', fontSize: 28, fill: p.cream }}>Copi</text>
         <text x={cx} y={cy + 14} textAnchor="middle"
         style={{ fontFamily: '"Inter", sans-serif', fontSize: 9, fontWeight: 600, letterSpacing: '0.25em', fill: p.cream, opacity: 0.8 }}>
           ALMANAC · MMXXVI
@@ -2555,7 +2555,7 @@ function RoasterDashboard({ user = {} }) {
   const RADIUS = window.RADIUS || { card: 12, pill: 999, tag: 999 };
   const SHADOW = window.SHADOW || { card: '0 1px 3px rgba(0,0,0,0.04)', cardHover: '0 4px 6px rgba(0,0,0,0.06)' };
 
-  const display = { fontFamily: 'DM Serif Display, serif' };
+  const display = { fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontWeight: 700 };
   const sans = { fontFamily: 'Inter, sans-serif' };
 
   const name = user.name || 'Brian';
@@ -3173,7 +3173,7 @@ function AdminTeamPage({ user = {} }) {
   const p      = window.NEW_PALETTE || PROTO_PALETTE;
   const RADIUS = window.RADIUS || { card: 12, pill: 999 };
   const SHADOW = window.SHADOW || { card: '0 1px 3px rgba(0,0,0,0.04)' };
-  const display = { fontFamily: 'DM Serif Display, serif' };
+  const display = { fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontWeight: 700 };
   const sans    = { fontFamily: 'Inter, sans-serif' };
 
   const name = user.name || 'Brian Turko';
@@ -3503,7 +3503,7 @@ function AdminCurriculumPage({ user = {} }) {
     sun: '#C68A3D',
     cherry: '#7A2B1F'
   };
-  const display = { fontFamily: '"DM Serif Display", Georgia, serif' };
+  const display = { fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif' };
   const sub = { fontFamily: '"Inter", sans-serif' };
   const sans = { fontFamily: '"Inter", sans-serif' };
   const lbl = { fontFamily: '"Inter", sans-serif', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
@@ -3974,7 +3974,7 @@ function AdminSettingsPage({ user = {} }) {
     sun: '#C68A3D',
     cherry: '#7A2B1F',
   };
-  const display = { fontFamily: '"DM Serif Display", Georgia, serif' };
+  const display = { fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif' };
   const sub     = { fontFamily: '"Inter", sans-serif' };
   const sans    = { fontFamily: '"Inter", sans-serif' };
   const lbl     = { fontFamily: '"Inter", sans-serif', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
@@ -4286,7 +4286,7 @@ function AdminAnalyticsPage({ user = {} }) {
     sun: '#C68A3D',
     cherry: '#7A2B1F',
   };
-  const display = { fontFamily: '"DM Serif Display", Georgia, serif' };
+  const display = { fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif' };
   const sub     = { fontFamily: '"Inter", sans-serif' };
   const sans    = { fontFamily: '"Inter", sans-serif' };
   const lbl     = { fontFamily: '"Inter", sans-serif', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
@@ -4603,7 +4603,7 @@ Object.assign(window, { AdminAnalyticsPage });
 function BaristaDashboard({ user = {} }) {
   const _th = window.THEME || {};
   const p = { bg: _th.bg||'#EFE9DA', fg: _th.ink||'#1F1B14', accent: _th.accent||'#44704B', cream: _th.bgCard||'#FBF8F0', sun: _th.gold||'#C49455', cherry: _th.danger||'#7A2B1F', rule: _th.line||'#D5CDBA', muted: _th.muted||'#6E675A' };
-  const display = { fontFamily: '"DM Serif Display", Georgia, serif' };
+  const display = { fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif' };
   const sub     = { fontFamily: '"Inter", sans-serif' };
   const sans    = { fontFamily: '"Inter", sans-serif' };
   const lbl     = { fontFamily: '"Inter", sans-serif', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', fontSize: 10 };
@@ -4965,7 +4965,7 @@ Object.assign(window, { BaristaDashboard });
 function BaristaLibrary({ user = {} }) {
   const _th = window.THEME || {};
   const p = { bg: _th.bg||'#EFE9DA', fg: _th.ink||'#1F1B14', accent: _th.accent||'#44704B', cream: _th.bgCard||'#FBF8F0', sun: _th.gold||'#C49455', cherry: _th.danger||'#7A2B1F', rule: _th.line||'#D5CDBA', muted: _th.muted||'#6E675A' };
-  const display = { fontFamily: '"DM Serif Display", Georgia, serif' };
+  const display = { fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif' };
   const sub     = { fontFamily: '"Inter", sans-serif' };
   const sans    = { fontFamily: '"Inter", sans-serif' };
   const lbl     = { fontFamily: '"Inter", sans-serif', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', fontSize: 10 };
@@ -5191,7 +5191,7 @@ function BaristaProfile({ user = {} }) {
     sun:    '#C68A3D',
     cherry: '#7A2B1F',
   };
-  const display = { fontFamily: '"DM Serif Display", Georgia, serif' };
+  const display = { fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif' };
   const sub     = { fontFamily: '"Inter", sans-serif' };
   const sans    = { fontFamily: '"Inter", sans-serif' };
   const lbl     = { fontFamily: '"Inter", sans-serif', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', fontSize: 10 };

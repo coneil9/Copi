@@ -122,7 +122,7 @@ function AdminSettingsNew({ user = {} }) {
   const SectionHeader = ({ eyebrow, title }) => (
     <div style={{ marginBottom: 20 }}>
       <p style={{ fontFamily: '"Inter", sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: th.accent, margin: '0 0 4px' }}>{eyebrow}</p>
-      <h2 style={{ fontFamily: '"DM Serif Display", Georgia, serif', fontSize: 24, fontWeight: 400, color: th.ink, margin: 0 }}>{title}</h2>
+      <h2 style={{ fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontSize: 24, fontWeight: 400, color: th.ink, margin: 0 }}>{title}</h2>
     </div>
   );
 
@@ -161,7 +161,7 @@ function AdminSettingsNew({ user = {} }) {
         {/* Page header */}
         <div style={{ marginBottom: 36 }}>
           <p style={{ fontFamily: '"Inter", sans-serif', fontSize: 11, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: th.accent, margin: '0 0 4px' }}>Owner · Settings</p>
-          <h1 style={{ fontFamily: '"DM Serif Display", Georgia, serif', fontSize: 38, fontWeight: 400, color: th.ink, margin: 0 }}>Account settings</h1>
+          <h1 style={{ fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontSize: 38, fontWeight: 400, color: th.ink, margin: 0 }}>Account settings</h1>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
