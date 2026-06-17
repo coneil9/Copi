@@ -18,6 +18,9 @@ import './pages/lesson-player-new.jsx';
 import './pages/cms-page.jsx';
 import './pages/billing-page.jsx';
 import './pages/barista-profile-new.jsx';
+import './pages/admin-curriculum-new.jsx';
+import './pages/admin-analytics-new.jsx';
+import './pages/admin-settings-new.jsx';
 import './prototype/coffee-mascot.jsx';
 import './prototype/ui-components.jsx';
 import './prototype/nav-new.jsx';
@@ -6074,9 +6077,21 @@ function PageFor({ route, user, inviteToken, onSignup, onCafeSetupComplete, onIn
     if (StaffPage) return <StaffPage user={user || {}} />;
     return <AdminTeamPage user={user || {}} />;
   }
-  if (route === 'admin-curriculum') return <AdminCurriculumPage user={user || {}} />;
-  if (route === 'settings')  return <AdminSettingsPage user={user || {}} />;
-  if (route === 'analytics') return <AdminAnalyticsPage user={user || {}} />;
+  if (route === 'admin-curriculum') {
+    const AdminCurriculumNew = window.AdminCurriculumNew;
+    if (AdminCurriculumNew) return <AdminCurriculumNew user={user || {}} />;
+    return <AdminCurriculumPage user={user || {}} />;
+  }
+  if (route === 'settings') {
+    const AdminSettingsNew = window.AdminSettingsNew;
+    if (AdminSettingsNew) return <AdminSettingsNew user={user || {}} />;
+    return <AdminSettingsPage user={user || {}} />;
+  }
+  if (route === 'analytics') {
+    const AdminAnalyticsNew = window.AdminAnalyticsNew;
+    if (AdminAnalyticsNew) return <AdminAnalyticsNew user={user || {}} />;
+    return <AdminAnalyticsPage user={user || {}} />;
+  }
   if (route === 'manager-dashboard') return ManagerDashboard ? <ManagerDashboard user={user || {}} /> : <RoasterDashboard user={user || {}} />;
   if (route === 'billing')   return BillingPage ? <BillingPage user={user || {}} /> : <AdminSettingsPage user={user || {}} />;
   if (route === 'cms')       return CmsPage ? <CmsPage user={user || {}} /> : null;
@@ -6334,7 +6349,8 @@ function CopiPrototype() {
     if (text === 'Billing')           { e.preventDefault(); navigate('billing');          return; }
     if (text === 'Curriculum')        {
       e.preventDefault();
-      const inAdminSurface = user && user.kind === 'admin' && ['dashboard','team','admin-curriculum'].includes(route);
+      const adminRoutes = ['dashboard','team','admin-curriculum','analytics','settings','billing','ai-review','manager-dashboard'];
+      const inAdminSurface = user && (user.kind === 'admin' || ['owner','admin','manager'].includes(user.role)) && adminRoutes.includes(route);
       navigate(inAdminSurface ? 'admin-curriculum' : 'curriculum');
       return;
     }
