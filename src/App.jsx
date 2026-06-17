@@ -21,6 +21,11 @@ import './pages/barista-profile-new.jsx';
 import './pages/admin-curriculum-new.jsx';
 import './pages/admin-analytics-new.jsx';
 import './pages/admin-settings-new.jsx';
+import './pages/admin-shell.jsx';
+import './pages/admin-home.jsx';
+import './pages/admin-team.jsx';
+import './pages/admin-lessons-grid.jsx';
+import './pages/admin-setup-copi.jsx';
 import './prototype/coffee-mascot.jsx';
 import './prototype/animations.jsx';
 import './prototype/ui-components.jsx';
@@ -6069,12 +6074,38 @@ function PageFor({ route, user, inviteToken, onSignup, onCafeSetupComplete, onIn
   const StaffPage         = window.StaffPage;
   const AiReviewPage      = window.AiReviewPage;
 
+  // Wireframe-based admin screens (left-sidebar shell)
+  if (route === 'admin-home') {
+    const AdminHome = window.AdminHome;
+    if (AdminHome) return <AdminHome user={user || {}} />;
+  }
+  if (route === 'admin-team') {
+    const AdminTeam = window.AdminTeam;
+    if (AdminTeam) return <AdminTeam user={user || {}} view="roster" />;
+  }
+  if (route === 'admin-team-add') {
+    const AdminTeam = window.AdminTeam;
+    if (AdminTeam) return <AdminTeam user={user || {}} view="add" />;
+  }
+  if (route === 'admin-lessons-grid') {
+    const AdminLessonsGrid = window.AdminLessonsGrid;
+    if (AdminLessonsGrid) return <AdminLessonsGrid user={user || {}} />;
+  }
+  if (route === 'admin-setup-copi') {
+    const AdminSetupCopi = window.AdminSetupCopi;
+    if (AdminSetupCopi) return <AdminSetupCopi user={user || {}} />;
+  }
+
   // New authenticated pages (pick new over legacy when available)
   if (route === 'dashboard')  {
+    const AdminHome = window.AdminHome;
+    if (AdminHome) return <AdminHome user={user || {}} />;
     if (OwnerDashboard) return <OwnerDashboard user={user || {}} />;
     return <RoasterDashboard user={user || {}} />;
   }
   if (route === 'team') {
+    const AdminTeam = window.AdminTeam;
+    if (AdminTeam) return <AdminTeam user={user || {}} view="roster" />;
     if (StaffPage) return <StaffPage user={user || {}} />;
     return <AdminTeamPage user={user || {}} />;
   }
@@ -6123,6 +6154,11 @@ function RouteBadge({ route, onHome }) {
     home: 'HOME · LANDING', signup: 'SIGN UP', 'cafe-setup': 'SETUP',
     curriculum: 'CURRICULUM', pricing: 'PRICING', about: 'ABOUT',
     dashboard: 'WORKSPACE · OWNER', team: 'TEAM · OWNER',
+    'admin-home': 'HOME · OWNER',
+    'admin-team': 'ROSTER · OWNER',
+    'admin-team-add': 'ADD TEAMMATE · OWNER',
+    'admin-lessons-grid': 'LESSONS · OWNER',
+    'admin-setup-copi': 'SET UP COPI AI · OWNER',
     'admin-curriculum': 'CURRICULUM · OWNER', settings: 'SETTINGS',
     analytics: 'ANALYTICS', billing: 'BILLING',
     'manager-dashboard': 'DASHBOARD · MANAGER', 'manager-team': 'TEAM · MANAGER',
