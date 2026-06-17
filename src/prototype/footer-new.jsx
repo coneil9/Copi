@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { NEW_PALETTE, TYPOGRAPHY, containerStyle, sectionStyle } from './design-system.jsx';
+import { SectionDivider } from './animations.jsx';
 
 function FooterNew({ theme = {} }) {
   const p = { ...NEW_PALETTE, ...(theme.palette || {}) };
@@ -18,9 +19,9 @@ function FooterNew({ theme = {} }) {
   };
 
   const footerContainerStyle = {
-    ...sectionStyle({ paddingTop: 60, paddingBottom: 40 }),
-    background: p.bg,
-    borderTop: `1px solid ${p.tagBorder}`
+    ...sectionStyle({ paddingTop: 100, paddingBottom: 40 }),
+    background: 'var(--copi-parchment)',
+    position: 'relative'
   };
 
   const footerInnerStyle = {
@@ -88,7 +89,9 @@ function FooterNew({ theme = {} }) {
 
   return (
     <footer style={footerContainerStyle}>
-      <div style={footerInnerStyle}>
+      {/* Top divider — forest of CTA above flows down into parchment */}
+      <SectionDivider fromColor="var(--copi-forest)" position="top" height={70} variant="diagonal" />
+      <div style={{ ...footerInnerStyle, position: 'relative', zIndex: 2 }}>
         {/* Top row - Logo + Nav */}
         <div style={topRowStyle}>
           {/* Logo + tagline */}

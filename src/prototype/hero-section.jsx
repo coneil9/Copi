@@ -1,13 +1,14 @@
 // ═════════════════════════════════════════════════════════
 // HERO SECTION — Landing page hero with two-column layout
 // Left: eyebrow + h1 + body + email input/button + trust line
-// Right: Coffee mascot with circular halo background
+// Right: Coffee mascot with circular halo background, idle bob
 // ═════════════════════════════════════════════════════════
 
 import React from 'react';
 import { NEW_PALETTE, TYPOGRAPHY, containerStyle, sectionStyle } from './design-system.jsx';
 import CoffeeMascot from './coffee-mascot.jsx';
 import { Eyebrow, InputWithButton } from './ui-components.jsx';
+import { Reveal, Highlight } from './animations.jsx';
 
 function HeroSection({ theme = {} }) {
   const p = { ...NEW_PALETTE, ...(theme.palette || {}) };
@@ -15,14 +16,13 @@ function HeroSection({ theme = {} }) {
 
   const handleEmailSubmit = (email) => {
     console.log('Waitlist signup:', email);
-    // Open trial modal if available
     if (window.CopiActions && window.CopiActions.openTrial) {
       window.CopiActions.openTrial();
     }
   };
 
   const heroContainerStyle = {
-    ...sectionStyle({ paddingTop: 60, paddingBottom: 80 }),
+    ...sectionStyle({ paddingTop: 80, paddingBottom: 120 }),
     background: p.bg
   };
 
@@ -86,41 +86,47 @@ function HeroSection({ theme = {} }) {
   return (
     <section style={heroContainerStyle}>
       <div style={heroInnerStyle}>
-        {/* Left column - Text content */}
+        {/* Left column - Text content (headline visible immediately) */}
         <div style={leftColumnStyle}>
           <Eyebrow style={{ marginBottom: 16 }}>
             FOR INDEPENDENT CAFES
           </Eyebrow>
 
           <h1 style={headlineStyle}>
-            AI onboarding for small and medium cafes.
+            <Highlight>AI onboarding</Highlight> for small and medium cafes.
           </h1>
 
-          <p style={bodyStyle}>
-            Copi turns your handbook, recipes, and house standards into a
-            training track your team finishes on their phone. Set it up once
-            and step back off the floor.
-          </p>
+          <Reveal variant="fade-up" delay={80}>
+            <p style={bodyStyle}>
+              Copi turns your handbook, recipes, and house standards into a
+              training track your team finishes on their phone. Set it up once
+              and step back off the floor.
+            </p>
+          </Reveal>
 
-          <InputWithButton
-            placeholder="you@yourcafe.com"
-            buttonText="Join the waitlist"
-            onSubmit={handleEmailSubmit}
-          />
+          <Reveal variant="fade-up" delay={160}>
+            <InputWithButton
+              placeholder="you@yourcafe.com"
+              buttonText="Join the waitlist"
+              onSubmit={handleEmailSubmit}
+            />
 
-          <div style={trustLineStyle}>
-            <span>⏱</span>
-            <span>
-              Onboarding Vancouver cafes first. No card, no setup call.
-            </span>
-          </div>
+            <div style={trustLineStyle}>
+              <span>⏱</span>
+              <span>
+                Onboarding Vancouver cafes first. No card, no setup call.
+              </span>
+            </div>
+          </Reveal>
         </div>
 
-        {/* Right column - Coffee mascot with halo */}
+        {/* Right column - Coffee mascot with halo + idle float */}
         <div style={rightColumnStyle}>
           <div style={haloStyle} />
           <div style={mascotWrapperStyle}>
-            <CoffeeMascot variant="hero" size={320} />
+            <div className="copi-float">
+              <CoffeeMascot variant="hero" size={320} />
+            </div>
           </div>
         </div>
       </div>
@@ -128,7 +134,6 @@ function HeroSection({ theme = {} }) {
   );
 }
 
-// Export to window
 window.HeroSection = HeroSection;
 
 export default HeroSection;

@@ -1,11 +1,13 @@
 // ═════════════════════════════════════════════════════════
 // HOW IT WORKS SECTION — 3-step setup process
-// Eyebrow + h2 + 3-column numbered steps
-// ═══════════════════════════════════════════════════════════
+// Parchment bg (returns to base palette after the forest section).
+// Steps slide in from the left in sequence; "afternoon" is highlighted.
+// ═════════════════════════════════════════════════════════
 
 import React from 'react';
 import { NEW_PALETTE, TYPOGRAPHY, containerStyle, sectionStyle, SPACING } from './design-system.jsx';
 import { Eyebrow, StepBadge } from './ui-components.jsx';
+import { Reveal, Highlight } from './animations.jsx';
 
 function HowItWorksSection({ theme = {} }) {
   const p = { ...NEW_PALETTE, ...(theme.palette || {}) };
@@ -32,9 +34,10 @@ function HowItWorksSection({ theme = {} }) {
   ];
 
   const sectionContainerStyle = {
-    ...sectionStyle(),
-    background: p.bg,
-    scrollMarginTop: 80  // For smooth scroll offset
+    ...sectionStyle({ paddingTop: 120, paddingBottom: 120 }),
+    background: 'var(--copi-parchment)',
+    scrollMarginTop: 80,
+    position: 'relative'
   };
 
   const sectionInnerStyle = {
@@ -45,7 +48,7 @@ function HowItWorksSection({ theme = {} }) {
   const headlineStyle = {
     ...t.h2,
     color: p.textPrimary,
-    margin: '0 0 48px 0'
+    margin: '0 0 56px 0'
   };
 
   const stepsGridStyle = {
@@ -79,19 +82,25 @@ function HowItWorksSection({ theme = {} }) {
   return (
     <section id="how-it-works" style={sectionContainerStyle}>
       <div style={sectionInnerStyle}>
-        <Eyebrow style={{ marginBottom: 16 }}>SETUP</Eyebrow>
+        <Reveal variant="fade-up">
+          <Eyebrow style={{ marginBottom: 16 }}>SETUP</Eyebrow>
+        </Reveal>
 
-        <h2 style={headlineStyle}>
-          Up and running in an afternoon.
-        </h2>
+        <Reveal variant="fade-up" delay={60}>
+          <h2 style={headlineStyle}>
+            Up and running in an <Highlight>afternoon</Highlight>.
+          </h2>
+        </Reveal>
 
         <div style={stepsGridStyle}>
-          {steps.map((step) => (
-            <div key={step.number} style={stepStyle}>
-              <StepBadge number={step.number} />
-              <h3 style={stepTitleStyle}>{step.title}</h3>
-              <p style={stepDescStyle}>{step.description}</p>
-            </div>
+          {steps.map((step, i) => (
+            <Reveal key={step.number} variant="slide-right" delay={140 + i * 120} duration={400}>
+              <div style={stepStyle}>
+                <StepBadge number={step.number} />
+                <h3 style={stepTitleStyle}>{step.title}</h3>
+                <p style={stepDescStyle}>{step.description}</p>
+              </div>
+            </Reveal>
           ))}
         </div>
       </div>
@@ -99,7 +108,6 @@ function HowItWorksSection({ theme = {} }) {
   );
 }
 
-// Export to window
 window.HowItWorksSection = HowItWorksSection;
 
 export default HowItWorksSection;

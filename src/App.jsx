@@ -22,6 +22,7 @@ import './pages/admin-curriculum-new.jsx';
 import './pages/admin-analytics-new.jsx';
 import './pages/admin-settings-new.jsx';
 import './prototype/coffee-mascot.jsx';
+import './prototype/animations.jsx';
 import './prototype/ui-components.jsx';
 import './prototype/nav-new.jsx';
 import './prototype/hero-section.jsx';

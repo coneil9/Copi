@@ -1,11 +1,13 @@
 // ═════════════════════════════════════════════════════════
 // PROBLEM SECTION — The current state of cafe training
 // Eyebrow + h2 + quote pills + body paragraph
+// Cream background (separates from parchment hero above).
 // ═════════════════════════════════════════════════════════
 
 import React from 'react';
 import { NEW_PALETTE, TYPOGRAPHY, containerStyle, sectionStyle } from './design-system.jsx';
-import { Eyebrow, Tag } from './ui-components.jsx';
+import { Eyebrow } from './ui-components.jsx';
+import { Reveal, Highlight } from './animations.jsx';
 
 function ProblemSection({ theme = {} }) {
   const p = { ...NEW_PALETTE, ...(theme.palette || {}) };
@@ -20,8 +22,9 @@ function ProblemSection({ theme = {} }) {
   ];
 
   const sectionContainerStyle = {
-    ...sectionStyle(),
-    background: p.bg
+    ...sectionStyle({ paddingTop: 100, paddingBottom: 100 }),
+    background: 'var(--copi-cream)',
+    position: 'relative'
   };
 
   const sectionInnerStyle = {
@@ -48,7 +51,7 @@ function ProblemSection({ theme = {} }) {
     ...t.bodySmall,
     padding: '10px 18px',
     borderRadius: 999,
-    background: 'transparent',
+    background: p.bgCard,
     border: `1.5px solid ${p.tagBorder}`,
     color: p.textMuted,
     fontStyle: 'italic'
@@ -64,34 +67,41 @@ function ProblemSection({ theme = {} }) {
   return (
     <section style={sectionContainerStyle}>
       <div style={sectionInnerStyle}>
-        <Eyebrow style={{ marginBottom: 16 }}>
-          THE WAY IT WORKS TODAY
-        </Eyebrow>
+        <Reveal variant="fade-up">
+          <Eyebrow style={{ marginBottom: 16 }}>
+            THE WAY IT WORKS TODAY
+          </Eyebrow>
+        </Reveal>
 
-        <h2 style={headlineStyle}>
-          Most cafes train by memory, and it walks out the door.
-        </h2>
+        <Reveal variant="fade-up" delay={60}>
+          <h2 style={headlineStyle}>
+            Most cafes train by <Highlight>memory</Highlight>, and it walks out the door.
+          </h2>
+        </Reveal>
 
         <div style={quotesContainerStyle}>
           {quotes.map((quote, i) => (
-            <div key={i} style={quoteStyle}>
-              "{quote}"
-            </div>
+            <Reveal key={i} variant="slide-up" delay={120 + i * 70} duration={320}>
+              <div style={quoteStyle}>
+                "{quote}"
+              </div>
+            </Reveal>
           ))}
         </div>
 
-        <p style={bodyStyle}>
-          A binder, a Google Doc, and a senior barista to shadow. It rarely
-          sticks, it never scales, and it tracks nothing. Every time someone
-          leaves, the knowledge leaves with them, and you start over on the
-          next hire.
-        </p>
+        <Reveal variant="fade-up" delay={120 + quotes.length * 70}>
+          <p style={bodyStyle}>
+            A binder, a Google Doc, and a senior barista to shadow. It rarely
+            sticks, it never scales, and it tracks nothing. Every time someone
+            leaves, the knowledge leaves with them, and you start over on the
+            next hire.
+          </p>
+        </Reveal>
       </div>
     </section>
   );
 }
 
-// Export to window
 window.ProblemSection = ProblemSection;
 
 export default ProblemSection;

@@ -1,6 +1,24 @@
 /* Primary fonts: Fredoka (chunky rounded display headings), Inter (body/UI), plus legacy fonts */
 @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600&family=Lato:wght@300;400;700;900&family=Unna:ital,wght@0,400;0,700;1,400;1,700&family=Yrsa:wght@400;500;600;700&display=swap');
 
+/* ── Brand colour tokens ─────────────────────────────────
+   Mirrors the THEME export in design-system.jsx so inline-style
+   sections can reference brand colours via CSS variables too. */
+:root {
+  --copi-parchment: #EFE9DA;   /* page bg */
+  --copi-cream:     #F5F0E8;   /* secondary light bg */
+  --copi-card:      #FBF8F0;   /* card / input bg */
+  --copi-forest:    #2E3B2F;   /* deep forest green section bg */
+  --copi-forest-deep: #1F2A20; /* forest deeper accent */
+  --copi-green:     #44704B;   /* accent / CTA */
+  --copi-yellow:    #F4C542;   /* highlight + CTA */
+  --copi-yellow-soft: #FFE08A;
+  --copi-ink:       #1F1B14;
+  --copi-on-dark:   #EFE9DA;
+  --copi-muted:     #6E675A;
+  --copi-line:      #D5CDBA;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -13,9 +31,9 @@ body,
 }
 
 body {
-  background: #EFE9DA;
+  background: var(--copi-parchment);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  color: #1F1B14;
+  color: var(--copi-ink);
 }
 
 @keyframes spin {
@@ -36,4 +54,50 @@ select {
 
 a {
   color: inherit;
+}
+
+/* ── Scroll reveal animations ────────────────────────────
+   Reveal wrapper starts hidden and transitions to visible
+   when `.is-in` is added (driven by IntersectionObserver). */
+.copi-reveal {
+  opacity: 0;
+  transition-property: opacity, transform, clip-path;
+  transition-duration: 360ms;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: 0ms;
+  will-change: opacity, transform;
+}
+.copi-reveal--fade-up    { transform: translateY(20px); }
+.copi-reveal--slide-up   { transform: translateY(40px); }
+.copi-reveal--slide-right { transform: translateX(-30px); }
+.copi-reveal--slide-left { transform: translateX(30px); }
+.copi-reveal--scale      { transform: scale(0.94); }
+.copi-reveal--clip       { clip-path: inset(0 0 100% 0); }
+.copi-reveal.is-in {
+  opacity: 1;
+  transform: none;
+  clip-path: inset(0 0 0 0);
+}
+
+/* Idle bob — used by hero Cupper */
+.copi-float {
+  animation: copiFloat 4.5s ease-in-out infinite;
+  transform-origin: center;
+}
+@keyframes copiFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-10px); }
+}
+
+/* Respect reduced-motion: kill all reveal + idle animations */
+@media (prefers-reduced-motion: reduce) {
+  .copi-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+    transition: none !important;
+  }
+  .copi-float {
+    animation: none !important;
+  }
 }
