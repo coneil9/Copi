@@ -47,7 +47,7 @@ function StatCell({ visual, value, label, isLast = false }) {
     }}>
       <div style={{ minHeight: 64, display: 'flex', alignItems: 'center' }}>{visual}</div>
       <div style={{
-        fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif',
+        fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif',
         fontWeight: 700,
         fontSize: 28,
         color: 'var(--copi-ink)',
@@ -56,7 +56,7 @@ function StatCell({ visual, value, label, isLast = false }) {
         {value}
       </div>
       <div style={{
-        fontFamily: '"Inter", sans-serif',
+        fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
         fontSize: 12,
         color: 'var(--copi-muted)',
         letterSpacing: '0.04em',
@@ -77,7 +77,7 @@ function ListPanel({ title, items }) {
       padding: 24
     }}>
       <h3 style={{
-        fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif',
+        fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif',
         fontWeight: 600,
         fontSize: 17,
         color: 'var(--copi-ink)',
@@ -102,7 +102,7 @@ function ListPanel({ title, items }) {
               alignItems: 'flex-start',
               padding: '8px 0',
               borderBottom: i === items.length - 1 ? 'none' : '1px dashed var(--copi-line)',
-              fontFamily: '"Inter", sans-serif',
+              fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
               fontSize: 14,
               color: 'var(--copi-ink)'
             }}
@@ -155,7 +155,7 @@ function AdminHome({ user = {} }) {
     <AdminShell current="home" user={user} cafe={cafe}>
       {/* Greeting */}
       <h1 style={{
-        fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif',
+        fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif',
         fontWeight: 700,
         fontSize: 44,
         color: 'var(--copi-ink)',
@@ -184,7 +184,7 @@ function AdminHome({ user = {} }) {
           padding: '16px 20px'
         }}>
           <div style={{
-            fontFamily: '"Inter", sans-serif',
+            fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
             fontSize: 13,
             fontWeight: 600,
             color: 'var(--copi-ink)',
@@ -196,7 +196,7 @@ function AdminHome({ user = {} }) {
             margin: '0 0 12px 0',
             padding: '0 0 0 18px',
             color: 'var(--copi-muted)',
-            fontFamily: '"Inter", sans-serif',
+            fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
             fontSize: 13,
             lineHeight: 1.6
           }}>
@@ -215,7 +215,7 @@ function AdminHome({ user = {} }) {
                 borderRadius: 999,
                 border: '1px solid var(--copi-line)',
                 background: '#F5F0E8',
-                fontFamily: '"Inter", sans-serif',
+                fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
                 fontSize: 13,
                 color: 'var(--copi-ink)',
                 outline: 'none'
@@ -228,7 +228,7 @@ function AdminHome({ user = {} }) {
                 borderRadius: 999,
                 background: '#2D5016',
                 color: '#F5F0E8',
-                fontFamily: '"Inter", sans-serif',
+                fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
                 fontSize: 13,
                 fontWeight: 600,
                 border: 'none',
@@ -244,7 +244,7 @@ function AdminHome({ user = {} }) {
       {/* Quick Insights */}
       <section style={{ marginBottom: 40 }}>
         <h2 style={{
-          fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif',
+          fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif',
           fontWeight: 600,
           fontSize: 22,
           color: 'var(--copi-ink)',
@@ -268,7 +268,7 @@ function AdminHome({ user = {} }) {
           <StatCell
             visual={
               <div style={{
-                fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif',
+                fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif',
                 fontWeight: 700,
                 fontSize: 56,
                 color: '#2D5016',
@@ -283,7 +283,7 @@ function AdminHome({ user = {} }) {
           <StatCell
             visual={
               <div style={{
-                fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif',
+                fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif',
                 fontWeight: 700,
                 fontSize: 56,
                 color: '#44704B',
@@ -301,7 +301,7 @@ function AdminHome({ user = {} }) {
         <div style={{
           textAlign: 'right',
           marginTop: 8,
-          fontFamily: '"Inter", sans-serif',
+          fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
           fontSize: 12,
           color: 'var(--copi-muted)'
         }}>
@@ -309,7 +309,7 @@ function AdminHome({ user = {} }) {
             background: 'none',
             border: 'none',
             color: '#44704B',
-            fontFamily: '"Inter", sans-serif',
+            fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
             fontSize: 12,
             fontWeight: 600,
             cursor: 'pointer',

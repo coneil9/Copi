@@ -78,7 +78,7 @@ function AdminSettingsNew({ user = {} }) {
   };
 
   const inputStyle = {
-    fontFamily: '"Inter", sans-serif', fontSize: 14, fontWeight: 400,
+    fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 14, fontWeight: 400,
     width: '100%', padding: '10px 14px',
     background: th.bgCard, color: th.ink,
     border: `1.5px solid ${th.line}`, borderRadius: th.input,
@@ -121,20 +121,20 @@ function AdminSettingsNew({ user = {} }) {
 
   const SectionHeader = ({ eyebrow, title }) => (
     <div style={{ marginBottom: 20 }}>
-      <p style={{ fontFamily: '"Inter", sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: th.accent, margin: '0 0 4px' }}>{eyebrow}</p>
-      <h2 style={{ fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontSize: 24, fontWeight: 400, color: th.ink, margin: 0 }}>{title}</h2>
+      <p style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: th.accent, margin: '0 0 4px' }}>{eyebrow}</p>
+      <h2 style={{ fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif', fontSize: 24, fontWeight: 400, color: th.ink, margin: 0 }}>{title}</h2>
     </div>
   );
 
   const FieldLabel = ({ children }) => (
-    <p style={{ fontFamily: '"Inter", sans-serif', fontSize: 11, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: th.muted, margin: '0 0 6px' }}>{children}</p>
+    <p style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 11, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: th.muted, margin: '0 0 6px' }}>{children}</p>
   );
 
   const SaveButton = ({ section, onClick }) => (
     <button
       onClick={onClick}
       style={{
-        fontFamily: '"Inter", sans-serif', fontSize: 13, fontWeight: 500,
+        fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 13, fontWeight: 500,
         padding: '9px 22px', borderRadius: 999,
         background: saved === section ? th.success || th.accent : th.accent,
         border: 'none', color: th.onDark, cursor: 'pointer',
@@ -160,8 +160,8 @@ function AdminSettingsNew({ user = {} }) {
       <div style={{ maxWidth: 860, margin: '0 auto', padding: '32px 28px 80px' }}>
         {/* Page header */}
         <div style={{ marginBottom: 36 }}>
-          <p style={{ fontFamily: '"Inter", sans-serif', fontSize: 11, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: th.accent, margin: '0 0 4px' }}>Owner · Settings</p>
-          <h1 style={{ fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontSize: 38, fontWeight: 400, color: th.ink, margin: 0 }}>Account settings</h1>
+          <p style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 11, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: th.accent, margin: '0 0 4px' }}>Owner · Settings</p>
+          <h1 style={{ fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif', fontSize: 38, fontWeight: 400, color: th.ink, margin: 0 }}>Account settings</h1>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
@@ -230,14 +230,14 @@ function AdminSettingsNew({ user = {} }) {
                       background: th.bgCard,
                     }}>
                       <div>
-                        <p style={{ fontFamily: '"Inter", sans-serif', fontSize: 14, fontWeight: 500, color: th.ink, margin: 0 }}>{loc.name}</p>
-                        {loc.address && <p style={{ fontFamily: '"Inter", sans-serif', fontSize: 12, color: th.muted, margin: '2px 0 0' }}>{loc.address}</p>}
+                        <p style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 14, fontWeight: 500, color: th.ink, margin: 0 }}>{loc.name}</p>
+                        {loc.address && <p style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 12, color: th.muted, margin: '2px 0 0' }}>{loc.address}</p>}
                       </div>
-                      <span style={{ fontFamily: '"Inter", sans-serif', fontSize: 11, fontWeight: 600, color: th.accent, background: `${th.accent}14`, padding: '3px 10px', borderRadius: 999 }}>Active</span>
+                      <span style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 11, fontWeight: 600, color: th.accent, background: `${th.accent}14`, padding: '3px 10px', borderRadius: 999 }}>Active</span>
                     </div>
                   ))}
                 </div>
-                <p style={{ fontFamily: '"Inter", sans-serif', fontSize: 12, color: th.muted, margin: '8px 0 0' }}>
+                <p style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 12, color: th.muted, margin: '8px 0 0' }}>
                   To add or remove locations, contact <span style={{ color: th.accent }}>support@copi.app</span>.
                 </p>
               </div>
@@ -260,8 +260,8 @@ function AdminSettingsNew({ user = {} }) {
                   borderBottom: i < notifRows.length - 1 ? `1px solid ${th.line}` : 'none',
                 }}>
                   <div style={{ flex: 1 }}>
-                    <p style={{ fontFamily: '"Inter", sans-serif', fontSize: 14, fontWeight: 500, color: th.ink, margin: 0 }}>{row.label}</p>
-                    <p style={{ fontFamily: '"Inter", sans-serif', fontSize: 12, color: th.muted, margin: '2px 0 0' }}>{row.desc}</p>
+                    <p style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 14, fontWeight: 500, color: th.ink, margin: 0 }}>{row.label}</p>
+                    <p style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 12, color: th.muted, margin: '2px 0 0' }}>{row.desc}</p>
                   </div>
                   <Toggle
                     on={notifications[row.key]}
@@ -304,14 +304,14 @@ function AdminSettingsNew({ user = {} }) {
                 />
               </div>
               {passwordError && (
-                <p style={{ fontFamily: '"Inter", sans-serif', fontSize: 13, color: th.danger, margin: 0 }}>{passwordError}</p>
+                <p style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 13, color: th.danger, margin: 0 }}>{passwordError}</p>
               )}
             </div>
             <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
               <button
                 onClick={handleChangePassword}
                 style={{
-                  fontFamily: '"Inter", sans-serif', fontSize: 13, fontWeight: 500,
+                  fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 13, fontWeight: 500,
                   padding: '9px 22px', borderRadius: 999,
                   background: th.accent, border: 'none', color: th.onDark, cursor: 'pointer',
                 }}
@@ -331,13 +331,13 @@ function AdminSettingsNew({ user = {} }) {
                 background: `${th.danger}08`, border: `1px solid ${th.danger}22`,
               }}>
                 <div>
-                  <p style={{ fontFamily: '"Inter", sans-serif', fontSize: 14, fontWeight: 500, color: th.ink, margin: 0 }}>Export all data</p>
-                  <p style={{ fontFamily: '"Inter", sans-serif', fontSize: 12, color: th.muted, margin: '2px 0 0' }}>Download a CSV of all staff progress and onboarding records.</p>
+                  <p style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 14, fontWeight: 500, color: th.ink, margin: 0 }}>Export all data</p>
+                  <p style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 12, color: th.muted, margin: '2px 0 0' }}>Download a CSV of all staff progress and onboarding records.</p>
                 </div>
                 <button
                   onClick={() => showToast('Data export started. You will receive an email shortly.')}
                   style={{
-                    fontFamily: '"Inter", sans-serif', fontSize: 12, fontWeight: 500,
+                    fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 12, fontWeight: 500,
                     padding: '7px 16px', borderRadius: 999, flexShrink: 0,
                     background: th.bgCard, border: `1px solid ${th.line}`,
                     color: th.ink, cursor: 'pointer',
@@ -352,13 +352,13 @@ function AdminSettingsNew({ user = {} }) {
                 background: `${th.danger}08`, border: `1px solid ${th.danger}22`,
               }}>
                 <div>
-                  <p style={{ fontFamily: '"Inter", sans-serif', fontSize: 14, fontWeight: 500, color: th.danger, margin: 0 }}>Cancel subscription</p>
-                  <p style={{ fontFamily: '"Inter", sans-serif', fontSize: 12, color: th.muted, margin: '2px 0 0' }}>Your account and all data will be deactivated at the end of the billing period.</p>
+                  <p style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 14, fontWeight: 500, color: th.danger, margin: 0 }}>Cancel subscription</p>
+                  <p style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 12, color: th.muted, margin: '2px 0 0' }}>Your account and all data will be deactivated at the end of the billing period.</p>
                 </div>
                 <button
                   onClick={() => act.navigate && act.navigate('billing')}
                   style={{
-                    fontFamily: '"Inter", sans-serif', fontSize: 12, fontWeight: 500,
+                    fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 12, fontWeight: 500,
                     padding: '7px 16px', borderRadius: 999, flexShrink: 0,
                     background: `${th.danger}12`, border: `1px solid ${th.danger}44`,
                     color: th.danger, cursor: 'pointer',
@@ -378,7 +378,7 @@ function AdminSettingsNew({ user = {} }) {
           position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',
           zIndex: 9999, background: th.ink, color: th.onDark,
           padding: '12px 20px', borderRadius: 999,
-          fontFamily: '"Inter", sans-serif', fontSize: 13,
+          fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 13,
           maxWidth: 400, boxShadow: sh.modal || sh.card,
         }}>
           {toast}

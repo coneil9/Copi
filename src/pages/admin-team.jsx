@@ -36,7 +36,7 @@ function PercentPill({ value }) {
       borderRadius: 999,
       background: tone.bg,
       color: tone.fg,
-      fontFamily: '"Inter", sans-serif',
+      fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
       fontSize: 12,
       fontWeight: 600,
       fontVariantNumeric: 'tabular-nums'
@@ -87,7 +87,7 @@ function RosterView() {
   return (
     <>
       <h1 style={{
-        fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif',
+        fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif',
         fontWeight: 700,
         fontSize: 36,
         color: 'var(--copi-ink)',
@@ -106,7 +106,7 @@ function RosterView() {
           <table style={{
             width: '100%',
             borderCollapse: 'collapse',
-            fontFamily: '"Inter", sans-serif',
+            fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
             fontSize: 13
           }}>
             <thead>
@@ -133,7 +133,7 @@ function RosterView() {
                       border: '1px solid var(--copi-line)',
                       borderRadius: 8,
                       padding: '5px 10px',
-                      fontFamily: '"Inter", sans-serif',
+                      fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
                       fontSize: 12,
                       color: 'var(--copi-ink)'
                     }}
@@ -202,7 +202,7 @@ function RosterView() {
           color: '#F5F0E8',
           padding: '10px 18px',
           borderRadius: 999,
-          fontFamily: '"Inter", sans-serif',
+          fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
           fontSize: 13,
           fontWeight: 500,
           boxShadow: '0 8px 24px rgba(31,27,20,0.24)',
@@ -218,7 +218,7 @@ function RosterView() {
 const th = {
   textAlign: 'left',
   padding: '12px 16px',
-  fontFamily: '"Inter", sans-serif',
+  fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
   fontSize: 11,
   fontWeight: 600,
   letterSpacing: '0.08em',
@@ -228,7 +228,7 @@ const th = {
 
 const td = {
   padding: '12px 16px',
-  fontFamily: '"Inter", sans-serif',
+  fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
   fontSize: 13,
   color: 'var(--copi-ink)',
   verticalAlign: 'middle'
@@ -244,7 +244,7 @@ function SecondaryButton({ children, onClick }) {
         color: '#2D5016',
         padding: '10px 18px',
         borderRadius: 999,
-        fontFamily: '"Inter", sans-serif',
+        fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
         fontSize: 13,
         fontWeight: 600,
         cursor: 'pointer'
@@ -290,7 +290,7 @@ function AddTeammateView() {
   return (
     <form onSubmit={submit} style={{ maxWidth: 720 }}>
       <h1 style={{
-        fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif',
+        fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif',
         fontWeight: 700,
         fontSize: 36,
         color: 'var(--copi-ink)',
@@ -337,7 +337,7 @@ function AddTeammateView() {
                     background: on ? '#2D5016' : '#FBF8F0',
                     color: on ? '#F5F0E8' : 'var(--copi-ink)',
                     border: on ? '1.5px solid #2D5016' : '1.5px solid var(--copi-line)',
-                    fontFamily: '"Inter", sans-serif',
+                    fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
                     fontSize: 13,
                     fontWeight: 600,
                     cursor: 'pointer',
@@ -370,7 +370,7 @@ function AddTeammateView() {
             onChange={(e) => setContext(e.target.value)}
             rows={5}
             placeholder="e.g. has worked at a third-wave shop for two years, comfortable on bar but new to pour-over."
-            style={{ ...inputStyle, resize: 'vertical', fontFamily: '"Inter", sans-serif' }}
+            style={{ ...inputStyle, resize: 'vertical', fontFamily: '"Hanken Grotesk", "Inter", sans-serif' }}
           />
         </Field>
       </div>
@@ -388,7 +388,7 @@ function AddTeammateView() {
             borderRadius: 999,
             border: 'none',
             cursor: 'pointer',
-            fontFamily: '"Inter", sans-serif',
+            fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
             fontSize: 14,
             fontWeight: 600
           }}
@@ -404,7 +404,7 @@ function AddTeammateView() {
           borderRadius: 10,
           background: confirmation.kind === 'ok' ? 'rgba(68,112,75,0.10)' : 'rgba(122,43,31,0.10)',
           color: confirmation.kind === 'ok' ? '#2D5016' : '#7A2B1F',
-          fontFamily: '"Inter", sans-serif',
+          fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
           fontSize: 13
         }}>
           {confirmation.text}
@@ -423,7 +423,7 @@ function Field({ label, children }) {
       gap: 20
     }}>
       <span style={{
-        fontFamily: '"Inter", sans-serif',
+        fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
         fontSize: 13,
         fontWeight: 500,
         color: 'var(--copi-ink)',
@@ -442,7 +442,7 @@ const inputStyle = {
   borderRadius: 10,
   border: '1px solid var(--copi-line)',
   background: '#F5F0E8',
-  fontFamily: '"Inter", sans-serif',
+  fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
   fontSize: 14,
   color: 'var(--copi-ink)',
   outline: 'none'

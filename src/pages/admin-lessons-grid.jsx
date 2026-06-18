@@ -62,7 +62,7 @@ function ActionChip({ label, onClick, danger = false }) {
         background: colors.bg,
         border: `1.4px solid ${colors.border}`,
         color: colors.fg,
-        fontFamily: '"Inter", sans-serif',
+        fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
         fontSize: 12,
         fontWeight: 600,
         cursor: 'pointer',
@@ -88,7 +88,7 @@ function ModuleCard({ module, onPreview, onAssign, onDifficulty }) {
     }}>
       <header>
         <h3 style={{
-          fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif',
+          fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif',
           fontWeight: 700,
           fontSize: 19,
           color: 'var(--copi-ink)',
@@ -98,7 +98,7 @@ function ModuleCard({ module, onPreview, onAssign, onDifficulty }) {
           {module.title}
         </h3>
         <div style={{
-          fontFamily: '"Inter", sans-serif',
+          fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
           fontSize: 11,
           color: 'var(--copi-muted)',
           letterSpacing: '0.06em',
@@ -119,7 +119,7 @@ function ModuleCard({ module, onPreview, onAssign, onDifficulty }) {
       }}>
         {module.topics.map((t, i) => (
           <li key={i} style={{
-            fontFamily: '"Inter", sans-serif',
+            fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
             fontSize: 13,
             color: 'var(--copi-ink)',
             display: 'flex',
@@ -156,7 +156,7 @@ function EmptyCard({ onClick }) {
         flexDirection: 'column',
         gap: 10,
         color: 'var(--copi-muted)',
-        fontFamily: '"Inter", sans-serif',
+        fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
         fontSize: 14,
         fontWeight: 500,
         transition: 'background 160ms, border-color 160ms'
@@ -171,7 +171,7 @@ function EmptyCard({ onClick }) {
       }}
     >
       <span style={{
-        fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif',
+        fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif',
         fontWeight: 600,
         fontSize: 48,
         lineHeight: 1,
@@ -238,7 +238,7 @@ function AdminLessonsGrid({ user = {} }) {
   return (
     <AdminShell current="lessons" user={user} cafe={cafe}>
       <h1 style={{
-        fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif',
+        fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif',
         fontWeight: 700,
         fontSize: 36,
         color: 'var(--copi-ink)',
@@ -299,7 +299,7 @@ function AdminLessonsGrid({ user = {} }) {
               }}
             >
               <div style={{
-                fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif',
+                fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif',
                 fontWeight: 700,
                 fontSize: 20,
                 color: 'var(--copi-ink)',
@@ -308,7 +308,7 @@ function AdminLessonsGrid({ user = {} }) {
                 Difficulty for "{m.title}"
               </div>
               <div style={{
-                fontFamily: '"Inter", sans-serif',
+                fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
                 fontSize: 13,
                 color: 'var(--copi-muted)',
                 marginBottom: 20
@@ -328,7 +328,7 @@ function AdminLessonsGrid({ user = {} }) {
                         background: on ? '#2D5016' : '#FBF8F0',
                         color: on ? '#F5F0E8' : 'var(--copi-ink)',
                         border: on ? '1.5px solid #2D5016' : '1.5px solid var(--copi-line)',
-                        fontFamily: '"Inter", sans-serif',
+                        fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
                         fontSize: 13,
                         fontWeight: 600,
                         cursor: 'pointer'
@@ -348,7 +348,7 @@ function AdminLessonsGrid({ user = {} }) {
                     background: '#2D5016',
                     color: '#F5F0E8',
                     border: 'none',
-                    fontFamily: '"Inter", sans-serif',
+                    fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
                     fontSize: 13,
                     fontWeight: 600,
                     cursor: 'pointer'

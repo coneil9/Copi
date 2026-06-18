@@ -66,27 +66,30 @@ export const NEW_PALETTE = {
 };
 
 // ── Typography ───────────────────────────────────────────
-// Display: Fredoka (chunky rounded sans, weight 700) — used for h1/h2/h3/h4 and hero display text.
-// Body: Inter — labels, paragraphs, captions.
+// Display: Playpen Sans (chunky friendly grotesque, weights 700/800) — h1/h2/h3.
+// Body: Hanken Grotesk — labels, paragraphs, inputs, captions.
+const DISPLAY_STACK = '"Playpen Sans", "Fredoka", "Nunito", system-ui, sans-serif';
+const BODY_STACK    = '"Hanken Grotesk", "Inter", -apple-system, BlinkMacSystemFont, sans-serif';
+
 export const TYPOGRAPHY = {
-  display:      { fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontWeight: 700, fontStyle: 'normal' },
-  displayItalic:{ fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontWeight: 700, fontStyle: 'normal' },
+  display:      { fontFamily: DISPLAY_STACK, fontWeight: 800, fontStyle: 'normal' },
+  displayItalic:{ fontFamily: DISPLAY_STACK, fontWeight: 800, fontStyle: 'normal' },
 
-  h1: { fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontSize: 56, fontWeight: 700, lineHeight: 1.05, letterSpacing: '-0.01em' },
-  h2: { fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontSize: 42, fontWeight: 700, lineHeight: 1.15, letterSpacing: '-0.005em' },
-  h3: { fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontSize: 28, fontWeight: 700, lineHeight: 1.25 },
-  h4: { fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontSize: 22, fontWeight: 600, lineHeight: 1.3 },
+  h1: { fontFamily: DISPLAY_STACK, fontSize: 56, fontWeight: 800, lineHeight: 1.05, letterSpacing: '-0.01em' },
+  h2: { fontFamily: DISPLAY_STACK, fontSize: 42, fontWeight: 700, lineHeight: 1.15, letterSpacing: '-0.005em' },
+  h3: { fontFamily: DISPLAY_STACK, fontSize: 28, fontWeight: 700, lineHeight: 1.25 },
+  h4: { fontFamily: DISPLAY_STACK, fontSize: 22, fontWeight: 600, lineHeight: 1.3 },
 
-  body:      { fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif', fontSize: 16, fontWeight: 400, lineHeight: 1.6 },
-  bodyLarge: { fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif', fontSize: 18, fontWeight: 400, lineHeight: 1.6 },
-  bodySmall: { fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif', fontSize: 14, fontWeight: 400, lineHeight: 1.5 },
+  body:      { fontFamily: BODY_STACK, fontSize: 16, fontWeight: 400, lineHeight: 1.6 },
+  bodyLarge: { fontFamily: BODY_STACK, fontSize: 18, fontWeight: 400, lineHeight: 1.6 },
+  bodySmall: { fontFamily: BODY_STACK, fontSize: 14, fontWeight: 400, lineHeight: 1.5 },
 
-  eyebrow: { fontFamily: '"Inter", sans-serif', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.14em', lineHeight: 1.4 },
-  button:  { fontFamily: '"Inter", sans-serif', fontSize: 14, fontWeight: 500, letterSpacing: '0.01em' },
-  nav:     { fontFamily: '"Inter", sans-serif', fontSize: 14, fontWeight: 400 },
-  label:   { fontFamily: '"Inter", sans-serif', fontSize: 12, fontWeight: 500 },
-  caption: { fontFamily: '"Inter", sans-serif', fontSize: 12, fontWeight: 400, lineHeight: 1.4 },
-  mono:    { fontFamily: '"Inter", monospace', fontSize: 13, fontWeight: 400, lineHeight: 1.5 },
+  eyebrow: { fontFamily: BODY_STACK, fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.14em', lineHeight: 1.4 },
+  button:  { fontFamily: BODY_STACK, fontSize: 14, fontWeight: 600, letterSpacing: '0.01em' },
+  nav:     { fontFamily: BODY_STACK, fontSize: 14, fontWeight: 500 },
+  label:   { fontFamily: BODY_STACK, fontSize: 12, fontWeight: 500 },
+  caption: { fontFamily: BODY_STACK, fontSize: 12, fontWeight: 400, lineHeight: 1.4 },
+  mono:    { fontFamily: BODY_STACK, fontSize: 13, fontWeight: 400, lineHeight: 1.5 },
 };
 
 // ── Spacing / Layout ─────────────────────────────────────

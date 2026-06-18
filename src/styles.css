@@ -1,22 +1,42 @@
-/* Primary fonts: Fredoka (chunky rounded display headings), Inter (body/UI), plus legacy fonts */
-@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600&family=Lato:wght@300;400;700;900&family=Unna:ital,wght@0,400;0,700;1,400;1,700&family=Yrsa:wght@400;500;600;700&display=swap');
+/* Display: Playpen Sans (chunky friendly handwritten-feel sans, h1/h2/h3).
+   Body / UI: Hanken Grotesk (clean modern grotesque, body/labels/inputs).
+   Legacy fonts kept for older inline references in App.jsx + lesson player. */
+@import url('https://fonts.googleapis.com/css2?family=Playpen+Sans:wght@400;500;600;700;800&family=Hanken+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=Lato:wght@300;400;700;900&family=Unna:ital,wght@0,400;0,700;1,400;1,700&family=Yrsa:wght@400;500;600;700&display=swap');
 
-/* ── Brand colour tokens ─────────────────────────────────
-   Mirrors the THEME export in design-system.jsx so inline-style
-   sections can reference brand colours via CSS variables too. */
+/* ── Brand palette ──────────────────────────────────────
+   Extracted from the official Copi palette swatch.
+   Use the NAMED tokens (--glade-green, --pearl-bush, etc.) in new code.
+   The --copi-* aliases below keep older inline styles working unchanged. */
 :root {
-  --copi-parchment: #EFE9DA;   /* page bg */
-  --copi-cream:     #F5F0E8;   /* secondary light bg */
-  --copi-card:      #FBF8F0;   /* card / input bg */
-  --copi-forest:    #2E3B2F;   /* deep forest green section bg */
-  --copi-forest-deep: #1F2A20; /* forest deeper accent */
-  --copi-green:     #44704B;   /* accent / CTA */
-  --copi-yellow:    #F4C542;   /* highlight + CTA */
-  --copi-yellow-soft: #FFE08A;
-  --copi-ink:       #1F1B14;
-  --copi-on-dark:   #EFE9DA;
-  --copi-muted:     #6E675A;
-  --copi-line:      #D5CDBA;
+  --glade-green:      #6F8B5F;   /* primary forest green                  */
+  --glade-green-deep: #56723F;   /* deeper green for hover / active fills */
+  --graphite:         #1F1A14;   /* dark near-black for body + headings   */
+  --roman-coffee:     #826A4C;   /* warm brown for secondary accents      */
+  --alabaster:        #F5EDDC;   /* near-white card surfaces              */
+  --heathered-gray:   #B5A38B;   /* borders, dividers, placeholder        */
+  --pearl-bush:       #E8DDC8;   /* warm cream page background            */
+  --ripe-lemon:       #F4CE2F;   /* highlight + active sub-nav            */
+  --white:            #FFFFFF;   /* pure white                            */
+  --danger:           #9C3D27;   /* "at risk" warm red                    */
+  --danger-soft:      #C76E5A;   /* lighter red for progress bars         */
+
+  /* Backwards-compat copi-* aliases used by older inline styles. */
+  --copi-parchment:   var(--pearl-bush);
+  --copi-cream:       var(--alabaster);
+  --copi-card:        var(--white);
+  --copi-forest:      var(--glade-green-deep);
+  --copi-forest-deep: var(--graphite);
+  --copi-green:       var(--glade-green);
+  --copi-yellow:      var(--ripe-lemon);
+  --copi-yellow-soft: #FFE07A;
+  --copi-ink:         var(--graphite);
+  --copi-on-dark:     var(--alabaster);
+  --copi-muted:       var(--roman-coffee);
+  --copi-line:        var(--heathered-gray);
+
+  /* Type tokens */
+  --font-display: 'Playpen Sans', 'Fredoka', 'Nunito', system-ui, sans-serif;
+  --font-body:    'Hanken Grotesk', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 * {
@@ -31,9 +51,36 @@ body,
 }
 
 body {
-  background: var(--copi-parchment);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  color: var(--copi-ink);
+  background: var(--pearl-bush);
+  font-family: var(--font-body);
+  font-weight: 400;
+  color: var(--graphite);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Default heading typography — Playpen Sans across the app. */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  color: var(--graphite);
+  margin: 0;
+}
+h1 { font-weight: 800; letter-spacing: -0.01em; }
+h2 { font-weight: 700; letter-spacing: -0.005em; }
+h3 { font-weight: 700; }
+h4 { font-weight: 600; }
+h5, h6 { font-weight: 600; }
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  font-family: var(--font-body);
+}
+
+a {
+  color: inherit;
 }
 
 @keyframes spin {
@@ -43,17 +90,6 @@ body {
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateX(-50%) translateY(10px); }
   to   { opacity: 1; transform: translateX(-50%) translateY(0); }
-}
-
-button,
-input,
-textarea,
-select {
-  font: inherit;
-}
-
-a {
-  color: inherit;
 }
 
 /* ── Scroll reveal animations ────────────────────────────

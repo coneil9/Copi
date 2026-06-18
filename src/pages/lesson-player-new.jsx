@@ -198,7 +198,7 @@ function NewLessonPlayer({ open, email, target, onClose }) {
               <p style={{ ...ty.eyebrow, color: th.muted, marginBottom: 12 }}>
                 QUESTION {qIdx + 1} OF {unit.quiz.length}
               </p>
-              <p style={{ ...ty.h4, color: th.ink, marginBottom: 20, fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif' }}>{question.q}</p>
+              <p style={{ ...ty.h4, color: th.ink, marginBottom: 20, fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif' }}>{question.q}</p>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
                 {question.options.map((opt, i) => {

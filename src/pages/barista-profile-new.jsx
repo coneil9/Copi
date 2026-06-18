@@ -51,7 +51,7 @@ function BaristaProfileNew({ user = {} }) {
       <div style={{
         width: size, height: size, background: th.accent, color: th.onDark,
         borderRadius: '50%', display: 'grid', placeItems: 'center', flexShrink: 0,
-        fontFamily: '"Inter", sans-serif', fontSize: size * 0.37, fontWeight: 700, letterSpacing: '0.04em',
+        fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: size * 0.37, fontWeight: 700, letterSpacing: '0.04em',
       }}>{initials}</div>
     );
   };
@@ -87,11 +87,11 @@ function BaristaProfileNew({ user = {} }) {
 
       {/* ── Nav (matches BaristaDashboard) ─────────────────── */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 48px', height: 64, borderBottom: `1px solid ${th.line}`, background: th.bgCard, position: 'sticky', top: 0, zIndex: 100 }}>
-        <span style={{ fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontStyle: 'italic', fontSize: 26, color: th.accent, lineHeight: 1 }}>Copi.</span>
+        <span style={{ fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif', fontStyle: 'italic', fontSize: 26, color: th.accent, lineHeight: 1 }}>Copi.</span>
         <div style={{ display: 'flex', gap: 28 }}>
           {[{ l: 'Today', active: false }, { l: 'Library', active: false }, { l: 'Profile', active: true }].map(x => (
             <a key={x.l} style={{
-              fontFamily: '"Inter", sans-serif', fontSize: 14, cursor: 'pointer',
+              fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 14, cursor: 'pointer',
               color: x.active ? th.ink : th.muted, fontWeight: x.active ? 600 : 400,
               borderBottom: x.active ? `2px solid ${th.accent}` : '2px solid transparent',
               paddingBottom: 4, textDecoration: 'none', transition: 'color 140ms',
@@ -101,7 +101,7 @@ function BaristaProfileNew({ user = {} }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '6px 14px', borderRadius: 999, background: th.gold, color: th.ink }}>
             <svg width="12" height="14" viewBox="0 0 12 14" fill={th.ink}><path d="M6 0 C 7 3.5, 10 4.5, 10 8.5 C 10 11.5, 8 14, 6 14 C 4 14, 2 11.5, 2 8.5 C 2 6, 3.5 5, 4.5 3.5 C 5 2, 5 1, 6 0 Z" /></svg>
-            <span style={{ fontFamily: '"Inter", sans-serif', fontWeight: 700, fontSize: 13 }}>{overall}%</span>
+            <span style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontWeight: 700, fontSize: 13 }}>{overall}%</span>
           </div>
           <Mono name={fullName} size={36} />
         </div>
@@ -115,8 +115,8 @@ function BaristaProfileNew({ user = {} }) {
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 18 }}>
             <Mono name={fullName} size={100} />
           </div>
-          <h1 style={{ fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontSize: 48, fontWeight: 400, letterSpacing: '-0.02em', color: th.ink, margin: '0 0 8px' }}>{fullName}</h1>
-          <p style={{ fontFamily: '"Inter", sans-serif', fontSize: 17, color: th.muted, margin: 0, fontStyle: 'italic' }}>
+          <h1 style={{ fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif', fontSize: 48, fontWeight: 400, letterSpacing: '-0.02em', color: th.ink, margin: '0 0 8px' }}>{fullName}</h1>
+          <p style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 17, color: th.muted, margin: 0, fontStyle: 'italic' }}>
             Barista at {locName} · joined {joinedDate}
           </p>
         </div>
@@ -129,8 +129,8 @@ function BaristaProfileNew({ user = {} }) {
             { big: String(certifiedCount + (lessonsDone >= 1 ? 1 : 0) + (lessonsDone >= 7 ? 1 : 0)), label: 'badges',  color: th.ink },
           ].map((s, i) => (
             <div key={i} style={{ background: th.bgCard, borderRadius: th.card, padding: '22px 16px', textAlign: 'center', border: `1px solid ${th.line}`, boxShadow: sh.card }}>
-              <div style={{ fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontStyle: 'italic', fontSize: 46, lineHeight: 1, color: s.color, fontWeight: 400 }}>{s.big}</div>
-              <div style={{ fontFamily: '"Inter", sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: th.muted, marginTop: 8 }}>{s.label}</div>
+              <div style={{ fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif', fontStyle: 'italic', fontSize: 46, lineHeight: 1, color: s.color, fontWeight: 400 }}>{s.big}</div>
+              <div style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: th.muted, marginTop: 8 }}>{s.label}</div>
             </div>
           ))}
         </div>
@@ -139,54 +139,54 @@ function BaristaProfileNew({ user = {} }) {
         {nextVol && (
           <div style={{ background: th.accentDeep || '#34503A', color: th.onDark, borderRadius: th.card + 2, padding: '24px 26px', marginBottom: 32, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 20 }}>
             <div>
-              <p style={{ fontFamily: '"Inter", sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', opacity: 0.75, margin: '0 0 10px' }}>◆ Certification</p>
-              <p style={{ fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontSize: 28, fontWeight: 400, lineHeight: 1.2, margin: '0 0 8px' }}>
+              <p style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', opacity: 0.75, margin: '0 0 10px' }}>◆ Certification</p>
+              <p style={{ fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif', fontSize: 28, fontWeight: 400, lineHeight: 1.2, margin: '0 0 8px' }}>
                 Working toward <em style={{ fontStyle: 'italic', color: th.gold }}>{certLabel}.</em>
               </p>
-              <p style={{ fontFamily: '"Inter", sans-serif', fontSize: 14, opacity: 0.8, margin: 0 }}>
+              <p style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 14, opacity: 0.8, margin: 0 }}>
                 {lessonsLeft > 0 ? `${lessonsLeft} lesson${lessonsLeft !== 1 ? 's' : ''} left in ${nextVol.vol} ${nextVol.name}.` : 'Take the final test to certify.'}
               </p>
             </div>
-            <div style={{ fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontStyle: 'italic', fontSize: 26, fontWeight: 400, background: th.bgCard, color: th.accent, borderRadius: '50%', width: 80, height: 80, display: 'grid', placeItems: 'center', flexShrink: 0, border: `2px solid ${th.line}`, boxShadow: sh.card }}>
+            <div style={{ fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif', fontStyle: 'italic', fontSize: 26, fontWeight: 400, background: th.bgCard, color: th.accent, borderRadius: '50%', width: 80, height: 80, display: 'grid', placeItems: 'center', flexShrink: 0, border: `2px solid ${th.line}`, boxShadow: sh.card }}>
               {certPct}%
             </div>
           </div>
         )}
         {!nextVol && assignedVols.length > 0 && (
           <div style={{ background: th.accent, color: th.onDark, borderRadius: th.card + 2, padding: '20px 24px', marginBottom: 32, textAlign: 'center' }}>
-            <p style={{ fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontSize: 24, margin: 0 }}>All tracks certified. 🏅</p>
+            <p style={{ fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif', fontSize: 24, margin: 0 }}>All tracks certified. 🏅</p>
           </div>
         )}
 
         {/* Badges */}
-        <p style={{ fontFamily: '"Inter", sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: th.accent, textAlign: 'center', margin: '36px 0 18px' }}>◆ Badges</p>
+        <p style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: th.accent, textAlign: 'center', margin: '36px 0 18px' }}>◆ Badges</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 36 }}>
           {badges.map((b, i) => (
             <div key={i} style={{ background: th.bgCard, borderRadius: th.card, padding: '20px 10px 16px', textAlign: 'center', border: `1px solid ${th.line}`, boxShadow: sh.card, opacity: b.earned ? 1 : 0.45, transition: 'opacity 200ms' }}>
               <div style={{ width: 52, height: 52, borderRadius: '50%', margin: '0 auto 10px', background: b.earned ? th.gold : th.bgInset, border: `2px solid ${b.earned ? th.gold + '88' : th.line}`, display: 'grid', placeItems: 'center' }}>
                 <BadgeIcon kind={b.icon} color={b.earned ? th.ink : th.muted} size={22} />
               </div>
-              <p style={{ fontFamily: '"Inter", sans-serif', fontSize: 11, fontWeight: 600, color: th.ink, margin: '0 0 3px', lineHeight: 1.2 }}>{b.label}</p>
-              {!b.earned && <p style={{ fontFamily: '"Inter", sans-serif', fontSize: 9, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: th.muted, margin: 0 }}>Locked</p>}
+              <p style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 11, fontWeight: 600, color: th.ink, margin: '0 0 3px', lineHeight: 1.2 }}>{b.label}</p>
+              {!b.earned && <p style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 9, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: th.muted, margin: 0 }}>Locked</p>}
             </div>
           ))}
         </div>
 
         {/* Account settings */}
-        <p style={{ fontFamily: '"Inter", sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: th.accent, textAlign: 'center', margin: '0 0 18px' }}>◆ Account</p>
+        <p style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: th.accent, textAlign: 'center', margin: '0 0 18px' }}>◆ Account</p>
         <div style={{ background: th.bgCard, borderRadius: th.card + 2, padding: '26px 26px', border: `1px solid ${th.line}`, boxShadow: sh.card, display: 'flex', flexDirection: 'column', gap: 18 }}>
           <div>
-            <label style={{ fontFamily: '"Inter", sans-serif', fontSize: 11, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: th.muted, display: 'block', marginBottom: 6 }}>Name</label>
+            <label style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 11, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: th.muted, display: 'block', marginBottom: 6 }}>Name</label>
             <input type="text" value={fullName} onChange={e => setFullName(e.target.value)}
-              style={{ width: '100%', fontFamily: '"Inter", sans-serif', fontSize: 15, padding: '10px 14px', background: th.bg, color: th.ink, border: `1.5px solid ${th.line}`, borderRadius: 10, outline: 'none', boxSizing: 'border-box' }}
+              style={{ width: '100%', fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 15, padding: '10px 14px', background: th.bg, color: th.ink, border: `1.5px solid ${th.line}`, borderRadius: 10, outline: 'none', boxSizing: 'border-box' }}
               onFocus={e => { e.target.style.borderColor = th.accent; }}
               onBlur={e => { e.target.style.borderColor = th.line; }}
             />
           </div>
           <div>
-            <label style={{ fontFamily: '"Inter", sans-serif', fontSize: 11, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: th.muted, display: 'block', marginBottom: 6 }}>Email</label>
+            <label style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 11, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: th.muted, display: 'block', marginBottom: 6 }}>Email</label>
             <input type="email" value={workEmail} onChange={e => setWorkEmail(e.target.value)}
-              style={{ width: '100%', fontFamily: '"Inter", sans-serif', fontSize: 15, padding: '10px 14px', background: th.bg, color: th.ink, border: `1.5px solid ${th.line}`, borderRadius: 10, outline: 'none', boxSizing: 'border-box' }}
+              style={{ width: '100%', fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 15, padding: '10px 14px', background: th.bg, color: th.ink, border: `1.5px solid ${th.line}`, borderRadius: 10, outline: 'none', boxSizing: 'border-box' }}
               onFocus={e => { e.target.style.borderColor = th.accent; }}
               onBlur={e => { e.target.style.borderColor = th.line; }}
             />
@@ -199,8 +199,8 @@ function BaristaProfileNew({ user = {} }) {
             ].map((row, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 20 }}>
                 <div>
-                  <p style={{ fontFamily: '"Inter", sans-serif', fontSize: 15, fontWeight: 500, color: th.ink, margin: '0 0 2px' }}>{row.label}</p>
-                  <p style={{ fontFamily: '"Inter", sans-serif', fontSize: 13, color: th.muted, margin: 0 }}>{row.desc}</p>
+                  <p style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 15, fontWeight: 500, color: th.ink, margin: '0 0 2px' }}>{row.label}</p>
+                  <p style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 13, color: th.muted, margin: 0 }}>{row.desc}</p>
                 </div>
                 <Toggle on={row.on} onClick={() => row.set(!row.on)} />
               </div>
@@ -209,14 +209,14 @@ function BaristaProfileNew({ user = {} }) {
 
           <button
             onClick={flashSaved}
-            style={{ fontFamily: '"Inter", sans-serif', fontSize: 14, fontWeight: 500, padding: '10px', borderRadius: 999, background: saved ? th.accent : th.bgInset, border: `1.5px solid ${saved ? th.accent : th.line}`, color: saved ? th.onDark : th.ink, cursor: 'pointer', transition: 'all 200ms', width: '100%' }}>
+            style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 14, fontWeight: 500, padding: '10px', borderRadius: 999, background: saved ? th.accent : th.bgInset, border: `1.5px solid ${saved ? th.accent : th.line}`, color: saved ? th.onDark : th.ink, cursor: 'pointer', transition: 'all 200ms', width: '100%' }}>
             {saved ? 'Saved ✓' : 'Save changes'}
           </button>
         </div>
 
         {/* Log out */}
         <div style={{ textAlign: 'center', marginTop: 40 }}>
-          <button data-app-action="logout" style={{ fontFamily: '"Inter", sans-serif', fontSize: 12, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: th.muted, background: 'none', border: 'none', cursor: 'pointer', opacity: 0.6 }}>
+          <button data-app-action="logout" style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 12, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: th.muted, background: 'none', border: 'none', cursor: 'pointer', opacity: 0.6 }}>
             Log out
           </button>
         </div>

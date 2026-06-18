@@ -26,6 +26,11 @@ import './pages/admin-home.jsx';
 import './pages/admin-team.jsx';
 import './pages/admin-lessons-grid.jsx';
 import './pages/admin-setup-copi.jsx';
+import './pages/admin-analytics-page.jsx';
+import './pages/admin-curriculum-page.jsx';
+import './pages/admin-billing-page.jsx';
+import './pages/admin-profile-page.jsx';
+import './pages/admin-notifications-page.jsx';
 import './prototype/coffee-mascot.jsx';
 import './prototype/animations.jsx';
 import './prototype/ui-components.jsx';
@@ -78,7 +83,7 @@ function ImagePlaceholder({ label, bg, fg, height = 280 }) {
       </svg>
       <div style={{ position: 'relative', textAlign: 'center' }}>
         <div style={{
-          fontFamily: '"Inter", sans-serif', fontSize: 11, letterSpacing: '0.18em',
+          fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 11, letterSpacing: '0.18em',
           textTransform: 'uppercase', opacity: 0.7, marginBottom: 6,
         }}>
           {label}
@@ -604,10 +609,10 @@ function LessonPlayer({ open, email, target, onClose }) {
   const _th = window.THEME || {};
   const _ty = window.TYPOGRAPHY || {};
   const p = { bg: _th.bg||'#EFE9DA', fg: _th.ink||'#1F1B14', accent: _th.accent||'#44704B', cream: _th.bgCard||'#FBF8F0', sun: _th.gold||'#C49455', cherry: _th.danger||'#7A2B1F', rule: _th.line||'#D5CDBA', muted: _th.muted||'#6E675A' };
-  const display = _ty.displayItalic || { fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontStyle: 'italic' };
-  const sub = _ty.body || { fontFamily: '"Inter", sans-serif' };
-  const sans = _ty.button || { fontFamily: '"Inter", sans-serif' };
-  const lbl = { fontFamily: '"Inter", sans-serif', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', fontSize: 10 };
+  const display = _ty.displayItalic || { fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif', fontStyle: 'italic' };
+  const sub = _ty.body || { fontFamily: '"Hanken Grotesk", "Inter", sans-serif' };
+  const sans = _ty.button || { fontFamily: '"Hanken Grotesk", "Inter", sans-serif' };
+  const lbl = { fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', fontSize: 10 };
 
   const store = window.CopiStore;
   const [phase, setPhase] = React.useState('read'); // read | quiz | result
@@ -974,10 +979,10 @@ function AssignModal({ open, volId, onClose }) {
   const _th = window.THEME || {};
   const _ty = window.TYPOGRAPHY || {};
   const p = { bg: _th.bg||'#EFE9DA', fg: _th.ink||'#1F1B14', accent: _th.accent||'#44704B', cream: _th.bgCard||'#FBF8F0', sun: _th.gold||'#C49455', cherry: _th.danger||'#7A2B1F', rule: _th.line||'#D5CDBA', muted: _th.muted||'#6E675A' };
-  const display = _ty.displayItalic || { fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontStyle: 'italic' };
-  const sub = _ty.body || { fontFamily: '"Inter", sans-serif' };
-  const sans = _ty.button || { fontFamily: '"Inter", sans-serif' };
-  const lbl = { fontFamily: '"Inter", sans-serif', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
+  const display = _ty.displayItalic || { fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif', fontStyle: 'italic' };
+  const sub = _ty.body || { fontFamily: '"Hanken Grotesk", "Inter", sans-serif' };
+  const sans = _ty.button || { fontFamily: '"Hanken Grotesk", "Inter", sans-serif' };
+  const lbl = { fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
 
   const store = window.CopiStore;
   const vol = volId ? store.volById(volId) : null;
@@ -1196,11 +1201,11 @@ function BaristaDetailModal({ open, email, onClose }) {
   const _th = window.THEME || {};
   const _ty = window.TYPOGRAPHY || {};
   const p = { bg: _th.bg||'#EFE9DA', fg: _th.ink||'#1F1B14', accent: _th.accent||'#44704B', cream: _th.bgCard||'#FBF8F0', sun: _th.gold||'#C49455', cherry: _th.danger||'#7A2B1F', rule: _th.line||'#D5CDBA', muted: _th.muted||'#6E675A' };
-  const display = _ty.displayItalic || { fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontStyle: 'italic' };
-  const sub = _ty.body || { fontFamily: '"Inter", sans-serif' };
-  const sans = _ty.button || { fontFamily: '"Inter", sans-serif' };
-  const lbl = { fontFamily: '"Inter", sans-serif', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
-  const mono = { fontFamily: '"Inter", sans-serif', fontVariantNumeric: 'tabular-nums' };
+  const display = _ty.displayItalic || { fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif', fontStyle: 'italic' };
+  const sub = _ty.body || { fontFamily: '"Hanken Grotesk", "Inter", sans-serif' };
+  const sans = _ty.button || { fontFamily: '"Hanken Grotesk", "Inter", sans-serif' };
+  const lbl = { fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
+  const mono = { fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontVariantNumeric: 'tabular-nums' };
 
   const store = window.useCopiStore();
   const [closing, setClosing] = React.useState(false);
@@ -1454,10 +1459,10 @@ function PourOver({
 
       {/* FIG label — top right */}
       <g transform={`translate(${w - 140}, 28)`}>
-        <text style={{ fontFamily: '"Inter", sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.28em', fill: ink, opacity: 0.6 }}>
+        <text style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.28em', fill: ink, opacity: 0.6 }}>
           FIG. I
         </text>
-        <text y="18" style={{ fontFamily: '"Inter", sans-serif', fontStyle: 'italic', fontSize: 16, fill: ink }}>
+        <text y="18" style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontStyle: 'italic', fontSize: 16, fill: ink }}>
           The pour-over
         </text>
         <line x1="0" y1="26" x2="110" y2="26" stroke={ink} strokeWidth="0.6" opacity="0.5" />
@@ -1471,7 +1476,7 @@ function PourOver({
       <rect x={cx - 110} y="510" width="220" height="30" fill={paper} stroke={ink} strokeWidth="1.3" />
       <rect x={cx + 50} y="518" width="50" height="14" fill="none" stroke={ink} strokeWidth="0.6" opacity="0.7" />
       <text x={cx + 75} y="530" textAnchor="middle"
-      style={{ fontFamily: '"Inter", sans-serif', fontSize: 9, fontWeight: 700, letterSpacing: '0.15em', fill: ink, fontVariantNumeric: 'tabular-nums' }}>
+      style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 9, fontWeight: 700, letterSpacing: '0.15em', fill: ink, fontVariantNumeric: 'tabular-nums' }}>
         324 g
       </text>
       {/* scale platform line */}
@@ -1597,11 +1602,11 @@ function PourOver({
         <line x1={cx + 100} y1="278" x2={cx + 165} y2="252" stroke={ink} strokeWidth="0.5" opacity="0.7" />
         <circle cx={cx + 100} cy="278" r="1.6" fill={ink} opacity="0.7" />
         <text x={cx + 168} y="244"
-        style={{ fontFamily: '"Inter", sans-serif', fontSize: 9, fontWeight: 700, letterSpacing: '0.22em', fill: ink, opacity: 0.8 }}>
+        style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 9, fontWeight: 700, letterSpacing: '0.22em', fill: ink, opacity: 0.8 }}>
           60° CONE
         </text>
         <text x={cx + 168} y="259"
-        style={{ fontFamily: '"Inter", sans-serif', fontStyle: 'italic', fontSize: 12, fill: ink, opacity: 0.7 }}>
+        style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontStyle: 'italic', fontSize: 12, fill: ink, opacity: 0.7 }}>
           bloom 45 s
         </text>
       </g>
@@ -1611,11 +1616,11 @@ function PourOver({
         <line x1="158" y1="262" x2="60" y2="200" stroke={ink} strokeWidth="0.5" opacity="0.7" />
         <circle cx="158" cy="262" r="1.6" fill={ink} opacity="0.7" />
         <text x="22" y="188"
-        style={{ fontFamily: '"Inter", sans-serif', fontSize: 9, fontWeight: 700, letterSpacing: '0.22em', fill: ink, opacity: 0.8 }}>
+        style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 9, fontWeight: 700, letterSpacing: '0.22em', fill: ink, opacity: 0.8 }}>
           GOOSENECK · 94°C
         </text>
         <text x="22" y="203"
-        style={{ fontFamily: '"Inter", sans-serif', fontStyle: 'italic', fontSize: 12, fill: ink, opacity: 0.7 }}>
+        style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontStyle: 'italic', fontSize: 12, fill: ink, opacity: 0.7 }}>
           steady, slow pour
         </text>
       </g>
@@ -1627,11 +1632,11 @@ function PourOver({
         <circle cx={cx - 78} cy="455" r="3.5" fill={spark} stroke={ink} strokeWidth="0.5" /> :
         <circle cx={cx - 78} cy="455" r="1.6" fill={ink} opacity="0.7" />}
         <text x="22" y="476"
-        style={{ fontFamily: '"Inter", sans-serif', fontSize: 9, fontWeight: 700, letterSpacing: '0.22em', fill: ink, opacity: 0.8 }}>
+        style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 9, fontWeight: 700, letterSpacing: '0.22em', fill: ink, opacity: 0.8 }}>
           RATIO 1 : 16
         </text>
         <text x="22" y="491"
-        style={{ fontFamily: '"Inter", sans-serif', fontStyle: 'italic', fontSize: 12, fill: ink, opacity: 0.7 }}>
+        style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontStyle: 'italic', fontSize: 12, fill: ink, opacity: 0.7 }}>
           20 g coffee · 320 g water
         </text>
       </g>
@@ -1654,10 +1659,10 @@ function CopiFooter({ theme = {} }) {
     sun: '#C68A3D',
     ...(theme.palette || {}),
   };
-  const display = { fontFamily: theme.displayFont || '"Fredoka", "Nunito", system-ui, sans-serif' };
-  const sub = { fontFamily: '"Inter", sans-serif' };
-  const sans = { fontFamily: '"Inter", sans-serif' };
-  const lbl = { fontFamily: '"Inter", sans-serif', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
+  const display = { fontFamily: theme.displayFont || '"Playpen Sans", "Fredoka", system-ui, sans-serif' };
+  const sub = { fontFamily: '"Hanken Grotesk", "Inter", sans-serif' };
+  const sans = { fontFamily: '"Hanken Grotesk", "Inter", sans-serif' };
+  const lbl = { fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
 
   const columns = [
     {
@@ -1773,10 +1778,10 @@ function BrandingTemplate3() {
     sun: '#C68A3D', // ochre
     rule: '#7A6B4E'
   };
-  const display = { fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif' };
-  const sub = { fontFamily: '"Inter", sans-serif' };
-  const sans = { fontFamily: '"Inter", sans-serif' };
-  const lbl = { fontFamily: '"Inter", sans-serif', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
+  const display = { fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif' };
+  const sub = { fontFamily: '"Hanken Grotesk", "Inter", sans-serif' };
+  const sans = { fontFamily: '"Hanken Grotesk", "Inter", sans-serif' };
+  const lbl = { fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
 
   // Almanac wheel — concentric ring of "months" / chapters
   const AlmanacWheel = ({ size = 520 }) => {
@@ -1820,7 +1825,7 @@ function BrandingTemplate3() {
         })}
         {/* arc labels */}
         {months.map((m, i) =>
-        <text key={i} style={{ fontFamily: '"Inter", sans-serif', fontSize: 11, fontWeight: 600, letterSpacing: '0.2em', fill: p.fg }}>
+        <text key={i} style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 11, fontWeight: 600, letterSpacing: '0.2em', fill: p.fg }}>
             <textPath href={`#arc-${i}`} startOffset="20%">{m.l} · {m.t.toUpperCase()}</textPath>
           </text>
         )}
@@ -1837,9 +1842,9 @@ function BrandingTemplate3() {
         <circle cx={cx} cy={cy} r={rHub} fill={p.accent} />
         <circle cx={cx} cy={cy} r={rHub - 8} fill="none" stroke={p.cream} strokeWidth="0.8" opacity="0.6" />
         <text x={cx} y={cy - 6} textAnchor="middle"
-        style={{ fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontStyle: 'italic', fontSize: 28, fill: p.cream }}>Copi</text>
+        style={{ fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif', fontStyle: 'italic', fontSize: 28, fill: p.cream }}>Copi</text>
         <text x={cx} y={cy + 14} textAnchor="middle"
-        style={{ fontFamily: '"Inter", sans-serif', fontSize: 9, fontWeight: 600, letterSpacing: '0.25em', fill: p.cream, opacity: 0.8 }}>
+        style={{ fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontSize: 9, fontWeight: 600, letterSpacing: '0.25em', fill: p.cream, opacity: 0.8 }}>
           ALMANAC · MMXXVI
         </text>
         {/* "now" indicator — a small sun at JUN */}
@@ -2561,7 +2566,7 @@ function RoasterDashboard({ user = {} }) {
   const RADIUS = window.RADIUS || { card: 12, pill: 999, tag: 999 };
   const SHADOW = window.SHADOW || { card: '0 1px 3px rgba(0,0,0,0.04)', cardHover: '0 4px 6px rgba(0,0,0,0.06)' };
 
-  const display = { fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontWeight: 700 };
+  const display = { fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif', fontWeight: 700 };
   const sans = { fontFamily: 'Inter, sans-serif' };
 
   const name = user.name || 'Brian';
@@ -3179,7 +3184,7 @@ function AdminTeamPage({ user = {} }) {
   const p      = window.NEW_PALETTE || PROTO_PALETTE;
   const RADIUS = window.RADIUS || { card: 12, pill: 999 };
   const SHADOW = window.SHADOW || { card: '0 1px 3px rgba(0,0,0,0.04)' };
-  const display = { fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif', fontWeight: 700 };
+  const display = { fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif', fontWeight: 700 };
   const sans    = { fontFamily: 'Inter, sans-serif' };
 
   const name = user.name || 'Brian Turko';
@@ -3509,11 +3514,11 @@ function AdminCurriculumPage({ user = {} }) {
     sun: '#C68A3D',
     cherry: '#7A2B1F'
   };
-  const display = { fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif' };
-  const sub = { fontFamily: '"Inter", sans-serif' };
-  const sans = { fontFamily: '"Inter", sans-serif' };
-  const lbl = { fontFamily: '"Inter", sans-serif', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
-  const mono = { fontFamily: '"Inter", sans-serif', fontVariantNumeric: 'tabular-nums' };
+  const display = { fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif' };
+  const sub = { fontFamily: '"Hanken Grotesk", "Inter", sans-serif' };
+  const sans = { fontFamily: '"Hanken Grotesk", "Inter", sans-serif' };
+  const lbl = { fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
+  const mono = { fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontVariantNumeric: 'tabular-nums' };
 
   const name = user.name || 'Brian Turko';
   const cafe = user.cafe || 'Milano';
@@ -3980,10 +3985,10 @@ function AdminSettingsPage({ user = {} }) {
     sun: '#C68A3D',
     cherry: '#7A2B1F',
   };
-  const display = { fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif' };
-  const sub     = { fontFamily: '"Inter", sans-serif' };
-  const sans    = { fontFamily: '"Inter", sans-serif' };
-  const lbl     = { fontFamily: '"Inter", sans-serif', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
+  const display = { fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif' };
+  const sub     = { fontFamily: '"Hanken Grotesk", "Inter", sans-serif' };
+  const sans    = { fontFamily: '"Hanken Grotesk", "Inter", sans-serif' };
+  const lbl     = { fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
 
   const name = user.name || 'Brian Turko';
   const cafe = user.cafe || 'Milano';
@@ -4292,11 +4297,11 @@ function AdminAnalyticsPage({ user = {} }) {
     sun: '#C68A3D',
     cherry: '#7A2B1F',
   };
-  const display = { fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif' };
-  const sub     = { fontFamily: '"Inter", sans-serif' };
-  const sans    = { fontFamily: '"Inter", sans-serif' };
-  const lbl     = { fontFamily: '"Inter", sans-serif', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
-  const mono    = { fontFamily: '"Inter", sans-serif', fontVariantNumeric: 'tabular-nums' };
+  const display = { fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif' };
+  const sub     = { fontFamily: '"Hanken Grotesk", "Inter", sans-serif' };
+  const sans    = { fontFamily: '"Hanken Grotesk", "Inter", sans-serif' };
+  const lbl     = { fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10 };
+  const mono    = { fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontVariantNumeric: 'tabular-nums' };
 
   const name = user.name || 'Brian Turko';
   const cafe = user.cafe || 'Milano';
@@ -4609,10 +4614,10 @@ Object.assign(window, { AdminAnalyticsPage });
 function BaristaDashboard({ user = {} }) {
   const _th = window.THEME || {};
   const p = { bg: _th.bg||'#EFE9DA', fg: _th.ink||'#1F1B14', accent: _th.accent||'#44704B', cream: _th.bgCard||'#FBF8F0', sun: _th.gold||'#C49455', cherry: _th.danger||'#7A2B1F', rule: _th.line||'#D5CDBA', muted: _th.muted||'#6E675A' };
-  const display = { fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif' };
-  const sub     = { fontFamily: '"Inter", sans-serif' };
-  const sans    = { fontFamily: '"Inter", sans-serif' };
-  const lbl     = { fontFamily: '"Inter", sans-serif', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', fontSize: 10 };
+  const display = { fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif' };
+  const sub     = { fontFamily: '"Hanken Grotesk", "Inter", sans-serif' };
+  const sans    = { fontFamily: '"Hanken Grotesk", "Inter", sans-serif' };
+  const lbl     = { fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', fontSize: 10 };
 
   const store = window.useCopiStore();
   const email = user.email || 'lili@milano.coffee';
@@ -4971,10 +4976,10 @@ Object.assign(window, { BaristaDashboard });
 function BaristaLibrary({ user = {} }) {
   const _th = window.THEME || {};
   const p = { bg: _th.bg||'#EFE9DA', fg: _th.ink||'#1F1B14', accent: _th.accent||'#44704B', cream: _th.bgCard||'#FBF8F0', sun: _th.gold||'#C49455', cherry: _th.danger||'#7A2B1F', rule: _th.line||'#D5CDBA', muted: _th.muted||'#6E675A' };
-  const display = { fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif' };
-  const sub     = { fontFamily: '"Inter", sans-serif' };
-  const sans    = { fontFamily: '"Inter", sans-serif' };
-  const lbl     = { fontFamily: '"Inter", sans-serif', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', fontSize: 10 };
+  const display = { fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif' };
+  const sub     = { fontFamily: '"Hanken Grotesk", "Inter", sans-serif' };
+  const sans    = { fontFamily: '"Hanken Grotesk", "Inter", sans-serif' };
+  const lbl     = { fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', fontSize: 10 };
 
   const store = window.useCopiStore();
   const email = user.email || 'lili@milano.coffee';
@@ -5160,7 +5165,7 @@ function BaristaLibrary({ user = {} }) {
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ ...sub, fontSize: 19, fontWeight: 500, lineHeight: 1.1 }}>
-                      <span style={{ opacity: 0.5, fontFamily: '"Inter", sans-serif', fontWeight: 700, fontSize: 13, marginRight: 8 }}>{vol.vol}</span>
+                      <span style={{ opacity: 0.5, fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontWeight: 700, fontSize: 13, marginRight: 8 }}>{vol.vol}</span>
                       {lesson.title}
                     </div>
                     <div style={{ ...sans, fontSize: 12, opacity: 0.55, marginTop: 3 }}>passed · tap to review</div>
@@ -5197,10 +5202,10 @@ function BaristaProfile({ user = {} }) {
     sun:    '#C68A3D',
     cherry: '#7A2B1F',
   };
-  const display = { fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif' };
-  const sub     = { fontFamily: '"Inter", sans-serif' };
-  const sans    = { fontFamily: '"Inter", sans-serif' };
-  const lbl     = { fontFamily: '"Inter", sans-serif', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', fontSize: 10 };
+  const display = { fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif' };
+  const sub     = { fontFamily: '"Hanken Grotesk", "Inter", sans-serif' };
+  const sans    = { fontFamily: '"Hanken Grotesk", "Inter", sans-serif' };
+  const lbl     = { fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', fontSize: 10 };
 
   const name = user.name || 'Lili Turko';
   const cafe = user.cafe || 'Milano';
@@ -6095,6 +6100,22 @@ function PageFor({ route, user, inviteToken, onSignup, onCafeSetupComplete, onIn
     const AdminSetupCopi = window.AdminSetupCopi;
     if (AdminSetupCopi) return <AdminSetupCopi user={user || {}} />;
   }
+  if (route === 'admin-curriculum-page') {
+    const AdminCurriculumPageNew = window.AdminCurriculumPageNew;
+    if (AdminCurriculumPageNew) return <AdminCurriculumPageNew user={user || {}} />;
+  }
+  if (route === 'admin-billing-page') {
+    const AdminBillingPage = window.AdminBillingPage;
+    if (AdminBillingPage) return <AdminBillingPage user={user || {}} />;
+  }
+  if (route === 'admin-profile-page') {
+    const AdminProfilePage = window.AdminProfilePage;
+    if (AdminProfilePage) return <AdminProfilePage user={user || {}} />;
+  }
+  if (route === 'admin-notifications-page') {
+    const AdminNotificationsPage = window.AdminNotificationsPage;
+    if (AdminNotificationsPage) return <AdminNotificationsPage user={user || {}} />;
+  }
 
   // New authenticated pages (pick new over legacy when available)
   if (route === 'dashboard')  {
@@ -6120,6 +6141,8 @@ function PageFor({ route, user, inviteToken, onSignup, onCafeSetupComplete, onIn
     return <AdminSettingsPage user={user || {}} />;
   }
   if (route === 'analytics') {
+    const AdminAnalyticsPageNew = window.AdminAnalyticsPageNew;
+    if (AdminAnalyticsPageNew) return <AdminAnalyticsPageNew user={user || {}} />;
     const AdminAnalyticsNew = window.AdminAnalyticsNew;
     if (AdminAnalyticsNew) return <AdminAnalyticsNew user={user || {}} />;
     return <AdminAnalyticsPage user={user || {}} />;
@@ -6158,7 +6181,11 @@ function RouteBadge({ route, onHome }) {
     'admin-team': 'ROSTER · OWNER',
     'admin-team-add': 'ADD TEAMMATE · OWNER',
     'admin-lessons-grid': 'LESSONS · OWNER',
+    'admin-curriculum-page': 'CURRICULUM · OWNER',
+    'admin-billing-page': 'BILLING · OWNER',
     'admin-setup-copi': 'SET UP COPI AI · OWNER',
+    'admin-profile-page': 'PROFILE · OWNER',
+    'admin-notifications-page': 'NOTIFICATIONS · OWNER',
     'admin-curriculum': 'CURRICULUM · OWNER', settings: 'SETTINGS',
     analytics: 'ANALYTICS', billing: 'BILLING',
     'manager-dashboard': 'DASHBOARD · MANAGER', 'manager-team': 'TEAM · MANAGER',
@@ -6179,7 +6206,7 @@ function RouteBadge({ route, onHome }) {
       display: 'flex', gap: 8, alignItems: 'center',
       padding: '10px 14px',
       background: 'rgba(26,20,16,0.86)', color: (window.THEME||{}).onDark||'#EFE9DA',
-      fontFamily: '"Inter", sans-serif', fontWeight: 600, letterSpacing: '0.18em',
+      fontFamily: '"Hanken Grotesk", "Inter", sans-serif', fontWeight: 600, letterSpacing: '0.18em',
       textTransform: 'uppercase', fontSize: 10,
       backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)',
       transform: show ? 'translateY(0)' : 'translateY(8px)',

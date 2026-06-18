@@ -23,7 +23,7 @@ function RefineButton({ children, onClick }) {
         background: 'transparent',
         border: '1.4px solid #7A2B1F',
         color: '#7A2B1F',
-        fontFamily: '"Inter", sans-serif',
+        fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
         fontSize: 12,
         fontWeight: 600,
         cursor: 'pointer'
@@ -44,7 +44,7 @@ function PrimaryButton({ children, onClick, style = {} }) {
         background: '#2D5016',
         color: '#F5F0E8',
         border: 'none',
-        fontFamily: '"Inter", sans-serif',
+        fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
         fontSize: 13,
         fontWeight: 600,
         cursor: 'pointer',
@@ -59,7 +59,7 @@ function PrimaryButton({ children, onClick, style = {} }) {
 function SectionLabel({ children }) {
   return (
     <div style={{
-      fontFamily: '"Inter", sans-serif',
+      fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
       fontSize: 13,
       fontWeight: 600,
       color: 'var(--copi-ink)',
@@ -81,14 +81,14 @@ function FoundCard({ label, sublabel, value, onChange, onAdjust, onRefine, multi
     }}>
       <div>
         <div style={{
-          fontFamily: '"Inter", sans-serif',
+          fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
           fontSize: 13,
           fontWeight: 600,
           color: 'var(--copi-ink)'
         }}>{label}</div>
         {sublabel && (
           <div style={{
-            fontFamily: '"Inter", sans-serif',
+            fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
             fontSize: 11,
             color: 'var(--copi-muted)',
             marginTop: 2
@@ -104,7 +104,7 @@ function FoundCard({ label, sublabel, value, onChange, onAdjust, onRefine, multi
           padding: '14px 20px 14px 36px',
           margin: 0,
           minHeight: 110,
-          fontFamily: '"Inter", sans-serif',
+          fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
           fontSize: 13,
           color: 'var(--copi-ink)',
           lineHeight: 1.7
@@ -138,7 +138,7 @@ function FoundCard({ label, sublabel, value, onChange, onAdjust, onRefine, multi
             border: '1px solid var(--copi-line)',
             borderRadius: 12,
             padding: '12px 16px',
-            fontFamily: '"Inter", sans-serif',
+            fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
             fontSize: 13,
             color: 'var(--copi-ink)',
             lineHeight: 1.6,
@@ -156,7 +156,7 @@ function FoundCard({ label, sublabel, value, onChange, onAdjust, onRefine, multi
             border: '1px solid var(--copi-line)',
             borderRadius: 12,
             padding: '10px 16px',
-            fontFamily: '"Inter", sans-serif',
+            fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
             fontSize: 13,
             color: 'var(--copi-ink)',
             outline: 'none'
@@ -209,7 +209,7 @@ function GeneralTab({ openModal }) {
             border: '1px solid var(--copi-line)',
             borderRadius: 12,
             padding: '10px 16px',
-            fontFamily: '"Inter", sans-serif',
+            fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
             fontSize: 13,
             color: 'var(--copi-ink)',
             outline: 'none'
@@ -218,7 +218,7 @@ function GeneralTab({ openModal }) {
       </div>
 
       <h3 style={{
-        fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif',
+        fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif',
         fontWeight: 600,
         fontSize: 20,
         color: 'var(--copi-ink)',
@@ -272,14 +272,14 @@ function DocSlot({ title, sublabel, onAdjust, onRefine }) {
     }}>
       <div>
         <div style={{
-          fontFamily: '"Inter", sans-serif',
+          fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
           fontSize: 13,
           fontWeight: 600,
           color: 'var(--copi-ink)'
         }}>{title}</div>
         {sublabel && (
           <div style={{
-            fontFamily: '"Inter", sans-serif',
+            fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
             fontSize: 11,
             color: 'var(--copi-muted)',
             marginTop: 2
@@ -298,7 +298,7 @@ function DocSlot({ title, sublabel, onAdjust, onRefine }) {
         gap: 6,
         cursor: 'pointer',
         color: hasFile ? '#2D5016' : 'var(--copi-muted)',
-        fontFamily: '"Inter", sans-serif',
+        fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
         fontSize: 13
       }}>
         <input
@@ -326,7 +326,7 @@ function DocumentsTab({ openModal }) {
   return (
     <div>
       <h3 style={{
-        fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif',
+        fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif',
         fontWeight: 600,
         fontSize: 22,
         color: 'var(--copi-ink)',
@@ -375,7 +375,7 @@ function ChipPick({ items, picked, onToggle }) {
               background: on ? '#2D5016' : '#FBF8F0',
               color: on ? '#F5F0E8' : 'var(--copi-ink)',
               border: on ? '1.5px solid #2D5016' : '1.5px solid var(--copi-line)',
-              fontFamily: '"Inter", sans-serif',
+              fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
               fontSize: 13,
               fontWeight: 600,
               cursor: 'pointer'
@@ -406,7 +406,7 @@ function EducationTab({ openModal }) {
   return (
     <div>
       <h3 style={{
-        fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif',
+        fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif',
         fontWeight: 600,
         fontSize: 22,
         color: 'var(--copi-ink)',
@@ -419,7 +419,7 @@ function EducationTab({ openModal }) {
         <div>
           <SectionLabel>What would you like to train?</SectionLabel>
           <div style={{
-            fontFamily: '"Inter", sans-serif',
+            fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
             fontSize: 12,
             color: 'var(--copi-muted)',
             marginBottom: 10
@@ -436,7 +436,7 @@ function EducationTab({ openModal }) {
         <div>
           <SectionLabel>What levels would you offer?</SectionLabel>
           <div style={{
-            fontFamily: '"Inter", sans-serif',
+            fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
             fontSize: 12,
             color: 'var(--copi-muted)',
             marginBottom: 10
@@ -464,7 +464,7 @@ function EducationTab({ openModal }) {
           borderRadius: 12,
           padding: 20,
           minHeight: 140,
-          fontFamily: '"Inter", sans-serif',
+          fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
           fontSize: 13,
           color: preview ? 'var(--copi-ink)' : 'var(--copi-muted)',
           lineHeight: 1.7
@@ -501,7 +501,7 @@ function RefineTab({ openModal }) {
   return (
     <div>
       <h3 style={{
-        fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif',
+        fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif',
         fontWeight: 600,
         fontSize: 22,
         color: 'var(--copi-ink)',
@@ -527,7 +527,7 @@ function RefineTab({ openModal }) {
           >
             <div>
               <div style={{
-                fontFamily: '"Inter", sans-serif',
+                fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
                 fontSize: 14,
                 fontWeight: 600,
                 color: 'var(--copi-ink)'
@@ -535,7 +535,7 @@ function RefineTab({ openModal }) {
                 {item.label}
               </div>
               <div style={{
-                fontFamily: '"Inter", sans-serif',
+                fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
                 fontSize: 12,
                 color: 'var(--copi-muted)',
                 marginTop: 2
@@ -551,7 +551,7 @@ function RefineTab({ openModal }) {
                 background: verified[item.key] ? 'rgba(68,112,75,0.10)' : 'transparent',
                 border: verified[item.key] ? '1.4px solid #2D5016' : '1.4px solid #7A2B1F',
                 color: verified[item.key] ? '#2D5016' : '#7A2B1F',
-                fontFamily: '"Inter", sans-serif',
+                fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
                 fontSize: 12,
                 fontWeight: 600,
                 cursor: 'pointer'
@@ -577,15 +577,15 @@ function AdminSetupCopi({ user = {}, tab: initialTab = 'General' }) {
   const [modal, setModal] = React.useState(null);
 
   const subnav = [
-    { label: 'Profile',          route: null,             active: false },
-    { label: 'Set up (Copi AI)', route: 'admin-setup-copi', active: true },
-    { label: 'Notifications',    route: null,             active: false }
+    { label: 'Profile',          route: 'admin-profile-page',       active: false },
+    { label: 'Set up (Copi AI)', route: 'admin-setup-copi',         active: true  },
+    { label: 'Notifications',    route: 'admin-notifications-page', active: false }
   ];
 
   return (
     <AdminShell current="settings" subnav={subnav} user={user} cafe={cafe}>
       <h1 style={{
-        fontFamily: '"Fredoka", "Nunito", system-ui, sans-serif',
+        fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif',
         fontWeight: 700,
         fontSize: 36,
         color: 'var(--copi-ink)',
@@ -614,7 +614,7 @@ function AdminSetupCopi({ user = {}, tab: initialTab = 'General' }) {
                 border: 'none',
                 borderRadius: '10px 10px 0 0',
                 color: 'var(--copi-ink)',
-                fontFamily: '"Inter", sans-serif',
+                fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
                 fontSize: 13,
                 fontWeight: active ? 700 : 500,
                 cursor: 'pointer',
