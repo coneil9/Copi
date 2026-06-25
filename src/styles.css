@@ -10,15 +10,20 @@
 :root {
   --glade-green:      #6F8B5F;   /* primary forest green                  */
   --glade-green-deep: #56723F;   /* deeper green for hover / active fills */
+  --glade-green-sage: #B6C6A0;   /* light sage for status chips           */
+  --sidebar-bg:       #2C3B1F;   /* deep olive sidebar background         */
+  --sidebar-bg-pill:  #F1E9D4;   /* light pill bg for active nav item     */
   --graphite:         #1F1A14;   /* dark near-black for body + headings   */
   --roman-coffee:     #826A4C;   /* warm brown for secondary accents      */
   --alabaster:        #F5EDDC;   /* near-white card surfaces              */
   --heathered-gray:   #B5A38B;   /* borders, dividers, placeholder        */
   --pearl-bush:       #E8DDC8;   /* warm cream page background            */
   --ripe-lemon:       #F4CE2F;   /* highlight + active sub-nav            */
+  --ripe-lemon-soft:  #F5E08C;   /* soft yellow for "Ahead" status chip   */
   --white:            #FFFFFF;   /* pure white                            */
   --danger:           #9C3D27;   /* "at risk" warm red                    */
   --danger-soft:      #C76E5A;   /* lighter red for progress bars         */
+  --terracotta-soft:  #D9A89A;   /* "Behind" chip background              */
 
   /* Backwards-compat copi-* aliases used by older inline styles. */
   --copi-parchment:   var(--pearl-bush);
@@ -125,7 +130,114 @@ a {
   50%      { transform: translateY(-10px); }
 }
 
-/* Respect reduced-motion: kill all reveal + idle animations */
+/* ── Dashboard animations ────────────────────────────────
+   Used by the dashboard StatCard / table / bar-chart / activity
+   components. All animations are skipped when the user has
+   prefers-reduced-motion: reduce set. */
+
+/* Page-content fade + slide-up on route mount */
+.dash-page {
+  animation: dashPageIn 250ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes dashPageIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Generic stagger-in primitive — children of `.dash-stagger` each
+   advance the delay by --dash-step (default 60ms). Apply
+   `.dash-stagger-item` to the element you want animated. */
+.dash-stagger-item {
+  opacity: 0;
+  animation: dashItemIn 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--dash-delay, 0ms);
+}
+@keyframes dashItemIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Progress bar fill from 0 to target. Target width is set via
+   --dash-progress (0-100) on the .dash-progress-fill node. */
+.dash-progress-fill {
+  width: 0;
+  animation: dashProgressFill 600ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: var(--dash-delay, 120ms);
+}
+@keyframes dashProgressFill {
+  to { width: var(--dash-progress, 0%); }
+}
+
+/* Weekly bar chart — bars grow from 0 height */
+.dash-bar-grow {
+  transform-origin: bottom;
+  animation: dashBarGrow 480ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--dash-delay, 0ms);
+}
+@keyframes dashBarGrow {
+  from { transform: scaleY(0); opacity: 0.4; }
+  to   { transform: scaleY(1); opacity: 1; }
+}
+
+/* Status chip fade-in */
+.dash-chip-in {
+  opacity: 0;
+  animation: dashChipIn 280ms ease-out forwards;
+  animation-delay: var(--dash-delay, 200ms);
+}
+@keyframes dashChipIn {
+  to { opacity: 1; }
+}
+
+/* Activity dot pulse — only applied to the most recent item */
+.dash-dot-pulse {
+  animation: dashDotPulse 2.4s ease-in-out infinite;
+  transform-origin: center;
+}
+@keyframes dashDotPulse {
+  0%, 100% { transform: scale(1);    box-shadow: 0 0 0 0 rgba(111, 139, 95, 0.45); }
+  50%      { transform: scale(1.15); box-shadow: 0 0 0 6px rgba(111, 139, 95, 0); }
+}
+
+/* Card hover lift — pronounced enough to register as feedback. */
+.dash-card-hover {
+  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 180ms ease,
+              border-color 180ms ease;
+}
+.dash-card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 36px rgba(31, 26, 20, 0.12), 0 3px 10px rgba(31, 26, 20, 0.06);
+  border-color: var(--glade-green-sage);
+}
+
+/* Table row hover tint */
+.dash-row-hover {
+  transition: background-color 100ms ease;
+}
+.dash-row-hover:hover {
+  background-color: rgba(232, 221, 200, 0.55);
+}
+
+/* Nav pill hover */
+.dash-nav-item {
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+/* Button brightness on hover */
+.dash-btn {
+  transition: filter 120ms ease, transform 120ms ease;
+}
+.dash-btn:hover { filter: brightness(1.06); }
+.dash-btn:active { transform: translateY(1px); }
+
+/* Quick-prompt chip hover (Ask Cupper) */
+.dash-chip-btn {
+  transition: transform 120ms ease, background-color 120ms ease;
+}
+.dash-chip-btn:hover { transform: scale(1.02); }
+
+/* Respect reduced-motion: kill all reveal + idle + dashboard animations */
 @media (prefers-reduced-motion: reduce) {
   .copi-reveal {
     opacity: 1 !important;
@@ -133,7 +245,27 @@ a {
     clip-path: none !important;
     transition: none !important;
   }
-  .copi-float {
+  .copi-float,
+  .dash-dot-pulse {
     animation: none !important;
+  }
+  .dash-page,
+  .dash-stagger-item,
+  .dash-bar-grow,
+  .dash-chip-in {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .dash-progress-fill {
+    animation: none !important;
+    width: var(--dash-progress, 0%) !important;
+  }
+  .dash-card-hover:hover,
+  .dash-btn:hover,
+  .dash-chip-btn:hover {
+    transform: none !important;
+    box-shadow: none !important;
+    filter: none !important;
   }
 }

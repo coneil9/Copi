@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { AdminShell } from './admin-shell.jsx';
+import { PageHeader, Card, PrimaryButton } from './admin-ui.jsx';
 
 const ROLES = ['Owner', 'Admin', 'Manager'];
 
@@ -76,27 +77,12 @@ function AdminProfilePage({ user = {} }) {
 
   return (
     <AdminShell current="settings" subnav={subnav} user={user} cafe={cafe}>
-      <div style={{
-        fontFamily: 'var(--font-body)',
-        fontSize: 11,
-        fontWeight: 700,
-        color: 'var(--glade-green-deep)',
-        letterSpacing: '0.16em',
-        textTransform: 'uppercase',
-        marginBottom: 10
-      }}>
-        OWNER · PROFILE
-      </div>
-      <h1 style={{
-        fontFamily: 'var(--font-display)',
-        fontWeight: 800,
-        fontSize: 48,
-        color: 'var(--graphite)',
-        margin: '0 0 28px 0',
-        letterSpacing: '-0.01em'
-      }}>
-        Your profile
-      </h1>
+      <PageHeader
+        eyebrow="OWNER · PROFILE"
+        title="Your profile"
+        subtitle="Update your account details. Changes apply across every dashboard view."
+      />
+
 
       <form
         onSubmit={save}

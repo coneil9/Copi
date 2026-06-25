@@ -1,333 +1,394 @@
 // ═════════════════════════════════════════════════════════
-// ADMIN HOME — Owner dashboard.
-// Greeting + Cupper AI chat prompt + quick insights row +
-// current onboarding steps + current lessons panels.
+// ADMIN HOME — Dashboard landing page.
+// Matches the Copi_Dashboard mockup: date eyebrow + "Good morning"
+// title + supporting line + actions, Ask Cupper widget top-right,
+// 4 stat cards, Team progress + Recent activity side-by-side,
+// Onboarding steps + Current lessons side-by-side, weekly engagement
+// bar chart. Animations + tokens come from admin-ui.jsx and styles.css.
 // ═════════════════════════════════════════════════════════
 
 import React from 'react';
-import { AdminShell, CupperMini } from './admin-shell.jsx';
+import { AdminShell } from './admin-shell.jsx';
+import {
+  PageHeader, PrimaryButton, SecondaryButton,
+  StatCard, Card, SectionHeader, StatusChip, ProgressBar,
+  ActivityItem, WeeklyBarChart, OnboardingStep, LessonRow, AskCupperCard,
+  Avatar
+} from './admin-ui.jsx';
 
 function greetingByHour() {
   const h = new Date().getHours();
-  if (h < 12) return 'Good Morning';
-  if (h < 18) return 'Good Afternoon';
-  return 'Good Evening';
+  if (h < 12) return 'Good morning';
+  if (h < 18) return 'Good afternoon';
+  return 'Good evening';
 }
 
-function MiniLineChart() {
-  // Static SVG line chart — purely visual, mirrors the wireframe sketch.
-  const points = '4,42 14,38 22,40 32,30 42,32 52,22 62,18 70,10';
-  return (
-    <svg viewBox="0 0 78 50" width="100%" height="64" aria-hidden="true">
-      <polyline
-        points={points}
-        fill="none"
-        stroke="#44704B"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <polygon points={`4,50 ${points} 70,50`} fill="rgba(68,112,75,0.12)" />
-      {/* arrow head */}
-      <path d="M 67 12 L 70 10 L 70 14" fill="none" stroke="#44704B" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
+function formatDate(d) {
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  return `${days[d.getDay()]} · ${months[d.getMonth()]} ${d.getDate()}`;
 }
 
-function StatCell({ visual, value, label, isLast = false }) {
-  return (
-    <div style={{
-      flex: 1,
-      padding: '20px 24px',
-      borderRight: isLast ? 'none' : '1px solid var(--copi-line)',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 8,
-      minWidth: 0
-    }}>
-      <div style={{ minHeight: 64, display: 'flex', alignItems: 'center' }}>{visual}</div>
-      <div style={{
-        fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif',
-        fontWeight: 700,
-        fontSize: 28,
-        color: 'var(--copi-ink)',
-        lineHeight: 1
-      }}>
-        {value}
-      </div>
-      <div style={{
-        fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
-        fontSize: 12,
-        color: 'var(--copi-muted)',
-        letterSpacing: '0.04em',
-        textTransform: 'uppercase'
-      }}>
-        {label}
-      </div>
-    </div>
-  );
-}
+// ── Seed data — realistic for a Vancouver third-wave shop ──
+const TEAM_ROWS = [
+  { name: 'Sofia Marin', role: 'Barista',    status: 'On track',   progress: 88 },
+  { name: 'Liam Cho',    role: 'Barista',    status: 'Ahead',      progress: 95 },
+  { name: 'Ava Reyes',   role: 'Shift lead', status: 'On track',   progress: 64 },
+  { name: 'Noah Bauer',  role: 'Barista',    status: 'Behind',     progress: 31 },
+  { name: 'Mia Russo',   role: 'New hire',   status: 'Onboarding', progress: 12 }
+];
 
-function ListPanel({ title, items }) {
-  return (
-    <section style={{
-      background: '#FBF8F0',
-      border: '1px solid var(--copi-line)',
-      borderRadius: 14,
-      padding: 24
-    }}>
-      <h3 style={{
-        fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif',
-        fontWeight: 600,
-        fontSize: 17,
-        color: 'var(--copi-ink)',
-        margin: '0 0 16px 0'
-      }}>
-        {title}
-      </h3>
-      <ol style={{
-        listStyle: 'none',
-        padding: 0,
-        margin: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 10
-      }}>
-        {items.map((label, i) => (
-          <li
-            key={i}
-            style={{
-              display: 'flex',
-              gap: 12,
-              alignItems: 'flex-start',
-              padding: '8px 0',
-              borderBottom: i === items.length - 1 ? 'none' : '1px dashed var(--copi-line)',
-              fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
-              fontSize: 14,
-              color: 'var(--copi-ink)'
-            }}
-          >
-            <span style={{
-              fontWeight: 600,
-              color: '#44704B',
-              flexShrink: 0,
-              width: 22
-            }}>
-              {i + 1}.
-            </span>
-            <span>{label}</span>
-          </li>
-        ))}
-      </ol>
-    </section>
-  );
-}
+const ACTIVITY = [
+  { kind: 'done',   body: <><b>Liam Cho</b> completed "Espresso extraction"</>, time: '12 min ago', pulse: true },
+  { kind: 'active', body: <><b>Mia Russo</b> started onboarding</>,             time: '1 hour ago' },
+  { kind: 'done',   body: <><b>Sofia Marin</b> scored 96% on "Milk steaming"</>, time: '3 hours ago' },
+  { kind: 'system', body: <><b>You</b> published a new lesson: "Latte art basics"</>, time: 'Yesterday' },
+  { kind: 'system', body: <><b>Noah Bauer</b> fell behind on "Origins"</>,       time: 'Yesterday' }
+];
+
+const ONBOARDING_STEPS = [
+  { title: 'Intro to Milano',         state: 'done' },
+  { title: 'Values in the workplace', state: 'done' },
+  { title: 'Learning our products',   state: 'in-progress' },
+  { title: 'How to use the machines', state: 'pending' }
+];
+
+const CURRENT_LESSONS = [
+  { title: 'Coffee history', pct: 100 },
+  { title: 'Origins',        pct: 72  },
+  { title: 'Processing',     pct: 40  },
+  { title: 'How to serve',   pct: 8   }
+];
+
+const WEEKLY_ENGAGEMENT = [
+  { label: 'Mon', value: 12 },
+  { label: 'Tue', value: 18 },
+  { label: 'Wed', value: 15 },
+  { label: 'Thu', value: 24 },
+  { label: 'Fri', value: 21 },
+  { label: 'Sat', value: 9  },
+  { label: 'Sun', value: 29 }
+];
+
+const ASK_CUPPER_PROMPTS = [
+  'What should I train next?',
+  'Refine the onboarding process',
+  'Customize coffee education'
+];
 
 function AdminHome({ user = {} }) {
   const store = window.useCopiStore ? window.useCopiStore() : window.CopiStore;
   const cafe  = store?.getDefaultCafe ? store.getDefaultCafe() : null;
-
-  // Display name — fall back to "Brian" to match the wireframe greeting.
   const firstName = (user?.name || 'Brian').split(' ')[0];
-
-  // Live team stats from the store, with friendly fallbacks.
-  const teamMembers = store?.team || [];
-  const employeeCount = teamMembers.length || 13;
-  const completionPct = Math.round((store?.teamCompletion?.() || 0.72) * 100) || 72;
-
-  const [prompt, setPrompt] = React.useState('');
-
-  const onboardingSteps = [
-    'Intro to Milano',
-    'Values in the workplace',
-    'Learning our products',
-    'How to use the machines'
-  ];
-
-  const currentLessons = [
-    'Coffee history',
-    'Origins',
-    'Processing',
-    'How to serve'
-  ];
+  const today = new Date();
+  const todayIndex = (today.getDay() + 6) % 7; // Mon-indexed (0..6)
+  const totalLessons = WEEKLY_ENGAGEMENT.reduce((s, d) => s + d.value, 0);
 
   return (
-    <AdminShell current="home" user={user} cafe={cafe}>
-      {/* Greeting */}
-      <h1 style={{
-        fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif',
-        fontWeight: 700,
-        fontSize: 44,
-        color: 'var(--copi-ink)',
-        margin: '0 0 28px 0',
-        letterSpacing: '-0.01em'
-      }}>
-        {greetingByHour()}, {firstName}.
-      </h1>
-
-      {/* Cupper + AI chat prompt */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: 16,
-        marginBottom: 40
-      }}>
-        <div style={{ flexShrink: 0, marginTop: 4 }}>
-          <CupperMini size={72} />
-        </div>
-
+    <AdminShell current="home" user={user} cafe={cafe} curriculumBadge={3}>
+      {/* Greeting block */}
+      <div style={{ marginBottom: 24 }}>
         <div style={{
-          flex: 1,
-          background: '#FBF8F0',
-          border: '1px solid var(--copi-line)',
-          borderRadius: 14,
-          padding: '16px 20px'
+          fontFamily: 'var(--font-body)',
+          fontSize: 11,
+          fontWeight: 700,
+          color: 'var(--roman-coffee)',
+          letterSpacing: '0.16em',
+          textTransform: 'uppercase',
+          marginBottom: 10
         }}>
-          <div style={{
-            fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
-            fontSize: 13,
-            fontWeight: 600,
-            color: 'var(--copi-ink)',
-            marginBottom: 6
-          }}>
-            Ask Cupper anything…
-          </div>
-          <ul style={{
-            margin: '0 0 12px 0',
-            padding: '0 0 0 18px',
-            color: 'var(--copi-muted)',
-            fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
-            fontSize: 13,
-            lineHeight: 1.6
-          }}>
-            <li>try: <em>"what should I train next?"</em></li>
-            <li>help me refine the onboarding process</li>
-            <li>customize the coffee education</li>
-          </ul>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <input
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Ask Cupper…"
-              style={{
-                flex: 1,
-                padding: '10px 14px',
-                borderRadius: 999,
-                border: '1px solid var(--copi-line)',
-                background: '#F5F0E8',
-                fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
-                fontSize: 13,
-                color: 'var(--copi-ink)',
-                outline: 'none'
-              }}
-            />
-            <button
-              onClick={() => setPrompt('')}
-              style={{
-                padding: '10px 18px',
-                borderRadius: 999,
-                background: '#2D5016',
-                color: '#F5F0E8',
-                fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
-                fontSize: 13,
-                fontWeight: 600,
-                border: 'none',
-                cursor: 'pointer'
-              }}
-            >
-              Ask
-            </button>
-          </div>
+          {formatDate(today)}
+        </div>
+        <h1 style={{
+          fontFamily: 'var(--font-display)',
+          fontWeight: 800,
+          fontSize: 44,
+          color: 'var(--graphite)',
+          margin: '0 0 10px 0',
+          letterSpacing: '-0.01em',
+          lineHeight: 1.05
+        }}>
+          {greetingByHour()}, {firstName}.
+        </h1>
+        <p style={{
+          fontFamily: 'var(--font-body)',
+          fontSize: 14,
+          color: 'var(--graphite)',
+          margin: '0 0 18px 0',
+          maxWidth: 560,
+          lineHeight: 1.55
+        }}>
+          Your team is <b>57% through</b> their assigned tracks. Two
+          onboarding steps need your review today.
+        </p>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <PrimaryButton onClick={() => window.CopiActions?.navigate?.('admin-team')}>
+            Review onboarding
+          </PrimaryButton>
+          <SecondaryButton onClick={() => window.CopiActions?.navigate?.('admin-team')}>
+            View team
+          </SecondaryButton>
         </div>
       </div>
 
-      {/* Quick Insights */}
-      <section style={{ marginBottom: 40 }}>
-        <h2 style={{
-          fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif',
-          fontWeight: 600,
-          fontSize: 22,
-          color: 'var(--copi-ink)',
-          margin: '0 0 16px 0'
-        }}>
-          Quick Insights
-        </h2>
+      {/* Ask Cupper — full-width hero card */}
+      <div style={{ marginBottom: 32 }}>
+        <AskCupperCard prompts={ASK_CUPPER_PROMPTS} onAsk={() => {}} />
+      </div>
 
+      {/* Quick insights */}
+      <section style={{ marginBottom: 28 }}>
+        <SectionHeader title="Quick insights" action={{ label: 'Customize ✎' }} />
         <div style={{
-          background: '#FBF8F0',
-          border: '1px solid var(--copi-line)',
-          borderRadius: 14,
-          display: 'flex',
-          overflow: 'hidden'
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: 14
         }}>
-          <StatCell
-            visual={<MiniLineChart />}
-            value="Trending up"
-            label="Quality education"
+          <StatCard
+            staggerIndex={0}
+            label="QUALITY EDUCATION"
+            value="A-"
+            supporting="Score climbing 4 weeks"
+            delta="12%"
+            progress={88}
           />
-          <StatCell
-            visual={
-              <div style={{
-                fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif',
-                fontWeight: 700,
-                fontSize: 56,
-                color: '#2D5016',
-                lineHeight: 1
-              }}>
-                #{employeeCount}
-              </div>
+          <StatCard
+            staggerIndex={1}
+            label="ACTIVE TEAMMATES"
+            value="6"
+            supporting="All on schedule"
+            badge={
+              <span style={{
+                padding: '3px 9px',
+                borderRadius: 999,
+                background: 'var(--ripe-lemon-soft)',
+                color: 'var(--graphite)',
+                fontFamily: 'var(--font-body)',
+                fontSize: 11,
+                fontWeight: 700
+              }}>+2 new</span>
             }
-            value="Employees"
-            label="Active teammates"
+            progress={100}
+            progressColor="var(--glade-green)"
           />
-          <StatCell
-            visual={
-              <div style={{
-                fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif',
-                fontWeight: 700,
-                fontSize: 56,
-                color: '#44704B',
-                lineHeight: 1
-              }}>
-                {completionPct}<span style={{ fontSize: 28 }}>%</span>
-              </div>
+          <StatCard
+            staggerIndex={2}
+            label="COMPLETION"
+            value="57%"
+            supporting="Across assigned tracks"
+            badge={
+              <span style={{
+                padding: '3px 9px',
+                borderRadius: 999,
+                background: 'rgba(111, 139, 95, 0.18)',
+                color: 'var(--glade-green-deep)',
+                fontFamily: 'var(--font-body)',
+                fontSize: 11,
+                fontWeight: 700
+              }}>On track</span>
             }
-            value="Completion"
-            label="Across assigned tracks"
-            isLast
+            progress={57}
           />
-        </div>
-
-        <div style={{
-          textAlign: 'right',
-          marginTop: 8,
-          fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
-          fontSize: 12,
-          color: 'var(--copi-muted)'
-        }}>
-          <button style={{
-            background: 'none',
-            border: 'none',
-            color: '#44704B',
-            fontFamily: '"Hanken Grotesk", "Inter", sans-serif',
-            fontSize: 12,
-            fontWeight: 600,
-            cursor: 'pointer',
-            padding: 0
-          }}>
-            customize ↗
-          </button>
+          <StatCard
+            staggerIndex={3}
+            label="AVG. TIME / LESSON"
+            value="14m"
+            supporting="Down from 19m"
+            delta="26%"
+            deltaTone="down"
+            progress={72}
+            progressColor="var(--glade-green)"
+          />
         </div>
       </section>
 
-      {/* Two side-by-side panels */}
+      {/* Team progress + Recent activity */}
       <section style={{
         display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: 24
+        gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)',
+        gap: 18,
+        marginBottom: 28
       }}>
-        <ListPanel title="Current onboarding steps" items={onboardingSteps} />
-        <ListPanel title="Current lessons" items={currentLessons} />
+        <Card>
+          <SectionHeader title="Team progress" action="View all 6" />
+          <div>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'minmax(0, 1.7fr) 100px minmax(0, 1.1fr)',
+              gap: 16,
+              padding: '0 0 10px 0',
+              borderBottom: '1px solid var(--pearl-bush)',
+              fontFamily: 'var(--font-body)',
+              fontSize: 10,
+              fontWeight: 700,
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+              color: 'var(--heathered-gray)'
+            }}>
+              <span>Teammate</span>
+              <span>Status</span>
+              <span style={{ textAlign: 'right' }}>Progress</span>
+            </div>
+            {TEAM_ROWS.map((row, i) => (
+              <div
+                key={row.name}
+                className="dash-stagger-item dash-row-hover"
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'minmax(0, 1.7fr) 100px minmax(0, 1.1fr)',
+                  gap: 16,
+                  alignItems: 'center',
+                  padding: '14px 0',
+                  borderBottom: i === TEAM_ROWS.length - 1 ? 'none' : '1px solid var(--pearl-bush)',
+                  '--dash-delay': `${i * 60 + 80}ms`
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+                  <Avatar name={row.name} size={32} />
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{
+                      fontFamily: 'var(--font-body)',
+                      fontSize: 14,
+                      fontWeight: 700,
+                      color: 'var(--graphite)'
+                    }}>
+                      {row.name}
+                    </div>
+                    <div style={{
+                      fontFamily: 'var(--font-body)',
+                      fontSize: 12,
+                      color: 'var(--heathered-gray)'
+                    }}>
+                      {row.role}
+                    </div>
+                  </div>
+                </div>
+                <StatusChip label={row.status} delay={i * 60 + 240} />
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  justifyContent: 'flex-end'
+                }}>
+                  <span style={{
+                    fontFamily: 'var(--font-body)',
+                    fontSize: 13,
+                    fontWeight: 700,
+                    color: 'var(--graphite)',
+                    fontVariantNumeric: 'tabular-nums'
+                  }}>
+                    {row.progress}%
+                  </span>
+                  <div style={{ width: 90 }}>
+                    <ProgressBar pct={row.progress} height={4} delay={i * 60 + 280} />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        <Card>
+          <SectionHeader title="Recent activity" />
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            {ACTIVITY.map((a, i) => (
+              <ActivityItem
+                key={i}
+                kind={a.kind}
+                body={a.body}
+                time={a.time}
+                pulse={!!a.pulse}
+                staggerIndex={i}
+              />
+            ))}
+          </div>
+        </Card>
+      </section>
+
+      {/* Onboarding steps + Current lessons */}
+      <section style={{
+        display: 'grid',
+        gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
+        gap: 18,
+        marginBottom: 28
+      }}>
+        <Card>
+          <SectionHeader title="Onboarding steps" action="2 of 4 done" />
+          <div>
+            {ONBOARDING_STEPS.map((s, i) => (
+              <OnboardingStep
+                key={s.title}
+                index={i + 1}
+                title={s.title}
+                state={s.state}
+                staggerIndex={i}
+              />
+            ))}
+          </div>
+        </Card>
+
+        <Card>
+          <SectionHeader title="Current lessons" action={{ label: 'All curriculum' }} />
+          <div>
+            {CURRENT_LESSONS.map((l, i) => (
+              <LessonRow
+                key={l.title}
+                index={i + 1}
+                title={l.title}
+                pct={l.pct}
+                staggerIndex={i}
+              />
+            ))}
+          </div>
+        </Card>
+      </section>
+
+      {/* Weekly engagement */}
+      <section style={{ marginBottom: 12 }}>
+        <Card style={{ padding: 28 }}>
+          <header style={{
+            display: 'flex',
+            alignItems: 'flex-end',
+            justifyContent: 'space-between',
+            gap: 16,
+            marginBottom: 28
+          }}>
+            <div>
+              <h2 style={{
+                fontFamily: 'var(--font-display)',
+                fontWeight: 700,
+                fontSize: 19,
+                color: 'var(--graphite)',
+                margin: '0 0 4px 0'
+              }}>
+                Weekly engagement
+              </h2>
+              <div style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: 12,
+                color: 'var(--roman-coffee)'
+              }}>
+                Lessons completed per day · last 7 days
+              </div>
+            </div>
+            <div style={{
+              fontFamily: 'var(--font-display)',
+              fontWeight: 800,
+              fontSize: 26,
+              color: 'var(--graphite)',
+              lineHeight: 1
+            }}>
+              {totalLessons} <span style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: 12,
+                fontWeight: 500,
+                color: 'var(--heathered-gray)',
+                marginLeft: 4
+              }}>total</span>
+            </div>
+          </header>
+          <WeeklyBarChart data={WEEKLY_ENGAGEMENT} todayIndex={todayIndex} height={220} />
+        </Card>
       </section>
     </AdminShell>
   );

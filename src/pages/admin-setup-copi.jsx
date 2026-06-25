@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { AdminShell, YellowMark, CopiModal } from './admin-shell.jsx';
+import { PageHeader } from './admin-ui.jsx';
 
 const TABS = ['General', 'Documents', 'Education', 'Refine'];
 
@@ -584,16 +585,30 @@ function AdminSetupCopi({ user = {}, tab: initialTab = 'General' }) {
 
   return (
     <AdminShell current="settings" subnav={subnav} user={user} cafe={cafe}>
-      <h1 style={{
-        fontFamily: '"Playpen Sans", "Fredoka", system-ui, sans-serif',
-        fontWeight: 700,
-        fontSize: 36,
-        color: 'var(--copi-ink)',
-        margin: '0 0 16px 0',
-        letterSpacing: '-0.01em'
-      }}>
-        Set up and refine with <YellowMark>Copi AI</YellowMark>
-      </h1>
+      <div style={{ marginBottom: 24 }}>
+        <div style={{
+          fontFamily: 'var(--font-body)',
+          fontSize: 11,
+          fontWeight: 700,
+          color: 'var(--roman-coffee)',
+          letterSpacing: '0.16em',
+          textTransform: 'uppercase',
+          marginBottom: 10
+        }}>
+          OWNER · SETTINGS
+        </div>
+        <h1 style={{
+          fontFamily: 'var(--font-display)',
+          fontWeight: 800,
+          fontSize: 40,
+          color: 'var(--graphite)',
+          margin: 0,
+          letterSpacing: '-0.01em',
+          lineHeight: 1.1
+        }}>
+          Set up and refine with <YellowMark>Copi AI</YellowMark>
+        </h1>
+      </div>
 
       {/* Tab bar */}
       <div style={{

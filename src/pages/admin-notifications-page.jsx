@@ -4,6 +4,7 @@
 
 import React from 'react';
 import { AdminShell } from './admin-shell.jsx';
+import { PageHeader } from './admin-ui.jsx';
 
 const PREFS = [
   { key: 'newEmployee',  title: 'New employee joined',     description: 'Whenever someone accepts your invite and finishes account setup.' },
@@ -70,37 +71,12 @@ function AdminNotificationsPage({ user = {} }) {
 
   return (
     <AdminShell current="settings" subnav={subnav} user={user} cafe={cafe}>
-      <div style={{
-        fontFamily: 'var(--font-body)',
-        fontSize: 11,
-        fontWeight: 700,
-        color: 'var(--glade-green-deep)',
-        letterSpacing: '0.16em',
-        textTransform: 'uppercase',
-        marginBottom: 10
-      }}>
-        OWNER · NOTIFICATIONS
-      </div>
-      <h1 style={{
-        fontFamily: 'var(--font-display)',
-        fontWeight: 800,
-        fontSize: 48,
-        color: 'var(--graphite)',
-        margin: '0 0 12px 0',
-        letterSpacing: '-0.01em'
-      }}>
-        Notifications
-      </h1>
-      <p style={{
-        fontFamily: 'var(--font-body)',
-        fontSize: 14,
-        color: 'var(--roman-coffee)',
-        margin: '0 0 28px 0',
-        maxWidth: 600
-      }}>
-        Pick which events Copi should email you about. Daily-bar noise stays
-        off by default — only the things you actually need to act on.
-      </p>
+      <PageHeader
+        eyebrow="OWNER · NOTIFICATIONS"
+        title="Notifications"
+        subtitle="Pick which events Copi should email you about. Daily-bar noise stays off by default — only the things you actually need to act on."
+      />
+
 
       <section style={{
         background: 'var(--alabaster)',

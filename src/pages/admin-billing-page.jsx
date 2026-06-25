@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { AdminShell, CopiModal } from './admin-shell.jsx';
+import { PageHeader, Card } from './admin-ui.jsx';
 
 const INVOICES = [
   { id: 'INV-2026-006', date: 'Jun 1, 2026',  description: 'Copi Pro — monthly subscription', amount: '$49.00', status: 'Paid' },
@@ -40,28 +41,12 @@ function AdminBillingPage({ user = {} }) {
 
   return (
     <AdminShell current="billing" user={user} cafe={cafe}>
-      {/* Eyebrow + title */}
-      <div style={{
-        fontFamily: 'var(--font-body)',
-        fontSize: 11,
-        fontWeight: 700,
-        color: 'var(--glade-green-deep)',
-        letterSpacing: '0.16em',
-        textTransform: 'uppercase',
-        marginBottom: 10
-      }}>
-        OWNER · BILLING
-      </div>
-      <h1 style={{
-        fontFamily: 'var(--font-display)',
-        fontWeight: 800,
-        fontSize: 48,
-        color: 'var(--graphite)',
-        margin: '0 0 28px 0',
-        letterSpacing: '-0.01em'
-      }}>
-        Billing &amp; plan
-      </h1>
+      <PageHeader
+        eyebrow="OWNER · BILLING"
+        title="Billing & plan"
+        subtitle="Manage your subscription, payment method, and download past invoices."
+      />
+
 
       {/* Top row: current plan + payment method side by side */}
       <div style={{
@@ -72,8 +57,8 @@ function AdminBillingPage({ user = {} }) {
       }}>
         {/* Current plan */}
         <section style={{
-          background: 'var(--alabaster)',
-          border: '1px solid var(--heathered-gray)',
+          background: 'var(--white)',
+          border: '1px solid var(--pearl-bush)',
           borderRadius: 14,
           padding: 26,
           display: 'flex',
@@ -212,8 +197,8 @@ function AdminBillingPage({ user = {} }) {
 
         {/* Payment method */}
         <section style={{
-          background: 'var(--alabaster)',
-          border: '1px solid var(--heathered-gray)',
+          background: 'var(--white)',
+          border: '1px solid var(--pearl-bush)',
           borderRadius: 14,
           padding: 26,
           display: 'flex',
@@ -233,7 +218,7 @@ function AdminBillingPage({ user = {} }) {
 
           <div style={{
             background: 'var(--white)',
-            border: '1px solid var(--heathered-gray)',
+            border: '1px solid var(--pearl-bush)',
             borderRadius: 12,
             padding: '18px 22px',
             display: 'flex',
@@ -314,8 +299,8 @@ function AdminBillingPage({ user = {} }) {
         </div>
 
         <div style={{
-          background: 'var(--alabaster)',
-          border: '1px solid var(--heathered-gray)',
+          background: 'var(--white)',
+          border: '1px solid var(--pearl-bush)',
           borderRadius: 14,
           overflow: 'hidden'
         }}>

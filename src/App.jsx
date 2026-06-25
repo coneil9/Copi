@@ -7,6 +7,7 @@ import './prototype/design-system.jsx';
 // New pages
 import './pages/signup-page.jsx';
 import './pages/cafe-setup-page.jsx';
+import './pages/import-roaster-page.jsx';
 import './pages/invite-accept-page.jsx';
 import './pages/staff-page.jsx';
 import './pages/manager-dashboard.jsx';
@@ -22,6 +23,7 @@ import './pages/admin-curriculum-new.jsx';
 import './pages/admin-analytics-new.jsx';
 import './pages/admin-settings-new.jsx';
 import './pages/admin-shell.jsx';
+import './pages/admin-ui.jsx';
 import './pages/admin-home.jsx';
 import './pages/admin-team.jsx';
 import './pages/admin-lessons-grid.jsx';
@@ -6067,7 +6069,7 @@ function VolumeModal({ open, volume, onClose, onTrial }) {
 // ────────────────────────────────────────────────────────────
 // Route → page
 // ────────────────────────────────────────────────────────────
-function PageFor({ route, user, inviteToken, onSignup, onCafeSetupComplete, onInviteAccepted, onLogin }) {
+function PageFor({ route, user, inviteToken, onSignup, onCafeSetupComplete, onImportRoasterComplete, onInviteAccepted, onLogin }) {
   const LandingPageNew    = window.LandingPageNew;
   const SignupPage        = window.SignupPage;
   const CafeSetupPage     = window.CafeSetupPage;
@@ -6164,6 +6166,11 @@ function PageFor({ route, user, inviteToken, onSignup, onCafeSetupComplete, onIn
   // Unauthenticated flows
   if (route === 'signup') return SignupPage ? <SignupPage onSignup={onSignup} onLogin={onLogin} /> : null;
   if (route === 'cafe-setup') return CafeSetupPage && onSignup ? <CafeSetupPage pendingUser={user || {}} onComplete={onCafeSetupComplete} /> : null;
+  if (route === 'import-roaster') {
+    const ImportRoasterPage = window.ImportRoasterPage;
+    if (ImportRoasterPage) return <ImportRoasterPage user={user || {}} onComplete={onImportRoasterComplete} />;
+    return null;
+  }
   if (route === 'invite-accept') return InviteAcceptPage ? <InviteAcceptPage token={inviteToken} onAccepted={onInviteAccepted} onExpired={onLogin} /> : null;
 
   return LandingPageNew ? <LandingPageNew /> : <BrandingTemplate3 />;
@@ -6174,7 +6181,7 @@ function PageFor({ route, user, inviteToken, onSignup, onCafeSetupComplete, onIn
 // ────────────────────────────────────────────────────────────
 function RouteBadge({ route, onHome }) {
   const labelFor = {
-    home: 'HOME · LANDING', signup: 'SIGN UP', 'cafe-setup': 'SETUP',
+    home: 'HOME · LANDING', signup: 'SIGN UP', 'cafe-setup': 'SETUP', 'import-roaster': 'IMPORT ROASTER',
     curriculum: 'CURRICULUM', pricing: 'PRICING', about: 'ABOUT',
     dashboard: 'WORKSPACE · OWNER', team: 'TEAM · OWNER',
     'admin-home': 'HOME · OWNER',
@@ -6315,7 +6322,16 @@ function CopiPrototype() {
   const handleCafeSetupComplete = (newUser) => {
     const u = { ...newUser, kind: 'admin', cafe: window.CopiStore?.getCafe(newUser.cafeId)?.name || 'My Cafe' };
     setUser(u);
-    setPendingSignupUser(null);
+    // Send new owners through the roaster-import step before the dashboard.
+    // The step is fully skippable, so this never blocks login.
+    goTo('import-roaster');
+    // Defer the pendingSignupUser clear until after the goTo fade-out
+    // (~180ms) so CafeSetupPage doesn't re-render with a null pendingUser
+    // mid-transition and crash on `pendingUser.name.split(...)`.
+    setTimeout(() => setPendingSignupUser(null), 400);
+  };
+
+  const handleImportRoasterComplete = () => {
     goTo('dashboard');
   };
 
@@ -6489,6 +6505,7 @@ function CopiPrototype() {
           inviteToken={inviteToken}
           onSignup={handleSignup}
           onCafeSetupComplete={handleCafeSetupComplete}
+          onImportRoasterComplete={handleImportRoasterComplete}
           onInviteAccepted={handleInviteAccepted}
           onLogin={() => setLogin(true)}
         />

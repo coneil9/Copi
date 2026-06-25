@@ -37,12 +37,14 @@ export function CafeSetupPage({ pendingUser, onComplete }) {
         locationIds.push(locId);
       }
 
-      // Create owner user
+      // Create owner user. Guard against the parent having already
+      // cleared pendingSignupUser by the time this fires.
       const ownerId = `usr-${cafeId}-owner`;
       db.users[ownerId] = {
         id: ownerId, cafeId, locationId: null,
-        name: pendingUser.name, email: pendingUser.email,
-        password: pendingUser.password || 'sso', role: 'owner',
+        name: pendingUser?.name || 'Owner',
+        email: pendingUser?.email || `owner@${cafeName.toLowerCase().replace(/\s+/g, '')}.coffee`,
+        password: pendingUser?.password || 'sso', role: 'owner',
         status: 'active', joinedAt: now,
       };
 
@@ -66,14 +68,14 @@ export function CafeSetupPage({ pendingUser, onComplete }) {
         <div style={{ background: th.bgCard, borderRadius: th.card + 4, padding: 32, boxShadow: sh.card, border: `1px solid ${th.line}` }}>
           {/* Progress dots */}
           <div style={{ display: 'flex', gap: 6, justifyContent: 'center', marginBottom: 24 }}>
-            {[1, 2].map((n) => (
-              <div key={n} style={{ width: 8, height: 8, borderRadius: 99, background: n === 2 ? th.accent : th.line }} />
+            {[1, 2, 3].map((n) => (
+              <div key={n} style={{ width: 8, height: 8, borderRadius: 99, background: n <= 2 ? th.accent : th.line }} />
             ))}
           </div>
 
           <h2 style={{ ...ty.h3, color: th.ink, margin: '0 0 6px', textAlign: 'center' }}>Tell us about your cafe</h2>
           <p style={{ ...ty.bodySmall, color: th.muted, textAlign: 'center', marginBottom: 28, marginTop: 0 }}>
-            Hi {pendingUser.name.split(' ')[0]} 👋 This takes 30 seconds.
+            Hi {(pendingUser?.name || 'there').split(' ')[0]} 👋 This takes 30 seconds.
           </p>
 
           <form onSubmit={handleSubmit}>

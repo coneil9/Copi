@@ -390,6 +390,116 @@ const CopiStore = {
     return passed;
   },
 
+  // ── Imported Curricula (roaster-website import) ──────────
+  // Separate from `modules` so the existing learning-track system
+  // is untouched. A curriculum holds tracks; each track holds
+  // trackLessons. Status flips draft → published on owner approval.
+
+  createDraftCurriculum(cafeId, { sourceUrl, shopName, tagline, about, logoUrl }) {
+    const id = uid();
+    const now = Date.now();
+    db.curricula[id] = {
+      id, cafeId,
+      status: 'draft',
+      sourceUrl: sourceUrl || null,
+      shopName: shopName || null,
+      tagline: tagline || null,
+      about: about || null,
+      logoUrl: logoUrl || null,
+      importedAt: now,
+      createdAt: now,
+    };
+    emit();
+    return db.curricula[id];
+  },
+
+  addTrack(curriculumId, { title, description, position }) {
+    const id = uid();
+    const existing = Object.values(db.tracks).filter((t) => t.curriculumId === curriculumId);
+    db.tracks[id] = {
+      id, curriculumId,
+      title: title || 'Untitled track',
+      description: description || '',
+      position: position ?? existing.length,
+    };
+    emit();
+    return db.tracks[id];
+  },
+
+  addLessonToTrack(trackId, { title, content, estimatedMinutes, position, aiGenerated = true }) {
+    const id = uid();
+    const existing = Object.values(db.trackLessons).filter((l) => l.trackId === trackId);
+    db.trackLessons[id] = {
+      id, trackId,
+      title: title || 'Untitled lesson',
+      content: content || '',
+      estimatedMinutes: estimatedMinutes ?? 10,
+      position: position ?? existing.length,
+      aiGenerated,
+    };
+    emit();
+    return db.trackLessons[id];
+  },
+
+  getCurriculum(curriculumId) { return db.curricula[curriculumId] || null; },
+
+  getDraftCurriculumForCafe(cafeId) {
+    return Object.values(db.curricula)
+      .filter((c) => c.cafeId === cafeId && c.status === 'draft')
+      .sort((a, b) => b.createdAt - a.createdAt)[0] || null;
+  },
+
+  getCurriculaForCafe(cafeId) {
+    return Object.values(db.curricula).filter((c) => c.cafeId === cafeId);
+  },
+
+  getTracksForCurriculum(curriculumId) {
+    return Object.values(db.tracks)
+      .filter((t) => t.curriculumId === curriculumId)
+      .sort((a, b) => a.position - b.position);
+  },
+
+  getLessonsForTrack(trackId) {
+    return Object.values(db.trackLessons)
+      .filter((l) => l.trackId === trackId)
+      .sort((a, b) => a.position - b.position);
+  },
+
+  publishCurriculum(curriculumId) {
+    const cur = db.curricula[curriculumId];
+    if (!cur) return null;
+    cur.status = 'published';
+    cur.publishedAt = Date.now();
+    // Flag every track lesson as no-longer-AI on the cafe's published copy
+    Object.values(db.trackLessons).forEach((l) => {
+      const t = db.tracks[l.trackId];
+      if (t && t.curriculumId === curriculumId) l.aiGenerated = false;
+    });
+    db.activity.unshift({
+      id: uid(),
+      who: 'Owner',
+      action: 'published',
+      label: `Curriculum: ${cur.shopName || 'imported roaster'}`,
+      kind: 'cert',
+      ts: Date.now(),
+    });
+    db.activity = db.activity.slice(0, 30);
+    emit();
+    return cur;
+  },
+
+  deleteCurriculum(curriculumId) {
+    const tracks = this.getTracksForCurriculum(curriculumId);
+    tracks.forEach((t) => {
+      Object.values(db.trackLessons).forEach((l) => {
+        if (l.trackId === t.id) delete db.trackLessons[l.id];
+      });
+      delete db.tracks[t.id];
+    });
+    delete db.curricula[curriculumId];
+    emit();
+  },
+
   // ── AI Jobs ──────────────────────────────────────────────
   createAiJob(cafeId, files) {
     const id = uid();

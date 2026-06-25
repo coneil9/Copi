@@ -1,73 +1,140 @@
 // ═════════════════════════════════════════════════════════
-// ADMIN SHELL — Left-sidebar layout used by all admin screens.
-// Sidebar uses Glade Green; the active top-level item renders as a
-// dark-green pill with a Ripe Lemon icon + border and bold white label
-// (matches the Settings reference). Active sub-nav items are Ripe Lemon.
-// All colours come from CSS custom properties defined in styles.css.
+// ADMIN SHELL — Persistent dashboard layout: 176px deep-olive
+// sidebar on the left, top bar (search + bell + avatar) on the
+// right, and a scrollable main content area. Every dashboard
+// page renders inside <AdminShell>; the page itself only owns
+// the content area.
 // ═════════════════════════════════════════════════════════
 
 import React from 'react';
 
-// Inline icon set used in the sidebar.
-function Icon({ name, size = 18, stroke = 'currentColor' }) {
-  const common = { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke, strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round' };
+// ── Icons ────────────────────────────────────────────────
+function Icon({ name, size = 18, stroke = 'currentColor', fill = 'none' }) {
+  const common = { width: size, height: size, viewBox: '0 0 24 24', fill, stroke, strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round' };
   switch (name) {
     case 'home':
       return (<svg {...common}><path d="M3 11.5L12 4l9 7.5" /><path d="M5 10v10h14V10" /></svg>);
     case 'team':
       return (<svg {...common}><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 4-7 8-7s8 3 8 7" /></svg>);
     case 'curriculum':
-      return (<svg {...common}><path d="M4 5h7v14H4z" /><path d="M13 5h7v14h-7z" /><path d="M4 9h7" /><path d="M13 9h7" /></svg>);
+      return (<svg {...common}><rect x="4" y="4" width="7" height="7" rx="1.4" /><rect x="13" y="4" width="7" height="7" rx="1.4" /><rect x="4" y="13" width="7" height="7" rx="1.4" /><rect x="13" y="13" width="7" height="7" rx="1.4" /></svg>);
     case 'analytics':
-      return (<svg {...common}><path d="M4 19V5" /><path d="M4 19h16" /><path d="M7 15l4-5 3 3 5-7" /><path d="M18 6h2v2" /></svg>);
+      return (<svg {...common}><path d="M3 14 L7 9 L11 13 L15 7 L21 14" /><circle cx="7" cy="9" r="1.2" /><circle cx="11" cy="13" r="1.2" /><circle cx="15" cy="7" r="1.2" /></svg>);
     case 'billing':
       return (<svg {...common}><rect x="3" y="6" width="18" height="13" rx="2" /><path d="M3 10h18" /><path d="M7 15h3" /></svg>);
     case 'settings':
       return (<svg {...common}><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>);
+    case 'search':
+      return (<svg {...common}><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" /></svg>);
+    case 'bell':
+      return (<svg {...common}><path d="M18 16v-5a6 6 0 1 0-12 0v5l-2 2h16z" /><path d="M10 21a2 2 0 0 0 4 0" /></svg>);
+    case 'power':
+      return (<svg {...common}><path d="M12 3v9" /><path d="M5.5 8a8 8 0 1 0 13 0" /></svg>);
     default:
       return null;
   }
 }
 
-// Cafe avatar — Alabaster circle with the cafe name in handwritten italic.
+// ── Cafe avatar (round, Alabaster, italic cafe name) ────
 function CafeAvatar({ name }) {
+  const cleaned = (name || 'milano').toLowerCase();
+  // Split into two lines if a single word — looks like the mockup ("milano / coffee")
+  const parts = cleaned.split(' ');
+  const top = parts[0];
+  const bottom = parts[1] || 'coffee';
   return (
     <div style={{
-      width: 88, height: 88, borderRadius: '50%',
+      width: 80, height: 80, borderRadius: '50%',
       background: 'var(--alabaster)',
-      border: '2px solid rgba(245, 237, 220, 0.18)',
       display: 'grid', placeItems: 'center',
       margin: '0 auto',
-      boxShadow: '0 4px 14px rgba(31, 26, 20, 0.25)'
+      boxShadow: '0 6px 16px rgba(0, 0, 0, 0.18)'
     }}>
-      <span style={{
-        fontFamily: '"Playpen Sans", "Yrsa", serif',
+      <div style={{
+        fontFamily: 'var(--font-display)',
         fontStyle: 'italic',
         fontWeight: 700,
-        fontSize: 20,
+        fontSize: 15,
         color: 'var(--glade-green-deep)',
-        letterSpacing: '0.01em'
+        textAlign: 'center',
+        lineHeight: 1.05
       }}>
-        {name.toLowerCase()}
-      </span>
+        {top}<br/>{bottom}
+      </div>
     </div>
   );
 }
 
-// ═══════════════════════════════════
-// AdminShell
-//   current: route key for the active top-level nav item
-//   subnav:  [{ label, route, active }]
-// ═══════════════════════════════════
+// ── Sidebar nav item ─────────────────────────────────────
+function NavItem({ item, isActive, onClick }) {
+  const [hover, setHover] = React.useState(false);
+  const bg = isActive ? 'var(--sidebar-bg-pill)' : (hover ? 'rgba(245, 237, 220, 0.08)' : 'transparent');
+  const fg = isActive ? 'var(--graphite)' : 'var(--alabaster)';
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      className="dash-nav-item"
+      style={{
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        padding: '9px 14px',
+        borderRadius: 8,
+        background: bg,
+        border: 'none',
+        color: fg,
+        fontFamily: 'var(--font-body)',
+        fontWeight: isActive ? 600 : 500,
+        fontSize: 13.5,
+        cursor: 'pointer',
+        textAlign: 'left'
+      }}
+    >
+      <Icon name={item.icon} size={16} stroke={fg} />
+      <span style={{ flex: 1 }}>{item.label}</span>
+      {item.badge != null && (
+        <span style={{
+          minWidth: 18,
+          height: 18,
+          padding: '0 6px',
+          borderRadius: 9,
+          background: isActive ? 'var(--glade-green-deep)' : 'rgba(245, 237, 220, 0.16)',
+          color: isActive ? 'var(--alabaster)' : 'var(--alabaster)',
+          fontFamily: 'var(--font-body)',
+          fontSize: 10,
+          fontWeight: 700,
+          display: 'grid',
+          placeItems: 'center'
+        }}>
+          {item.badge}
+        </span>
+      )}
+    </button>
+  );
+}
 
-export function AdminShell({ current = 'home', subnav = null, user = {}, cafe = null, children }) {
+// ── AdminShell ───────────────────────────────────────────
+export function AdminShell({
+  current = 'home',
+  subnav = null,
+  user = {},
+  cafe = null,
+  children,
+  // Override the curriculum badge from the page if needed.
+  curriculumBadge = 3
+}) {
   const act = window.CopiActions || {};
   const cafeName = cafe?.name || user?.cafe || 'Milano';
+  const userName = user?.name || 'Brian Turko';
+  const initials = userName.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase();
 
   const navItems = [
     { key: 'home',       label: 'Home',       icon: 'home',       route: 'admin-home' },
     { key: 'team',       label: 'Team',       icon: 'team',       route: 'admin-team' },
-    { key: 'curriculum', label: 'Curriculum', icon: 'curriculum', route: 'admin-curriculum-page' },
+    { key: 'curriculum', label: 'Curriculum', icon: 'curriculum', route: 'admin-curriculum-page', badge: curriculumBadge },
     { key: 'analytics',  label: 'Analytics',  icon: 'analytics',  route: 'analytics' },
     { key: 'billing',    label: 'Billing',    icon: 'billing',    route: 'admin-billing-page' },
     { key: 'settings',   label: 'Settings',   icon: 'settings',   route: 'admin-setup-copi' },
@@ -80,174 +147,275 @@ export function AdminShell({ current = 'home', subnav = null, user = {}, cafe = 
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'var(--pearl-bush)',
-      color: 'var(--graphite)',
       display: 'flex',
-      flexDirection: 'column'
+      background: 'var(--pearl-bush)',
+      color: 'var(--graphite)'
     }}>
-      {/* Top "Copi" header strip */}
-      <header style={{
-        height: 64,
-        background: 'var(--alabaster)',
-        borderBottom: '1px solid var(--heathered-gray)',
+      {/* Sidebar */}
+      <aside style={{
+        width: 200,
+        background: 'var(--sidebar-bg)',
+        color: 'var(--alabaster)',
         display: 'flex',
-        alignItems: 'center',
-        padding: '0 32px',
+        flexDirection: 'column',
+        padding: '22px 14px 18px',
         position: 'sticky',
         top: 0,
-        zIndex: 50
+        height: '100vh',
+        flexShrink: 0
       }}>
-        <span
+        {/* Logo */}
+        <div
           onClick={() => navigate('admin-home')}
           style={{
             fontFamily: 'var(--font-display)',
             fontWeight: 800,
             fontSize: 26,
-            color: 'var(--glade-green-deep)',
+            color: 'var(--alabaster)',
             cursor: 'pointer',
-            letterSpacing: '-0.01em'
+            paddingLeft: 4,
+            marginBottom: 22,
+            letterSpacing: '-0.02em'
           }}
         >
           Copi
-        </span>
-        <span style={{
-          marginLeft: 12,
-          padding: '4px 10px',
-          borderRadius: 999,
-          background: 'var(--pearl-bush)',
+        </div>
+
+        {/* Cafe avatar */}
+        <CafeAvatar name={cafeName} />
+        <div style={{
+          textAlign: 'center',
           fontFamily: 'var(--font-body)',
-          fontSize: 11,
-          fontWeight: 600,
-          color: 'var(--graphite)',
-          letterSpacing: '0.04em'
+          fontSize: 12,
+          color: 'rgba(245, 237, 220, 0.72)',
+          marginTop: 10,
+          marginBottom: 18
         }}>
-          {cafeName} Coffee
-        </span>
-        <div style={{ flex: 1 }} />
-        <span style={{
-          fontFamily: 'var(--font-body)',
-          fontSize: 13,
-          color: 'var(--graphite)'
-        }}>
-          {user?.name || 'Brian Turko'}
-        </span>
-      </header>
+          {cafeName} Coffee Co.
+        </div>
 
-      {/* Sidebar + content */}
-      <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
-        <aside style={{
-          width: 248,
-          background: 'var(--glade-green-deep)',
-          color: 'var(--alabaster)',
-          padding: '32px 18px 24px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 28,
-          flexShrink: 0
-        }}>
-          <CafeAvatar name={cafeName} />
-
-          <nav style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 8 }}>
-            {navItems.map((item) => {
-              const isActive = item.key === current;
-              return (
-                <div key={item.key}>
-                  <button
-                    onClick={() => navigate(item.route)}
-                    style={{
-                      width: '100%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 12,
-                      padding: '11px 14px',
-                      borderRadius: 12,
-                      background: isActive ? 'rgba(0, 0, 0, 0.22)' : 'transparent',
-                      border: isActive ? '1.5px solid var(--ripe-lemon)' : '1.5px solid transparent',
-                      color: 'var(--white)',
-                      fontFamily: 'var(--font-display)',
-                      fontWeight: isActive ? 800 : 500,
-                      fontSize: 15,
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                      transition: 'background 160ms, border-color 160ms',
-                      letterSpacing: isActive ? '0.005em' : 0
-                    }}
-                    onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)'; }}
-                    onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}
-                  >
-                    <Icon
-                      name={item.icon}
-                      size={18}
-                      stroke={isActive ? 'var(--ripe-lemon)' : 'var(--alabaster)'}
-                    />
-                    <span>{item.label}</span>
-                  </button>
-
-                  {/* Sub-nav under the active top-level item */}
-                  {isActive && subnav && (
-                    <div style={{
-                      marginTop: 6,
-                      marginLeft: 18,
-                      paddingLeft: 14,
-                      borderLeft: '1px solid rgba(245, 237, 220, 0.22)',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: 2
-                    }}>
-                      {subnav.map((sub) => (
-                        <button
-                          key={sub.label}
-                          onClick={() => sub.route && navigate(sub.route)}
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            padding: '6px 8px',
-                            borderRadius: 6,
-                            color: sub.active ? 'var(--ripe-lemon)' : 'rgba(245, 237, 220, 0.72)',
-                            fontFamily: 'var(--font-body)',
-                            fontSize: 13,
-                            fontWeight: sub.active ? 700 : 500,
-                            cursor: sub.route ? 'pointer' : 'default',
-                            textAlign: 'left',
-                            opacity: sub.route ? 1 : 0.85
-                          }}
-                        >
-                          – {sub.label}
-                        </button>
-                      ))}
-                    </div>
-                  )}
+        {/* Primary nav */}
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {navItems.map((item) => (
+            <div key={item.key}>
+              <NavItem
+                item={item}
+                isActive={item.key === current}
+                onClick={() => navigate(item.route)}
+              />
+              {/* Sub-nav under the active item (only Settings uses this today) */}
+              {item.key === current && subnav && (
+                <div style={{
+                  marginTop: 6,
+                  marginLeft: 14,
+                  paddingLeft: 14,
+                  borderLeft: '1px solid rgba(245, 237, 220, 0.22)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 2,
+                  marginBottom: 4
+                }}>
+                  {subnav.map((sub) => (
+                    <button
+                      key={sub.label}
+                      onClick={() => sub.route && navigate(sub.route)}
+                      className="dash-nav-item"
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        padding: '5px 8px',
+                        borderRadius: 6,
+                        color: sub.active ? 'var(--ripe-lemon)' : 'rgba(245, 237, 220, 0.72)',
+                        fontFamily: 'var(--font-body)',
+                        fontSize: 12.5,
+                        fontWeight: sub.active ? 700 : 500,
+                        cursor: sub.route ? 'pointer' : 'default',
+                        textAlign: 'left'
+                      }}
+                    >
+                      – {sub.label}
+                    </button>
+                  ))}
                 </div>
-              );
-            })}
-          </nav>
+              )}
+            </div>
+          ))}
+        </nav>
+
+        <div style={{ flex: 1 }} />
+
+        {/* Owner profile + power button at bottom */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          padding: '10px 8px',
+          borderRadius: 12,
+          background: 'rgba(0, 0, 0, 0.22)'
+        }}>
+          <div style={{
+            width: 28, height: 28, borderRadius: '50%',
+            background: 'var(--glade-green)',
+            color: 'var(--alabaster)',
+            display: 'grid', placeItems: 'center',
+            fontFamily: 'var(--font-body)',
+            fontSize: 11,
+            fontWeight: 700,
+            flexShrink: 0
+          }}>
+            {initials}
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: 12,
+              fontWeight: 700,
+              color: 'var(--alabaster)',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}>
+              {userName}
+            </div>
+            <div style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: 10,
+              color: 'rgba(245, 237, 220, 0.7)',
+              letterSpacing: '0.04em'
+            }}>
+              Owner
+            </div>
+          </div>
+          <button
+            data-app-action="logout"
+            title="Log out"
+            className="dash-btn"
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: 'rgba(245, 237, 220, 0.7)',
+              cursor: 'pointer',
+              padding: 4,
+              borderRadius: 6,
+              display: 'grid',
+              placeItems: 'center'
+            }}
+          >
+            <Icon name="power" size={16} stroke="currentColor" />
+          </button>
+        </div>
+      </aside>
+
+      {/* Main column */}
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+        {/* Top bar */}
+        <header style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 16,
+          padding: '18px 36px',
+          position: 'sticky',
+          top: 0,
+          background: 'var(--pearl-bush)',
+          zIndex: 40
+        }}>
+          {/* Search */}
+          <div style={{
+            flex: 1,
+            maxWidth: 420,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            padding: '9px 16px',
+            background: 'var(--white)',
+            border: '1px solid var(--pearl-bush)',
+            borderRadius: 999,
+            boxShadow: '0 1px 2px rgba(31, 26, 20, 0.04)'
+          }}>
+            <Icon name="search" size={15} stroke="var(--heathered-gray)" />
+            <input
+              placeholder="Search team, lessons, tracks…"
+              style={{
+                flex: 1,
+                border: 'none',
+                outline: 'none',
+                background: 'transparent',
+                fontFamily: 'var(--font-body)',
+                fontSize: 13,
+                color: 'var(--graphite)'
+              }}
+            />
+          </div>
 
           <div style={{ flex: 1 }} />
 
+          {/* Bell */}
           <button
-            data-app-action="logout"
+            type="button"
+            className="dash-btn"
             style={{
               background: 'transparent',
-              border: '1px solid rgba(245, 237, 220, 0.22)',
-              color: 'rgba(245, 237, 220, 0.72)',
-              padding: '8px 12px',
-              borderRadius: 999,
-              fontFamily: 'var(--font-body)',
-              fontSize: 12,
-              fontWeight: 500,
+              border: 'none',
               cursor: 'pointer',
-              letterSpacing: '0.04em'
+              padding: 8,
+              borderRadius: 999,
+              color: 'var(--graphite)',
+              position: 'relative'
             }}
           >
-            Log out
+            <Icon name="bell" size={18} stroke="currentColor" />
+            <span style={{
+              position: 'absolute',
+              top: 6, right: 6,
+              width: 8, height: 8,
+              background: 'var(--ripe-lemon)',
+              borderRadius: '50%',
+              border: '2px solid var(--pearl-bush)'
+            }} />
           </button>
-        </aside>
 
-        <main style={{
-          flex: 1,
-          padding: '40px 48px 64px',
-          overflowX: 'hidden'
-        }}>
+          {/* User chip */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            padding: '4px 12px 4px 4px',
+            borderRadius: 999,
+            background: 'var(--white)',
+            border: '1px solid var(--pearl-bush)'
+          }}>
+            <div style={{
+              width: 30, height: 30, borderRadius: '50%',
+              background: 'var(--glade-green-deep)',
+              color: 'var(--alabaster)',
+              display: 'grid', placeItems: 'center',
+              fontFamily: 'var(--font-body)',
+              fontSize: 11,
+              fontWeight: 700
+            }}>
+              {initials}
+            </div>
+            <span style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: 13,
+              fontWeight: 600,
+              color: 'var(--graphite)'
+            }}>
+              {userName}
+            </span>
+          </div>
+        </header>
+
+        {/* Page content */}
+        <main
+          key={current /* re-keys on route change so the dash-page fade-in re-runs */}
+          className="dash-page"
+          style={{
+            flex: 1,
+            padding: '8px 36px 48px',
+            overflowX: 'hidden'
+          }}
+        >
           {children}
         </main>
       </div>
@@ -255,7 +423,7 @@ export function AdminShell({ current = 'home', subnav = null, user = {}, cafe = 
   );
 }
 
-// Yellow highlight under a key word.
+// ── Yellow highlight + modal kept from previous shell ────
 export function YellowMark({ children }) {
   return (
     <span style={{
@@ -277,7 +445,6 @@ export function YellowMark({ children }) {
   );
 }
 
-// Shared modal — used by Refine / Verify across pages.
 export function CopiModal({ title, body, onClose, accent = 'var(--danger)' }) {
   if (!title && !body) return null;
   return (
@@ -293,12 +460,12 @@ export function CopiModal({ title, body, onClose, accent = 'var(--danger)' }) {
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          background: 'var(--alabaster)',
+          background: 'var(--white)',
           borderRadius: 16,
           padding: 32,
           maxWidth: 480,
           width: '100%',
-          border: '1px solid var(--heathered-gray)',
+          border: '1px solid var(--pearl-bush)',
           boxShadow: '0 24px 64px rgba(31, 26, 20, 0.28)'
         }}
       >
@@ -323,6 +490,7 @@ export function CopiModal({ title, body, onClose, accent = 'var(--danger)' }) {
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
           <button
             onClick={onClose}
+            className="dash-btn"
             style={{
               padding: '10px 20px',
               borderRadius: 999,
@@ -343,23 +511,16 @@ export function CopiModal({ title, body, onClose, accent = 'var(--danger)' }) {
   );
 }
 
-// Cupper mini — compact <img> of the official Cupper Ai.png asset.
-// Sized so the previous SVG footprint is preserved (the old SVG had a
-// 120 × 170 viewbox; the new PNG is 944 × 1108 with a transparent
-// background, so we keep height = size × (170/120) for parity).
+// Cupper mini — compact <img> for inline use (used by older pages).
 export function CupperMini({ size = 64 }) {
-  const height = Math.round(size * (170 / 120));
+  const height = Math.round(size * (1108 / 944));
   return (
     <img
       src="/assets/cupper-ai.png"
       alt="Cupper"
       width={size}
       height={height}
-      style={{
-        display: 'block',
-        background: 'transparent',
-        objectFit: 'contain'
-      }}
+      style={{ display: 'block', background: 'transparent', objectFit: 'contain' }}
     />
   );
 }

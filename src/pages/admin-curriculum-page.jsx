@@ -6,6 +6,8 @@
 
 import React from 'react';
 import { AdminShell, CopiModal } from './admin-shell.jsx';
+import { PageHeader } from './admin-ui.jsx';
+import { publishCurriculum as apiPublishCurriculum } from '../lib/roaster-import-service.js';
 
 const DIFFICULTIES = ['Easy', 'Intermediate', 'Advanced'];
 const STATUSES     = ['All', 'Assigned', 'Unassigned'];
@@ -132,18 +134,22 @@ function ActionButton({ label, onClick, variant = 'solid' }) {
   );
 }
 
-function ModuleCard({ module, onAction }) {
+function ModuleCard({ module, onAction, staggerIndex = 0 }) {
   return (
-    <article style={{
-      background: 'var(--alabaster)',
-      border: '1px solid var(--heathered-gray)',
-      borderRadius: 14,
-      padding: 22,
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 14,
-      minHeight: 270
-    }}>
+    <article
+      className="dash-stagger-item dash-card-hover"
+      style={{
+        background: 'var(--white)',
+        border: '1px solid var(--pearl-bush)',
+        borderRadius: 14,
+        padding: 22,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 14,
+        minHeight: 270,
+        boxShadow: '0 1px 2px rgba(31, 26, 20, 0.03)',
+        '--dash-delay': `${staggerIndex * 60 + 80}ms`
+      }}>
       <header>
         <div style={{
           display: 'flex',
@@ -171,6 +177,21 @@ function ModuleCard({ module, onAction }) {
             fontWeight: 700,
             letterSpacing: '0.06em'
           }}>{module.level.toUpperCase()}</span>
+          {module.aiGenerated && (
+            <span
+              title="Drafted by Cupper from your roaster website"
+              style={{
+                padding: '3px 10px',
+                borderRadius: 6,
+                background: 'var(--heathered-gray)',
+                color: 'var(--white)',
+                fontFamily: 'var(--font-body)',
+                fontSize: 10,
+                fontWeight: 700,
+                letterSpacing: '0.06em'
+              }}
+            >AI GENERATED</span>
+          )}
         </div>
         <h3 style={{
           fontFamily: 'var(--font-display)',
@@ -269,6 +290,7 @@ function EmptyCard({ onClick }) {
 function AdminCurriculumPage({ user = {} }) {
   const store = window.useCopiStore ? window.useCopiStore() : window.CopiStore;
   const cafe  = store?.getDefaultCafe ? store.getDefaultCafe() : null;
+  const cafeId = user?.cafeId || cafe?.id || null;
 
   const [modules, setModules] = React.useState(INITIAL_MODULES);
   const [status,  setStatus]  = React.useState('All');
@@ -276,13 +298,62 @@ function AdminCurriculumPage({ user = {} }) {
   const [sort,    setSort]    = React.useState('default');
   const [modal,   setModal]   = React.useState(null);
   const [diffPick, setDiffPick] = React.useState(null);
+  const [toast, setToast]    = React.useState(null);
+
+  // Pick up any draft curriculum that was generated during onboarding.
+  // Re-derives on every store emit so Publish all immediately removes
+  // the banner + AI badges without a full page reload.
+  const draft = cafeId && store?.getDraftCurriculumForCafe
+    ? store.getDraftCurriculumForCafe(cafeId)
+    : null;
+
+  const importedModules = React.useMemo(() => {
+    if (!draft || !store?.getTracksForCurriculum) return [];
+    return store.getTracksForCurriculum(draft.id).map((track) => {
+      const lessons = store.getLessonsForTrack(track.id);
+      return {
+        id: `imported-${track.id}`,
+        title: track.title,
+        description: track.description,
+        volume: 'IMPORTED',
+        level: 'Beginner',
+        assigned: 0,
+        difficulties: ['Easy'],
+        topics: lessons.map((l) => l.title),
+        aiGenerated: true,
+        curriculumId: draft.id,
+        trackId: track.id
+      };
+    });
+    // Re-evaluate on draft.status flip too (Publish clears `draft`).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draft?.id, draft?.status, store]);
+
+  const publishAll = async () => {
+    if (!draft) return;
+    await apiPublishCurriculum(draft.id);
+    setToast('Curriculum published — your team can now access their lessons.');
+    setTimeout(() => setToast(null), 3200);
+  };
+
+  const editDraftLessons = () => {
+    // Scrolls down to the imported cards — quick interaction without
+    // building a separate editor route.
+    if (typeof document !== 'undefined') {
+      const node = document.getElementById('imported-curriculum-section');
+      if (node) node.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 
   const toggleDiff = (d) => {
     setDiffs((prev) => prev.includes(d) ? prev.filter((x) => x !== d) : [...prev, d]);
   };
 
   const visible = React.useMemo(() => {
-    let list = modules.filter((m) => {
+    // Draft tracks render first so the owner sees the new content
+    // immediately, then the existing modules below.
+    const merged = [...importedModules, ...modules];
+    let list = merged.filter((m) => {
       if (status === 'Assigned'   && m.assigned <= 0) return false;
       if (status === 'Unassigned' && m.assigned > 0)  return false;
       if (!m.difficulties.some((d) => diffs.includes(d))) return false;
@@ -291,7 +362,7 @@ function AdminCurriculumPage({ user = {} }) {
     if (sort === 'assigned') list = [...list].sort((a, b) => b.assigned - a.assigned);
     if (sort === 'alpha')    list = [...list].sort((a, b) => a.title.localeCompare(b.title));
     return list;
-  }, [modules, status, diffs, sort]);
+  }, [modules, importedModules, status, diffs, sort]);
 
   const handleAction = (m, kind) => {
     if (kind === 'preview') {
@@ -340,33 +411,109 @@ function AdminCurriculumPage({ user = {} }) {
 
   return (
     <AdminShell current="curriculum" user={user} cafe={cafe}>
-      {/* Eyebrow + title */}
-      <div style={{
-        fontFamily: 'var(--font-body)',
-        fontSize: 11,
-        fontWeight: 700,
-        color: 'var(--glade-green-deep)',
-        letterSpacing: '0.16em',
-        textTransform: 'uppercase',
-        marginBottom: 10
-      }}>
-        OWNER · CURRICULUM
-      </div>
-      <h1 style={{
-        fontFamily: 'var(--font-display)',
-        fontWeight: 800,
-        fontSize: 48,
-        color: 'var(--graphite)',
-        margin: '0 0 28px 0',
-        letterSpacing: '-0.01em'
-      }}>
-        Curriculum
-      </h1>
+      <PageHeader
+        eyebrow="OWNER · CURRICULUM"
+        title="Curriculum"
+        subtitle="Preview every lesson module your team sees, refine with Cupper, and assign to teammates by difficulty."
+      />
+
+      {/* Draft banner — shows when a roaster import is awaiting review. */}
+      {draft && (
+        <div
+          id="imported-curriculum-section"
+          className="copi-reveal copi-reveal--fade-up is-in"
+          style={{
+            background: 'var(--ripe-lemon-soft)',
+            border: '1px solid var(--ripe-lemon)',
+            borderRadius: 14,
+            padding: '14px 20px',
+            marginBottom: 20,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 16,
+            flexWrap: 'wrap',
+            transitionDuration: '300ms'
+          }}
+        >
+          <div style={{ flex: 1, minWidth: 240 }}>
+            <div style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: 11,
+              fontWeight: 700,
+              color: 'var(--graphite)',
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+              marginBottom: 4
+            }}>
+              Draft curriculum
+            </div>
+            <div style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: 14,
+              color: 'var(--graphite)',
+              lineHeight: 1.5
+            }}>
+              This curriculum was imported from{' '}
+              <a
+                href={draft.sourceUrl || '#'}
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  color: 'var(--glade-green-deep)',
+                  fontWeight: 600,
+                  textDecoration: 'underline'
+                }}
+              >
+                {draft.sourceUrl || 'your roaster website'}
+              </a>
+              {' '}— review each lesson before publishing.
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+            <button
+              type="button"
+              onClick={publishAll}
+              className="dash-btn"
+              style={{
+                background: 'var(--glade-green-deep)',
+                color: 'var(--white)',
+                border: 'none',
+                padding: '10px 18px',
+                borderRadius: 999,
+                fontFamily: 'var(--font-body)',
+                fontSize: 13,
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              Publish all
+            </button>
+            <button
+              type="button"
+              onClick={editDraftLessons}
+              className="dash-btn"
+              style={{
+                background: 'transparent',
+                color: 'var(--graphite)',
+                border: '1.5px solid var(--graphite)',
+                padding: '10px 18px',
+                borderRadius: 999,
+                fontFamily: 'var(--font-body)',
+                fontSize: 13,
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              Edit lessons
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Filter / sort bar */}
       <div style={{
-        background: 'var(--alabaster)',
-        border: '1px solid var(--heathered-gray)',
+        background: 'var(--white)',
+        border: '1px solid var(--pearl-bush)',
         borderRadius: 14,
         padding: '14px 18px',
         marginBottom: 24,
@@ -442,8 +589,8 @@ function AdminCurriculumPage({ user = {} }) {
         gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
         gap: 18
       }}>
-        {visible.map((m) => (
-          <ModuleCard key={m.id} module={m} onAction={handleAction} />
+        {visible.map((m, i) => (
+          <ModuleCard key={m.id} module={m} onAction={handleAction} staggerIndex={i} />
         ))}
         <EmptyCard onClick={addEmpty} />
       </section>
@@ -454,6 +601,31 @@ function AdminCurriculumPage({ user = {} }) {
         accent={modal?.accent}
         onClose={() => setModal(null)}
       />
+
+      {/* Toast for Publish all success */}
+      {toast && (
+        <div
+          className="copi-reveal copi-reveal--fade-up is-in"
+          style={{
+            position: 'fixed',
+            bottom: 28,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'var(--glade-green-deep)',
+            color: 'var(--white)',
+            padding: '12px 22px',
+            borderRadius: 999,
+            fontFamily: 'var(--font-body)',
+            fontSize: 13,
+            fontWeight: 600,
+            boxShadow: '0 8px 24px rgba(31, 26, 20, 0.24)',
+            zIndex: 300,
+            transitionDuration: '260ms'
+          }}
+        >
+          ✓ {toast}
+        </div>
+      )}
 
       {/* Difficulty picker */}
       {diffPick && (() => {
