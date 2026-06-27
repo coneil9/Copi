@@ -438,6 +438,13 @@ export async function importRoaster({ url, shopId } = {}) {
       return { error: true, message: 'Store not initialized.', status: 422 };
     }
 
+    // Re-imports replace the previous draft for this cafe — keeps the DB
+    // from accumulating orphaned drafts no UI ever surfaces.
+    const existingDraft = store.getDraftCurriculumForCafe?.(shopId);
+    if (existingDraft) {
+      store.discardDraftCurriculum?.(existingDraft.id);
+    }
+
     const curriculum = store.createDraftCurriculum(shopId, {
       sourceUrl: v.url,
       shopName:  json.shop_name,

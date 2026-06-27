@@ -426,6 +426,13 @@ const CopiStore = {
     return db.tracks[id];
   },
 
+  updateTrack(id, updates) {
+    if (!db.tracks[id]) return null;
+    Object.assign(db.tracks[id], updates);
+    emit();
+    return db.tracks[id];
+  },
+
   addLessonToTrack(trackId, { title, content, estimatedMinutes, position, aiGenerated = true }) {
     const id = uid();
     const existing = Object.values(db.trackLessons).filter((l) => l.trackId === trackId);
@@ -439,6 +446,27 @@ const CopiStore = {
     };
     emit();
     return db.trackLessons[id];
+  },
+
+  updateTrackLesson(id, updates) {
+    if (!db.trackLessons[id]) return null;
+    Object.assign(db.trackLessons[id], updates);
+    emit();
+    return db.trackLessons[id];
+  },
+
+  deleteTrackLesson(id) {
+    if (!db.trackLessons[id]) return false;
+    delete db.trackLessons[id];
+    emit();
+    return true;
+  },
+
+  discardDraftCurriculum(curriculumId) {
+    const cur = db.curricula[curriculumId];
+    if (!cur || cur.status !== 'draft') return false;
+    this.deleteCurriculum(curriculumId);
+    return true;
   },
 
   getCurriculum(curriculumId) { return db.curricula[curriculumId] || null; },

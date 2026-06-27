@@ -33,6 +33,7 @@ import './pages/admin-curriculum-page.jsx';
 import './pages/admin-billing-page.jsx';
 import './pages/admin-profile-page.jsx';
 import './pages/admin-notifications-page.jsx';
+import './pages/draft-curriculum-editor.jsx';
 import './prototype/coffee-mascot.jsx';
 import './prototype/animations.jsx';
 import './prototype/ui-components.jsx';

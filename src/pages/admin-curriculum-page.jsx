@@ -135,12 +135,13 @@ function ActionButton({ label, onClick, variant = 'solid' }) {
 }
 
 function ModuleCard({ module, onAction, staggerIndex = 0 }) {
+  const isImported = !!module.aiGenerated;
   return (
     <article
       className="dash-stagger-item dash-card-hover"
       style={{
         background: 'var(--white)',
-        border: '1px solid var(--pearl-bush)',
+        border: isImported ? '1.5px solid var(--ripe-lemon)' : '1px solid var(--pearl-bush)',
         borderRadius: 14,
         padding: 22,
         display: 'flex',
@@ -237,9 +238,18 @@ function ModuleCard({ module, onAction, staggerIndex = 0 }) {
       </ul>
 
       <footer style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-        <ActionButton label="Preview + Refine"   onClick={() => onAction(module, 'preview')} variant="outline" />
-        <ActionButton label="Assign Employees"   onClick={() => onAction(module, 'assign')} />
-        <ActionButton label="Select Difficulties" onClick={() => onAction(module, 'difficulty')} variant="outline" />
+        {isImported ? (
+          <>
+            <ActionButton label="Read draft"  onClick={() => onAction(module, 'read-draft')} />
+            <ActionButton label="Discard"     onClick={() => onAction(module, 'discard')} variant="outline" />
+          </>
+        ) : (
+          <>
+            <ActionButton label="Preview + Refine"   onClick={() => onAction(module, 'preview')} variant="outline" />
+            <ActionButton label="Assign Employees"   onClick={() => onAction(module, 'assign')} />
+            <ActionButton label="Select Difficulties" onClick={() => onAction(module, 'difficulty')} variant="outline" />
+          </>
+        )}
       </footer>
     </article>
   );
@@ -299,6 +309,8 @@ function AdminCurriculumPage({ user = {} }) {
   const [modal,   setModal]   = React.useState(null);
   const [diffPick, setDiffPick] = React.useState(null);
   const [toast, setToast]    = React.useState(null);
+  const [editorOpen, setEditorOpen] = React.useState(false);
+  const [editorTrackId, setEditorTrackId] = React.useState(null);
 
   // Pick up any draft curriculum that was generated during onboarding.
   // Re-derives on every store emit so Publish all immediately removes
@@ -337,12 +349,27 @@ function AdminCurriculumPage({ user = {} }) {
   };
 
   const editDraftLessons = () => {
-    // Scrolls down to the imported cards — quick interaction without
-    // building a separate editor route.
-    if (typeof document !== 'undefined') {
-      const node = document.getElementById('imported-curriculum-section');
-      if (node) node.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+    if (!draft) return;
+    setEditorTrackId(null);
+    setEditorOpen(true);
+  };
+
+  const openLessonEditor = (trackId = null) => {
+    if (!draft) return;
+    setEditorTrackId(trackId);
+    setEditorOpen(true);
+  };
+
+  const discardDraft = () => {
+    if (!draft || !store?.discardDraftCurriculum) return;
+    const ok = window.confirm(
+      `Discard the draft curriculum imported from ${draft.sourceUrl || 'your roaster website'}? `
+      + 'All draft tracks and lessons will be removed. This cannot be undone.'
+    );
+    if (!ok) return;
+    store.discardDraftCurriculum(draft.id);
+    setToast('Draft discarded.');
+    setTimeout(() => setToast(null), 2600);
   };
 
   const toggleDiff = (d) => {
@@ -365,7 +392,11 @@ function AdminCurriculumPage({ user = {} }) {
   }, [modules, importedModules, status, diffs, sort]);
 
   const handleAction = (m, kind) => {
-    if (kind === 'preview') {
+    if (kind === 'read-draft') {
+      openLessonEditor(m.trackId);
+    } else if (kind === 'discard') {
+      discardDraft();
+    } else if (kind === 'preview') {
       setModal({
         title: `Refine "${m.title}"`,
         body: `Cupper will rebuild this module from your latest source docs and house standards. You'll get a draft to review — no changes go live until you publish.`,
@@ -506,6 +537,24 @@ function AdminCurriculumPage({ user = {} }) {
             >
               Edit lessons
             </button>
+            <button
+              type="button"
+              onClick={discardDraft}
+              className="dash-btn"
+              style={{
+                background: 'transparent',
+                color: 'var(--danger)',
+                border: 'none',
+                padding: '10px 12px',
+                borderRadius: 999,
+                fontFamily: 'var(--font-body)',
+                fontSize: 13,
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              Discard
+            </button>
           </div>
         </div>
       )}
@@ -601,6 +650,21 @@ function AdminCurriculumPage({ user = {} }) {
         accent={modal?.accent}
         onClose={() => setModal(null)}
       />
+
+      {/* Draft-lesson editor modal — opened from the banner or per-card Read draft. */}
+      {window.DraftCurriculumEditor && (
+        <window.DraftCurriculumEditor
+          open={editorOpen && !!draft}
+          curriculumId={draft?.id}
+          initialTrackId={editorTrackId}
+          onClose={() => setEditorOpen(false)}
+          onPublished={() => {
+            setEditorOpen(false);
+            setToast('Curriculum published — your team can now access their lessons.');
+            setTimeout(() => setToast(null), 3200);
+          }}
+        />
+      )}
 
       {/* Toast for Publish all success */}
       {toast && (

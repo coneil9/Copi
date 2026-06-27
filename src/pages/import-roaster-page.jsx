@@ -133,9 +133,19 @@ function LoadingState({ message }) {
 }
 
 // ─── Success preview ───────────────────────────────────────
+function formatTeachTime(totalMinutes) {
+  if (!totalMinutes || totalMinutes < 1) return null;
+  if (totalMinutes < 60) return `~${totalMinutes}m to teach`;
+  const hours = totalMinutes / 60;
+  // Show one decimal for sub-2h so 1.5h doesn't round down to 1h.
+  const display = hours < 2 ? hours.toFixed(1) : Math.round(hours);
+  return `~${display}h to teach`;
+}
+
 function SuccessPreview({ result, onPublish, onReview, publishing }) {
   const totalLessons = (result.tracks || []).reduce((s, t) => s + (t.lessonCount || 0), 0);
   const totalMinutes = (result.tracks || []).reduce((s, t) => s + (t.totalMinutes || 0), 0);
+  const teachTime    = formatTeachTime(totalMinutes);
   return (
     <div
       className="copi-reveal copi-reveal--fade-up is-in"
@@ -192,11 +202,15 @@ function SuccessPreview({ result, onPublish, onReview, publishing }) {
         fontWeight: 600,
         color: 'var(--graphite)'
       }}>
-        <span>{result.tracks.length} tracks</span>
+        <span>{result.tracks.length} {result.tracks.length === 1 ? 'track' : 'tracks'}</span>
         <span style={{ color: 'var(--heathered-gray)' }}>·</span>
-        <span>{totalLessons} lessons</span>
-        <span style={{ color: 'var(--heathered-gray)' }}>·</span>
-        <span>~{Math.round(totalMinutes / 60)}h to teach</span>
+        <span>{totalLessons} {totalLessons === 1 ? 'lesson' : 'lessons'}</span>
+        {teachTime && (
+          <>
+            <span style={{ color: 'var(--heathered-gray)' }}>·</span>
+            <span>{teachTime}</span>
+          </>
+        )}
       </div>
 
       <div style={{
@@ -313,6 +327,9 @@ export function ImportRoasterPage({ user = {}, onComplete }) {
   const intervalRef = React.useRef(null);
 
   const shopId = user?.cafeId || user?.cafe || (window.CopiStore?.getDefaultCafe?.()?.id) || null;
+  const existingDraft = shopId && window.CopiStore?.getDraftCurriculumForCafe
+    ? window.CopiStore.getDraftCurriculumForCafe(shopId)
+    : null;
 
   const goToDashboard = () => {
     if (typeof onComplete === 'function') return onComplete({ skipped: false });
@@ -408,6 +425,23 @@ export function ImportRoasterPage({ user = {}, onComplete }) {
 
         {phase === 'input' && (
           <form onSubmit={submit}>
+            {existingDraft && (
+              <div style={{
+                marginBottom: 16,
+                padding: '12px 14px',
+                borderRadius: 10,
+                background: 'var(--ripe-lemon-soft)',
+                border: '1px solid var(--ripe-lemon)',
+                fontFamily: 'var(--font-body)',
+                fontSize: 12.5,
+                color: 'var(--graphite)',
+                lineHeight: 1.5
+              }}>
+                You already have a draft curriculum from{' '}
+                <b>{existingDraft.shopName || existingDraft.sourceUrl}</b>. Importing a new
+                one will replace it.
+              </div>
+            )}
             <label style={{
               display: 'block',
               fontFamily: 'var(--font-body)',

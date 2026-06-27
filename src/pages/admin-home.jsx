@@ -79,13 +79,86 @@ const ASK_CUPPER_PROMPTS = [
 function AdminHome({ user = {} }) {
   const store = window.useCopiStore ? window.useCopiStore() : window.CopiStore;
   const cafe  = store?.getDefaultCafe ? store.getDefaultCafe() : null;
+  const cafeId = user?.cafeId || cafe?.id || null;
   const firstName = (user?.name || 'Brian').split(' ')[0];
   const today = new Date();
   const todayIndex = (today.getDay() + 6) % 7; // Mon-indexed (0..6)
   const totalLessons = WEEKLY_ENGAGEMENT.reduce((s, d) => s + d.value, 0);
 
+  // Persistent reminder when an owner skipped publishing during onboarding.
+  const draft = cafeId && store?.getDraftCurriculumForCafe
+    ? store.getDraftCurriculumForCafe(cafeId)
+    : null;
+  const draftTrackCount = draft && store?.getTracksForCurriculum
+    ? store.getTracksForCurriculum(draft.id).length
+    : 0;
+  const draftLessonCount = draft && store?.getTracksForCurriculum
+    ? store.getTracksForCurriculum(draft.id).reduce(
+        (sum, t) => sum + store.getLessonsForTrack(t.id).length, 0)
+    : 0;
+
   return (
     <AdminShell current="home" user={user} cafe={cafe} curriculumBadge={3}>
+      {/* Draft curriculum reminder — surfaces the unpublished import. */}
+      {draft && (
+        <div
+          className="copi-reveal copi-reveal--fade-up is-in"
+          style={{
+            background: 'var(--ripe-lemon-soft)',
+            border: '1px solid var(--ripe-lemon)',
+            borderRadius: 14,
+            padding: '14px 20px',
+            marginBottom: 18,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 14,
+            flexWrap: 'wrap',
+            transitionDuration: '300ms'
+          }}
+        >
+          <div style={{ flex: 1, minWidth: 240 }}>
+            <div style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: 11,
+              fontWeight: 700,
+              color: 'var(--graphite)',
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+              marginBottom: 4
+            }}>
+              Draft curriculum waiting
+            </div>
+            <div style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: 14,
+              color: 'var(--graphite)',
+              lineHeight: 1.5
+            }}>
+              {draft.shopName || 'Your imported roaster'} — {draftTrackCount} {draftTrackCount === 1 ? 'track' : 'tracks'},
+              {' '}{draftLessonCount} {draftLessonCount === 1 ? 'lesson' : 'lessons'}. Review and publish to release it to your team.
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => window.CopiActions?.navigate?.('admin-curriculum-page')}
+            className="dash-btn"
+            style={{
+              background: 'var(--glade-green-deep)',
+              color: 'var(--white)',
+              border: 'none',
+              padding: '10px 18px',
+              borderRadius: 999,
+              fontFamily: 'var(--font-body)',
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: 'pointer'
+            }}
+          >
+            Review draft →
+          </button>
+        </div>
+      )}
+
       {/* Greeting block */}
       <div style={{ marginBottom: 24 }}>
         <div style={{
@@ -121,13 +194,18 @@ function AdminHome({ user = {} }) {
           Your team is <b>57% through</b> their assigned tracks. Two
           onboarding steps need your review today.
         </p>
-        <div style={{ display: 'flex', gap: 10 }}>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
           <PrimaryButton onClick={() => window.CopiActions?.navigate?.('admin-team')}>
             Review onboarding
           </PrimaryButton>
           <SecondaryButton onClick={() => window.CopiActions?.navigate?.('admin-team')}>
             View team
           </SecondaryButton>
+          {!draft && (
+            <SecondaryButton onClick={() => window.CopiActions?.navigate?.('import-roaster')}>
+              Import from a roaster website
+            </SecondaryButton>
+          )}
         </div>
       </div>
 
