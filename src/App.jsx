@@ -34,6 +34,9 @@ import './pages/admin-billing-page.jsx';
 import './pages/admin-profile-page.jsx';
 import './pages/admin-notifications-page.jsx';
 import './pages/draft-curriculum-editor.jsx';
+import './pages/curriculum-assign-modal.jsx';
+import './pages/published-curriculum-viewer.jsx';
+import './pages/cupper-chat.jsx';
 import './prototype/coffee-mascot.jsx';
 import './prototype/animations.jsx';
 import './prototype/ui-components.jsx';
@@ -4994,6 +4997,13 @@ function BaristaLibrary({ user = {} }) {
   assignedVols.forEach((v) => { const s = store.volumeStats(email, v.id); totalDone += s.done; totalLessons += s.total; });
   const pct = totalLessons ? Math.round((totalDone / totalLessons) * 100) : 0;
 
+  // House curriculum — published imported curricula assigned to this user.
+  const _meUser = store.getUserByEmail ? store.getUserByEmail(email) : null;
+  const houseCurricula = (_meUser && store.getCurriculaForUser)
+    ? store.getCurriculaForUser(_meUser.id)
+    : [];
+  const [houseViewerTarget, setHouseViewerTarget] = React.useState(null);
+
   // Refreshers — most recently completed lessons.
   const _dbU2 = store.getUserByEmail ? store.getUserByEmail(email) : null;
   const _prog2 = _dbU2 ? (store.raw().progress[_dbU2.id] || {}) : {};
@@ -5145,6 +5155,55 @@ function BaristaLibrary({ user = {} }) {
           })}
         </div>
 
+        {/* House curriculum — published imports assigned to this user */}
+        {houseCurricula.length > 0 && (
+          <React.Fragment>
+            <div style={{ ...lbl, color: p.accent, textAlign: 'center', margin: '56px 0 10px' }}>◆ HOUSE CURRICULUM</div>
+            <p style={{ ...sub, fontSize: 17, fontStyle: 'italic', opacity: 0.65, textAlign: 'center', margin: '0 0 24px', fontWeight: 400 }}>
+              built from your cafe&rsquo;s own roasters and writing.
+            </p>
+            <div style={{ display: 'grid', gap: 14 }}>
+              {houseCurricula.map((cur) => {
+                const tracks = store.getTracksForCurriculum(cur.id);
+                const lessonCount = tracks.reduce(
+                  (s, t) => s + store.getLessonsForTrack(t.id).length, 0);
+                return (
+                  <button
+                    key={cur.id}
+                    onClick={() => setHouseViewerTarget({ curriculumId: cur.id })}
+                    style={{
+                      width: '100%', textAlign: 'left', background: p.cream, borderRadius: 22,
+                      border: `1.5px solid ${p.accent}55`,
+                      boxShadow: `0 4px 0 ${p.fg}10`,
+                      padding: '22px 24px', cursor: 'pointer',
+                      display: 'flex', gap: 18, alignItems: 'center',
+                    }}
+                  >
+                    <div style={{
+                      width: 60, height: 60, borderRadius: '50%', flex: '0 0 auto',
+                      background: p.accent, color: p.cream,
+                      display: 'grid', placeItems: 'center', ...display, fontStyle: 'italic',
+                      fontSize: 24, fontWeight: 400, border: `2px solid ${p.fg}`,
+                    }}>
+                      {(cur.shopName || 'H').split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ ...lbl, opacity: 0.5, fontSize: 9, marginBottom: 4 }}>HOUSE · IMPORTED</div>
+                      <div style={{ ...display, fontSize: 26, lineHeight: 1.05, letterSpacing: '-0.02em', fontWeight: 400 }}>
+                        {cur.shopName || 'House curriculum'}
+                      </div>
+                      <div style={{ ...sans, fontSize: 13, opacity: 0.7, marginTop: 6 }}>
+                        {tracks.length} {tracks.length === 1 ? 'track' : 'tracks'} · {lessonCount} {lessonCount === 1 ? 'lesson' : 'lessons'}
+                      </div>
+                    </div>
+                    <span style={{ ...lbl, color: p.accent, fontSize: 10, whiteSpace: 'nowrap' }}>READ →</span>
+                  </button>
+                );
+              })}
+            </div>
+          </React.Fragment>
+        )}
+
         {/* Refreshers */}
         {refreshers.length > 0 && (
           <React.Fragment>
@@ -5181,6 +5240,14 @@ function BaristaLibrary({ user = {} }) {
         )}
 
       </div>
+
+      {window.PublishedCurriculumViewer && (
+        <window.PublishedCurriculumViewer
+          open={!!houseViewerTarget}
+          curriculumId={houseViewerTarget?.curriculumId}
+          onClose={() => setHouseViewerTarget(null)}
+        />
+      )}
     </div>
   );
 }

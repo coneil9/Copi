@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:api": "vercel dev",
     "build": "vite build",
     "preview": "vite preview"
   },
@@ -13,7 +14,11 @@
     "vite": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "@supabase/supabase-js": "latest"
+    "@supabase/supabase-js": "latest",
+    "@anthropic-ai/sdk": "latest",
+    "zod": "latest"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "vercel": "latest"
+  }
 }

@@ -198,7 +198,8 @@ export function seedDatabase() {
     // Separate from `modules` so the existing learning-track system is untouched.
     curricula: {},   // { id, cafeId, status: 'draft'|'published', sourceUrl, shopName, tagline, about, logoUrl, importedAt, createdAt }
     tracks: {},      // { id, curriculumId, title, description, position }
-    trackLessons: {} // { id, trackId, title, content, estimatedMinutes, position, aiGenerated }
+    trackLessons: {}, // { id, trackId, title, content, estimatedMinutes, position, aiGenerated }
+    curriculumAssignments: {} // { id, curriculumId, userId, assignedAt }
   };
 }
 
@@ -207,9 +208,10 @@ export function seedDatabase() {
 // Called from loadDb() so an upgrade in place doesn't lose seed data.
 export function migrateDb(db) {
   if (!db || typeof db !== 'object') return db;
-  if (!db.curricula)    db.curricula    = {};
-  if (!db.tracks)       db.tracks       = {};
-  if (!db.trackLessons) db.trackLessons = {};
+  if (!db.curricula)             db.curricula             = {};
+  if (!db.tracks)                db.tracks                = {};
+  if (!db.trackLessons)          db.trackLessons          = {};
+  if (!db.curriculumAssignments) db.curriculumAssignments = {};
   return db;
 }
 

@@ -136,12 +136,17 @@ function ActionButton({ label, onClick, variant = 'solid' }) {
 
 function ModuleCard({ module, onAction, staggerIndex = 0 }) {
   const isImported = !!module.aiGenerated;
+  const isPublishedImport = !!module.publishedImport;
   return (
     <article
       className="dash-stagger-item dash-card-hover"
       style={{
         background: 'var(--white)',
-        border: isImported ? '1.5px solid var(--ripe-lemon)' : '1px solid var(--pearl-bush)',
+        border: isImported
+          ? '1.5px solid var(--ripe-lemon)'
+          : isPublishedImport
+            ? '1.5px solid var(--glade-green-sage)'
+            : '1px solid var(--pearl-bush)',
         borderRadius: 14,
         padding: 22,
         display: 'flex',
@@ -243,6 +248,11 @@ function ModuleCard({ module, onAction, staggerIndex = 0 }) {
             <ActionButton label="Read draft"  onClick={() => onAction(module, 'read-draft')} />
             <ActionButton label="Discard"     onClick={() => onAction(module, 'discard')} variant="outline" />
           </>
+        ) : isPublishedImport ? (
+          <>
+            <ActionButton label="Read"            onClick={() => onAction(module, 'read-published')} />
+            <ActionButton label="Manage access"   onClick={() => onAction(module, 'manage-access')} variant="outline" />
+          </>
         ) : (
           <>
             <ActionButton label="Preview + Refine"   onClick={() => onAction(module, 'preview')} variant="outline" />
@@ -311,6 +321,10 @@ function AdminCurriculumPage({ user = {} }) {
   const [toast, setToast]    = React.useState(null);
   const [editorOpen, setEditorOpen] = React.useState(false);
   const [editorTrackId, setEditorTrackId] = React.useState(null);
+  const [assignTarget, setAssignTarget] = React.useState(null); // curriculum being assigned-on-publish
+  const [publishingAssign, setPublishingAssign] = React.useState(false);
+  const [viewerTarget, setViewerTarget] = React.useState(null); // { curriculumId, trackId }
+  const [accessTarget, setAccessTarget] = React.useState(null); // { curriculumId, name } for post-publish access edit
 
   // Pick up any draft curriculum that was generated during onboarding.
   // Re-derives on every store emit so Publish all immediately removes
@@ -341,11 +355,85 @@ function AdminCurriculumPage({ user = {} }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draft?.id, draft?.status, store]);
 
-  const publishAll = async () => {
+  // Published curricula (post-publish) — render as regular cards with a
+  // green border, no AI badge, with an assignee count for the owner.
+  const publishedCurricula = cafeId && store?.getPublishedCurriculaForCafe
+    ? store.getPublishedCurriculaForCafe(cafeId)
+    : [];
+
+  const publishedModules = React.useMemo(() => {
+    if (!store?.getTracksForCurriculum) return [];
+    const cards = [];
+    publishedCurricula.forEach((cur) => {
+      const tracks = store.getTracksForCurriculum(cur.id);
+      const assigneeCount = store.getAssigneesForCurriculum?.(cur.id)?.length || 0;
+      tracks.forEach((track) => {
+        const lessons = store.getLessonsForTrack(track.id);
+        cards.push({
+          id: `published-${track.id}`,
+          title: track.title,
+          description: track.description,
+          volume: (cur.shopName || 'IMPORTED').toUpperCase(),
+          level: 'Beginner',
+          assigned: assigneeCount,
+          difficulties: ['Easy'],
+          topics: lessons.map((l) => l.title),
+          publishedImport: true,
+          curriculumId: cur.id,
+          curriculumName: cur.shopName,
+          trackId: track.id,
+        });
+      });
+    });
+    return cards;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [publishedCurricula.map((c) => c.id).join('|'), store]);
+
+  const publishAll = () => {
     if (!draft) return;
-    await apiPublishCurriculum(draft.id);
-    setToast('Curriculum published — your team can now access their lessons.');
-    setTimeout(() => setToast(null), 3200);
+    setAssignTarget(draft);
+  };
+
+  // Update access on an already-published curriculum.
+  const handleAccessConfirm = ({ userIds }) => {
+    if (!accessTarget) return;
+    const current = store.getAssigneesForCurriculum(accessTarget.curriculumId).map((u) => u.id);
+    const next = new Set(userIds);
+    current.forEach((uid) => {
+      if (!next.has(uid)) store.unassignCurriculum(accessTarget.curriculumId, uid);
+    });
+    userIds.forEach((uid) => {
+      if (!current.includes(uid)) store.assignCurriculumToUser(accessTarget.curriculumId, uid);
+    });
+    const name = accessTarget.name;
+    setAccessTarget(null);
+    setToast(
+      userIds.length > 0
+        ? `Updated access — ${userIds.length} ${userIds.length === 1 ? 'person' : 'people'} can now see ${name}.`
+        : `${name} is no longer assigned to anyone.`
+    );
+    setTimeout(() => setToast(null), 3600);
+  };
+
+  const handleAssignConfirm = async ({ userIds }) => {
+    if (!assignTarget) return;
+    setPublishingAssign(true);
+    const resp = await apiPublishCurriculum(assignTarget.id);
+    if (resp?.error) {
+      setPublishingAssign(false);
+      setToast(resp.message || 'Publish failed.');
+      setTimeout(() => setToast(null), 3200);
+      return;
+    }
+    userIds.forEach((uid) => store?.assignCurriculumToUser?.(assignTarget.id, uid));
+    setPublishingAssign(false);
+    setAssignTarget(null);
+    setToast(
+      userIds.length > 0
+        ? `Curriculum published to ${userIds.length} ${userIds.length === 1 ? 'person' : 'people'} — they can access it now.`
+        : 'Curriculum published — assign teammates anytime from the card.'
+    );
+    setTimeout(() => setToast(null), 3600);
   };
 
   const editDraftLessons = () => {
@@ -377,9 +465,8 @@ function AdminCurriculumPage({ user = {} }) {
   };
 
   const visible = React.useMemo(() => {
-    // Draft tracks render first so the owner sees the new content
-    // immediately, then the existing modules below.
-    const merged = [...importedModules, ...modules];
+    // Drafts first, then freshly published imports, then mock modules.
+    const merged = [...importedModules, ...publishedModules, ...modules];
     let list = merged.filter((m) => {
       if (status === 'Assigned'   && m.assigned <= 0) return false;
       if (status === 'Unassigned' && m.assigned > 0)  return false;
@@ -389,13 +476,17 @@ function AdminCurriculumPage({ user = {} }) {
     if (sort === 'assigned') list = [...list].sort((a, b) => b.assigned - a.assigned);
     if (sort === 'alpha')    list = [...list].sort((a, b) => a.title.localeCompare(b.title));
     return list;
-  }, [modules, importedModules, status, diffs, sort]);
+  }, [modules, importedModules, publishedModules, status, diffs, sort]);
 
   const handleAction = (m, kind) => {
     if (kind === 'read-draft') {
       openLessonEditor(m.trackId);
     } else if (kind === 'discard') {
       discardDraft();
+    } else if (kind === 'read-published') {
+      setViewerTarget({ curriculumId: m.curriculumId, trackId: m.trackId });
+    } else if (kind === 'manage-access') {
+      setAccessTarget({ curriculumId: m.curriculumId, name: m.curriculumName || m.title });
     } else if (kind === 'preview') {
       setModal({
         title: `Refine "${m.title}"`,
@@ -658,11 +749,49 @@ function AdminCurriculumPage({ user = {} }) {
           curriculumId={draft?.id}
           initialTrackId={editorTrackId}
           onClose={() => setEditorOpen(false)}
-          onPublished={() => {
+          requestPublish={() => {
             setEditorOpen(false);
-            setToast('Curriculum published — your team can now access their lessons.');
-            setTimeout(() => setToast(null), 3200);
+            setAssignTarget(draft);
           }}
+        />
+      )}
+
+      {/* Assign-then-publish modal */}
+      {window.CurriculumAssignModal && (
+        <window.CurriculumAssignModal
+          open={!!assignTarget}
+          curriculum={assignTarget}
+          cafeId={cafeId}
+          busy={publishingAssign}
+          onCancel={() => setAssignTarget(null)}
+          onConfirm={handleAssignConfirm}
+        />
+      )}
+
+      {/* Manage-access modal (post-publish) */}
+      {window.CurriculumAssignModal && accessTarget && (() => {
+        const cur = store.getCurriculum?.(accessTarget.curriculumId);
+        const initialIds = store.getAssigneesForCurriculum?.(accessTarget.curriculumId)?.map((u) => u.id) || [];
+        return (
+          <window.CurriculumAssignModal
+            open={true}
+            curriculum={cur}
+            cafeId={cafeId}
+            initialUserIds={initialIds}
+            submitLabel="Save access"
+            onCancel={() => setAccessTarget(null)}
+            onConfirm={handleAccessConfirm}
+          />
+        );
+      })()}
+
+      {/* Read-only viewer for published track lessons */}
+      {window.PublishedCurriculumViewer && (
+        <window.PublishedCurriculumViewer
+          open={!!viewerTarget}
+          curriculumId={viewerTarget?.curriculumId}
+          initialTrackId={viewerTarget?.trackId}
+          onClose={() => setViewerTarget(null)}
         />
       )}
 

@@ -97,6 +97,9 @@ function AdminHome({ user = {} }) {
         (sum, t) => sum + store.getLessonsForTrack(t.id).length, 0)
     : 0;
 
+  // Cupper chat drawer state — { initial: string, context: {...} } when open.
+  const [cupperOpen, setCupperOpen] = React.useState(null);
+
   return (
     <AdminShell current="home" user={user} cafe={cafe} curriculumBadge={3}>
       {/* Draft curriculum reminder — surfaces the unpublished import. */}
@@ -211,7 +214,17 @@ function AdminHome({ user = {} }) {
 
       {/* Ask Cupper — full-width hero card */}
       <div style={{ marginBottom: 32 }}>
-        <AskCupperCard prompts={ASK_CUPPER_PROMPTS} onAsk={() => {}} />
+        <AskCupperCard
+          prompts={ASK_CUPPER_PROMPTS}
+          onAsk={(text) => {
+            const trimmed = (text || '').trim();
+            if (!trimmed) return;
+            setCupperOpen({
+              initial: trimmed,
+              context: { cafeName: cafe?.name, role: user?.role || 'owner' },
+            });
+          }}
+        />
       </div>
 
       {/* Quick insights */}
@@ -468,6 +481,15 @@ function AdminHome({ user = {} }) {
           <WeeklyBarChart data={WEEKLY_ENGAGEMENT} todayIndex={todayIndex} height={220} />
         </Card>
       </section>
+
+      {window.CupperChat && (
+        <window.CupperChat
+          open={!!cupperOpen}
+          initialMessage={cupperOpen?.initial || null}
+          context={cupperOpen?.context || null}
+          onClose={() => setCupperOpen(null)}
+        />
+      )}
     </AdminShell>
   );
 }

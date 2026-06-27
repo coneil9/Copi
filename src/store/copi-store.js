@@ -524,8 +524,80 @@ const CopiStore = {
       });
       delete db.tracks[t.id];
     });
+    // Also clean up any assignments for this curriculum.
+    Object.values(db.curriculumAssignments || {}).forEach((a) => {
+      if (a.curriculumId === curriculumId) delete db.curriculumAssignments[a.id];
+    });
     delete db.curricula[curriculumId];
     emit();
+  },
+
+  // ── Curriculum Assignments ───────────────────────────────
+  // A separate, simpler assignment table than the legacy db.assignments
+  // (which is keyed to db.modules). Tracks which users can see an
+  // imported curriculum on their barista library.
+
+  assignCurriculumToUser(curriculumId, userId) {
+    if (!curriculumId || !userId) return null;
+    const existing = Object.values(db.curriculumAssignments)
+      .find((a) => a.curriculumId === curriculumId && a.userId === userId);
+    if (existing) return existing;
+    const id = uid();
+    db.curriculumAssignments[id] = {
+      id, curriculumId, userId, assignedAt: Date.now(),
+    };
+    emit();
+    return db.curriculumAssignments[id];
+  },
+
+  assignCurriculumToAll(curriculumId, cafeId) {
+    if (!curriculumId || !cafeId) return 0;
+    const targets = Object.values(db.users)
+      .filter((u) => u.cafeId === cafeId && ['barista','host'].includes(u.role));
+    let added = 0;
+    targets.forEach((u) => {
+      if (this.assignCurriculumToUser(curriculumId, u.id)) added += 1;
+    });
+    return added;
+  },
+
+  unassignCurriculum(curriculumId, userId) {
+    const hit = Object.values(db.curriculumAssignments)
+      .find((a) => a.curriculumId === curriculumId && a.userId === userId);
+    if (!hit) return false;
+    delete db.curriculumAssignments[hit.id];
+    emit();
+    return true;
+  },
+
+  getCurriculaForUser(userId) {
+    if (!userId) return [];
+    const assignedIds = new Set(
+      Object.values(db.curriculumAssignments)
+        .filter((a) => a.userId === userId)
+        .map((a) => a.curriculumId)
+    );
+    return Object.values(db.curricula)
+      .filter((c) => c.status === 'published' && assignedIds.has(c.id));
+  },
+
+  getAssigneesForCurriculum(curriculumId) {
+    return Object.values(db.curriculumAssignments)
+      .filter((a) => a.curriculumId === curriculumId)
+      .map((a) => db.users[a.userId])
+      .filter(Boolean);
+  },
+
+  isCurriculumAssigned(curriculumId, userId) {
+    return Object.values(db.curriculumAssignments)
+      .some((a) => a.curriculumId === curriculumId && a.userId === userId);
+  },
+
+  getPublishedCurriculaForCafe(cafeId) {
+    if (!cafeId) return [];
+    return Object.values(db.curricula)
+      .filter((c) => c.cafeId === cafeId && c.status === 'published')
+      .sort((a, b) => (b.publishedAt || 0) - (a.publishedAt || 0));
   },
 
   // ── AI Jobs ──────────────────────────────────────────────

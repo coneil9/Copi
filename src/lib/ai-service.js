@@ -55,6 +55,40 @@ export async function simulateUpload(cafeId, files, onProgress) {
   // Phase 2: processing → ready (6s more)
   await delay(6000);
 
+  if (import.meta.env.VITE_USE_REAL_AI === 'true') {
+    // Real backend branch
+    const resp = await fetch('/api/ai/milestones', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        cafeId,
+        files: processedFiles.map((f) => ({ name: f.name, text: f.extractedText })),
+      }),
+    });
+    const body = await resp.json();
+    if (body.error) {
+      store.updateAiJob(job.id, { status: 'error' });
+      if (onProgress) onProgress('error');
+      return job.id;
+    }
+    let order = 0;
+    const generatedMilestones = body.data.milestones.map((m) => ({
+      id: uid(), cafeId, role: m.role, order: order++,
+      title: m.title, desc: m.desc, source: m.source,
+      status: 'suggested', fromGap: m.fromGap,
+    }));
+    const gaps = body.data.gaps;
+    const db = store.raw();
+    generatedMilestones.forEach((ms) => { db.milestones[ms.id] = ms; });
+    store.updateAiJob(job.id, {
+      status: 'ready',
+      output: { milestoneIds: generatedMilestones.map((m) => m.id), gaps },
+    });
+    if (onProgress) onProgress('ready');
+    return job.id;
+  }
+
+  // Simulated fallback (rollback path) — unchanged behavior.
   // Analyse uploaded content
   const combinedText = processedFiles.map((f) => f.extractedText).join(' ');
   const keywords = extractKeywords(combinedText);

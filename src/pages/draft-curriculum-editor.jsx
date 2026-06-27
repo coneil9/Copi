@@ -11,6 +11,7 @@
 // ═════════════════════════════════════════════════════════
 
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { publishCurriculum as apiPublishCurriculum } from '../lib/roaster-import-service.js';
 
 function fmtDuration(minutes) {
@@ -33,7 +34,7 @@ function ChevronRight({ open }) {
   );
 }
 
-export function DraftCurriculumEditor({ open, curriculumId, initialTrackId = null, onClose, onPublished }) {
+export function DraftCurriculumEditor({ open, curriculumId, initialTrackId = null, onClose, onPublished, requestPublish }) {
   const store = window.useCopiStore ? window.useCopiStore() : window.CopiStore;
   const [activeLessonId, setActiveLessonId] = React.useState(null);
   const [expandedTracks, setExpandedTracks] = React.useState(() => new Set());
@@ -148,6 +149,17 @@ export function DraftCurriculumEditor({ open, curriculumId, initialTrackId = nul
       });
       setDirty(false);
     }
+    // When the parent supplies a requestPublish handler, defer publishing
+    // to it (so the assignment modal can run first). Falls back to a direct
+    // publish for any callers that haven't wired the assign flow yet.
+    if (typeof requestPublish === 'function') {
+      setClosing(true);
+      setTimeout(() => {
+        setClosing(false);
+        requestPublish();
+      }, 180);
+      return;
+    }
     setPublishing(true);
     const resp = await apiPublishCurriculum(curriculumId);
     setPublishing(false);
@@ -169,7 +181,7 @@ export function DraftCurriculumEditor({ open, curriculumId, initialTrackId = nul
   };
 
   // ── Render ────────────────────────────────────────────────
-  return (
+  return createPortal((
     <div
       data-proto-ui
       onClick={(e) => { if (e.target === e.currentTarget) attemptClose(); }}
@@ -673,7 +685,7 @@ export function DraftCurriculumEditor({ open, curriculumId, initialTrackId = nul
         )}
       </div>
     </div>
-  );
+  ), document.body);
 }
 
 if (typeof window !== 'undefined') {

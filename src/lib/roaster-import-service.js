@@ -402,37 +402,48 @@ export async function importRoaster({ url, shopId } = {}) {
   }
   bumpRateLimit();
 
-  // 3) Simulate the LLM call. A real backend would look like:
-  //
-  //    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-  //      method: 'POST',
-  //      headers: {
-  //        'x-api-key': process.env.ANTHROPIC_API_KEY,
-  //        'anthropic-version': '2023-06-01',
-  //        'content-type': 'application/json',
-  //      },
-  //      body: JSON.stringify({
-  //        model: ANTHROPIC_MODEL,
-  //        max_tokens: 4096,
-  //        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
-  //        system: SYSTEM_PROMPT,
-  //        messages: [{ role: 'user', content: `Roaster URL: ${v.url}` }]
-  //      })
-  //    });
-  //    const raw = (await resp.json()).content?.[0]?.text;
-  //    const json = JSON.parse(stripFences(raw));
-  //
-  // We mimic that flow end-to-end so the swap is one block.
-  try {
-    await wait(2200);                                    // network + first token
-    const fakeLlmText = '```json\n' + JSON.stringify(generatePayload(v.host)) + '\n```';
-    const json = JSON.parse(stripFences(fakeLlmText));
-
-    if (!json || !Array.isArray(json.tracks) || json.tracks.length === 0) {
-      throw new Error('Empty tracks in response');
+  // 3) Get the curriculum JSON — real backend when the flag is on, simulated otherwise.
+  let json;
+  if (import.meta.env.VITE_USE_REAL_AI === 'true') {
+    try {
+      const resp = await fetch('/api/import/roaster', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ url: v.url, shopId }),
+      });
+      const body = await resp.json();
+      if (body.error) return body; // server envelope matches our contract exactly
+      json = body.data;
+      if (!json || !Array.isArray(json.tracks) || json.tracks.length === 0) {
+        throw new Error('Empty tracks in response');
+      }
+    } catch (err) {
+      return {
+        error: true,
+        message: 'We couldn\'t read that site. Try a different URL, or skip this step and build your curriculum manually.',
+        status: 422,
+      };
     }
+  } else {
+    // Simulated fallback (rollback path) — unchanged behavior.
+    try {
+      await wait(2200);
+      const fakeLlmText = '```json\n' + JSON.stringify(generatePayload(v.host)) + '\n```';
+      json = JSON.parse(stripFences(fakeLlmText));
+      if (!json || !Array.isArray(json.tracks) || json.tracks.length === 0) {
+        throw new Error('Empty tracks in response');
+      }
+    } catch (err) {
+      return {
+        error: true,
+        message: 'We couldn\'t read that site. Try a different URL, or skip this step and build your curriculum manually.',
+        status: 422,
+      };
+    }
+  }
 
-    // 4) Persist via CopiStore (the same shape as the real backend would write)
+  // 4) Persist via CopiStore (the same shape as the real backend would write)
+  try {
     const store = window.CopiStore;
     if (!store) {
       return { error: true, message: 'Store not initialized.', status: 422 };
