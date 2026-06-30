@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(claude mcp *)",
+      "Bash(npx skills *)",
+      "Bash(curl -so /dev/null -w \"%{http_code}\" https://mcp.supabase.com/mcp)"
+    ]
+  },
+  "enabledMcpjsonServers": [
+    "supabase"
+  ]
+}
