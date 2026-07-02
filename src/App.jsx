@@ -1,4 +1,5 @@
 import React from 'react';
+import { supabase } from './lib/supabaseClient.js';
 import './store/copi-store.js';
 
 // Import new design system and components
@@ -5524,25 +5525,14 @@ Object.assign(window, { BaristaProfile });
 // underlying page components stay untouched.
 // ═════════════════════════════════════════════════════════
 
-// Admin credentials — these always route to the roaster dashboard.
-const PROTO_ADMIN = {
-  email: 'admin@milano.coffee',
-  password: 'copi2026',
-  name: 'Brian Turko',
-  cafe: 'Milano',
-  role: 'Roaster · Admin',
-};
-
-// Barista credentials — route to the barista "Today" view.
-// Maps to a real member of the canonical roster (copi-store.jsx)
-// so assignments and progress line up across admin + barista.
-const PROTO_BARISTA = {
-  email: 'lili@milano.coffee',
-  password: 'copi2026',
-  name: 'Lili Turko',
-  cafe: 'Milano',
-  role: 'Barista',
-};
+// Demo credentials for the sales/prototype flow.
+// These are the seeded Supabase users (see supabase/migrations/seed_data.sql);
+// clicking the demo buttons in LoginModal fills them in and they go through
+// real supabase.auth.signInWithPassword — same path as any other user.
+const DEMO_CREDENTIALS = [
+  { label: 'Admin demo',   email: 'admin@milano.coffee',   password: 'copi2026' },
+  { label: 'Barista demo', email: 'lili@milano.coffee',    password: 'copi2026' },
+];
 
 const PROTO_PALETTE = window.NEW_PALETTE || {
   bg: '#EFE9DA', fg: '#1F1B14', accent: '#44704B', cream: '#FBF8F0', sun: '#C49455'
@@ -5798,11 +5788,11 @@ function LoginModal({ open, onClose, onSwitchToTrial, onAuth }) {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [submitting, setSubmitting] = React.useState(false);
-  const [done, setDone] = React.useState(false);
+  const [error, setError] = React.useState('');
 
   React.useEffect(() => {
     if (open) {
-      setClosing(false); setEmail(''); setPassword(''); setSubmitting(false); setDone(false);
+      setClosing(false); setEmail(''); setPassword(''); setSubmitting(false); setError('');
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
@@ -5830,15 +5820,22 @@ function LoginModal({ open, onClose, onSwitchToTrial, onAuth }) {
 
   const valid = /.+@.+\..+/.test(email) && password.length >= 4;
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e && e.preventDefault();
     if (!valid || submitting) return;
+    setError('');
     setSubmitting(true);
-    setTimeout(() => {
+    try {
+      const result = onAuth ? await onAuth({ email, password }) : { ok: false, error: 'Auth handler missing' };
+      if (!result?.ok) {
+        setError(result?.error || 'Invalid email or password.');
+        setSubmitting(false);
+      }
+      // On success, the parent closes the modal — no local success state needed.
+    } catch (err) {
+      setError(err?.message || 'Something went wrong signing you in.');
       setSubmitting(false);
-      setDone(true);
-      setTimeout(() => { if (onAuth) onAuth({ email, password }); }, 700);
-    }, 700);
+    }
   };
 
   const inputStyle = {
@@ -5883,63 +5880,61 @@ function LoginModal({ open, onClose, onSwitchToTrial, onAuth }) {
         </div>
 
         <div style={{ padding: '32px 28px 24px' }}>
-          {!done ? (
-            <form onSubmit={submit}>
-              {/* Demo credential buttons */}
-              <div style={{ marginBottom: 24, display: 'grid', gap: 8 }}>
-                {[
-                  { l: 'Admin demo', email: PROTO_ADMIN.email, pw: PROTO_ADMIN.password },
-                  { l: 'Barista demo', email: PROTO_BARISTA.email, pw: PROTO_BARISTA.password },
-                ].map((row, i) => (
-                  <button key={i} type="button"
-                    onClick={() => { setEmail(row.email); setPassword(row.pw); }}
-                    style={{
-                      ...t.bodySmall, padding: '10px 14px', textAlign: 'left',
-                      background: p.bg, border: `1px dashed ${p.tagBorder}`,
-                      borderRadius: RADIUS.card, cursor: 'pointer', color: p.textMuted,
-                      display: 'flex', justifyContent: 'space-between', gap: 12,
-                    }}
-                  >
-                    <span style={{ fontWeight: 500, color: p.accent }}>{row.l}</span>
-                    <span>{row.email}</span>
-                  </button>
-                ))}
-              </div>
-
-              <h2 style={{ ...t.h2, fontSize: 32, color: p.textPrimary, margin: '0 0 8px 0' }}>Sign in</h2>
-              <p style={{ ...t.body, color: p.textMuted, margin: '0 0 24px 0' }}>Pick up where your team left off.</p>
-
-              <label style={{ display: 'block', marginBottom: 16 }}>
-                <div style={{ ...t.eyebrow, color: p.textMuted, marginBottom: 8 }}>Work email</div>
-                <input autoFocus type="email" placeholder="you@cafe.com"
-                  value={email} onChange={(e) => setEmail(e.target.value)} style={inputStyle} />
-              </label>
-              <label style={{ display: 'block', marginBottom: 4 }}>
-                <div style={{ ...t.eyebrow, color: p.textMuted, marginBottom: 8, display: 'flex', justifyContent: 'space-between' }}>
-                  <span>Password</span>
-                  <a style={{ color: p.accent, cursor: 'pointer' }}>Forgot?</a>
-                </div>
-                <input type="password" placeholder="••••••••"
-                  value={password} onChange={(e) => setPassword(e.target.value)} style={inputStyle} />
-              </label>
-
-              <button type="submit" disabled={!valid || submitting} style={{
-                ...t.button, width: '100%', marginTop: 20,
-                padding: '14px 24px', borderRadius: RADIUS.pill, border: 'none',
-                background: valid ? p.accent : p.tagBg, color: valid ? '#FFFFFF' : p.textMuted,
-                cursor: valid ? 'pointer' : 'not-allowed', transition: 'all 160ms ease',
-              }}>
-                {submitting ? 'Signing in…' : 'Sign in →'}
-              </button>
-            </form>
-          ) : (
-            <div style={{ textAlign: 'center', padding: '16px 0' }}>
-              <div style={{ ...t.eyebrow, color: p.accent, marginBottom: 16 }}>Signed in</div>
-              <h2 style={{ ...t.h2, fontSize: 36, color: p.textPrimary, margin: '0 0 12px 0' }}>Welcome back.</h2>
-              <p style={{ ...t.body, color: p.textMuted, margin: 0 }}>Loading your workspace…</p>
-              <div style={{ ...t.bodySmall, color: p.textMuted, marginTop: 20 }}>{email}</div>
+          <form onSubmit={submit}>
+            {/* Demo credential buttons — autofill only; real auth still runs. */}
+            <div style={{ marginBottom: 24, display: 'grid', gap: 8 }}>
+              {DEMO_CREDENTIALS.map((row, i) => (
+                <button key={i} type="button"
+                  onClick={() => { setEmail(row.email); setPassword(row.password); setError(''); }}
+                  style={{
+                    ...t.bodySmall, padding: '10px 14px', textAlign: 'left',
+                    background: p.bg, border: `1px dashed ${p.tagBorder}`,
+                    borderRadius: RADIUS.card, cursor: 'pointer', color: p.textMuted,
+                    display: 'flex', justifyContent: 'space-between', gap: 12,
+                  }}
+                >
+                  <span style={{ fontWeight: 500, color: p.accent }}>{row.label}</span>
+                  <span>{row.email}</span>
+                </button>
+              ))}
             </div>
-          )}
+
+            <h2 style={{ ...t.h2, fontSize: 32, color: p.textPrimary, margin: '0 0 8px 0' }}>Sign in</h2>
+            <p style={{ ...t.body, color: p.textMuted, margin: '0 0 24px 0' }}>Pick up where your team left off.</p>
+
+            <label style={{ display: 'block', marginBottom: 16 }}>
+              <div style={{ ...t.eyebrow, color: p.textMuted, marginBottom: 8 }}>Work email</div>
+              <input autoFocus type="email" placeholder="you@cafe.com"
+                value={email} onChange={(e) => { setEmail(e.target.value); if (error) setError(''); }} style={inputStyle} />
+            </label>
+            <label style={{ display: 'block', marginBottom: 4 }}>
+              <div style={{ ...t.eyebrow, color: p.textMuted, marginBottom: 8, display: 'flex', justifyContent: 'space-between' }}>
+                <span>Password</span>
+                <a style={{ color: p.accent, cursor: 'pointer' }}>Forgot?</a>
+              </div>
+              <input type="password" placeholder="••••••••"
+                value={password} onChange={(e) => { setPassword(e.target.value); if (error) setError(''); }} style={inputStyle} />
+            </label>
+
+            {error ? (
+              <div role="alert" style={{
+                ...t.bodySmall, marginTop: 16, padding: '10px 14px',
+                background: p.bg, color: p.cherry,
+                border: `1px solid ${p.cherry}`, borderRadius: RADIUS.card,
+              }}>
+                {error}
+              </div>
+            ) : null}
+
+            <button type="submit" disabled={!valid || submitting} style={{
+              ...t.button, width: '100%', marginTop: 20,
+              padding: '14px 24px', borderRadius: RADIUS.pill, border: 'none',
+              background: valid ? p.accent : p.tagBg, color: valid ? '#FFFFFF' : p.textMuted,
+              cursor: valid && !submitting ? 'pointer' : 'not-allowed', transition: 'all 160ms ease',
+            }}>
+              {submitting ? 'Signing in…' : 'Sign in →'}
+            </button>
+          </form>
         </div>
 
         <div style={{
@@ -6334,11 +6329,15 @@ function CopiPrototype() {
   const [fading, setFading] = React.useState(false);
   const [pendingSignupUser, setPendingSignupUser] = React.useState(null);
 
+  // Initial user hydration:
+  //   - Supabase session is loaded async by the onAuthStateChange effect below.
+  //   - For CMS/CopiStore fallback sessions we still read localStorage on mount
+  //     so demo/prototype sessions survive a refresh.
   const [user, setUser] = React.useState(() => {
     try {
       const raw = JSON.parse(localStorage.getItem('copi.user') || 'null');
       if (!raw) return null;
-      // Migrate old sessions that used email-based kind instead of role
+      if (raw.authProvider === 'supabase') return null; // let the auth listener rehydrate
       if (raw.kind === 'admin' && !raw.role) return { ...raw, role: 'owner' };
       if (raw.kind === 'barista' && !raw.role) return { ...raw, role: 'barista' };
       return raw;
@@ -6346,40 +6345,122 @@ function CopiPrototype() {
   });
 
   React.useEffect(() => {
-    if (user) localStorage.setItem('copi.user', JSON.stringify(user));
-    else localStorage.removeItem('copi.user');
+    // Supabase's SDK persists its own session; skip our copy for those users
+    // so we're not writing the same state in two places.
+    if (user && user.authProvider !== 'supabase') {
+      localStorage.setItem('copi.user', JSON.stringify(user));
+    } else if (!user) {
+      localStorage.removeItem('copi.user');
+    }
   }, [user]);
 
-  const handleAuth = ({ email, password }) => {
-    const store = window.CopiStore;
-    // CMS team login
-    if (email.trim().toLowerCase() === 'team@copi.app' && password === 'copi2026') {
-      const cmsUser = { id: 'cms', name: 'Copi Team', email: 'team@copi.app', role: 'cms', kind: 'admin' };
-      setUser(cmsUser);
+  // ── Supabase session bridge ────────────────────────────────────────
+  // Hydrates `user` from a Supabase session on mount and keeps it in sync
+  // with sign-in, sign-out, and token refresh events. Real auth flows only —
+  // CopiStore / CMS demo sessions bypass this path.
+  const hydrateSupabaseUser = React.useCallback(async (authUser) => {
+    if (!supabase || !authUser) return null;
+    const { data: row, error: err } = await supabase
+      .from('users')
+      .select('id, cafe_id, location_id, email, name, role, cafes(name)')
+      .eq('id', authUser.id)
+      .maybeSingle();
+    if (err || !row) return null;
+    return {
+      id: row.id,
+      cafeId: row.cafe_id,
+      locationId: row.location_id,
+      email: row.email,
+      name: row.name,
+      role: row.role,
+      kind: ['owner','admin'].includes(row.role) ? 'admin' : row.role,
+      cafe: row.cafes?.name || '',
+      authProvider: 'supabase',
+    };
+  }, []);
+
+  React.useEffect(() => {
+    if (!supabase) return; // env not configured — prototype/demo mode only
+    let cancelled = false;
+
+    // Rehydrate any existing session on first mount.
+    supabase.auth.getSession().then(async ({ data }) => {
+      if (cancelled || !data.session) return;
+      const u = await hydrateSupabaseUser(data.session.user);
+      if (!cancelled && u) {
+        setUser(u);
+        // Land the user on their role's home surface if they refresh into 'home'.
+        setRoute((r) => (r === 'home' ? routeForRole(u.role) : r));
+      }
+    });
+
+    const { data: sub } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_OUT') {
+        setUser(null);
+        return;
+      }
+      if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'USER_UPDATED') {
+        if (!session?.user) return;
+        const u = await hydrateSupabaseUser(session.user);
+        if (u) setUser(u);
+      }
+      // TOKEN_REFRESHED / PASSWORD_RECOVERY: SDK updates its own session, no-op here.
+    });
+
+    return () => { cancelled = true; sub?.subscription?.unsubscribe(); };
+  }, [hydrateSupabaseUser]);
+
+  // handleAuth returns { ok, error } so LoginModal can show inline errors.
+  //   1. Supabase auth (real) — the only path that creates a real session.
+  //   2. CMS hardcoded team login — unchanged; internal-only surface.
+  //   3. CopiStore in-memory fallback — preserves the sales/prototype roster
+  //      until CopiStore data reads are migrated in a later session.
+  const handleAuth = async ({ email, password }) => {
+    const trimmedEmail = email.trim().toLowerCase();
+
+    // 1) Real Supabase auth
+    if (supabase) {
+      const { data, error: signInErr } = await supabase.auth.signInWithPassword({
+        email: trimmedEmail, password,
+      });
+      if (!signInErr && data?.session?.user) {
+        const u = await hydrateSupabaseUser(data.session.user);
+        if (u) {
+          setUser(u);
+          setLogin(false);
+          goTo(routeForRole(u.role));
+          return { ok: true };
+        }
+        // Authed against Supabase Auth but no matching public.users row.
+        await supabase.auth.signOut();
+        return { ok: false, error: 'This account has no cafe profile yet. Ask your owner to resend your invite.' };
+      }
+      // Not a Supabase user — fall through to CMS + CopiStore fallbacks.
+    }
+
+    // 2) CMS internal login (hardcoded)
+    if (trimmedEmail === 'team@copi.app' && password === 'copi2026') {
+      setUser({ id: 'cms', name: 'Copi Team', email: 'team@copi.app', role: 'cms', kind: 'admin' });
       setLogin(false);
       goTo('cms');
-      return;
+      return { ok: true };
     }
-    // DB auth
-    const dbUser = store ? store.authenticate(email, password) : null;
+
+    // 3) CopiStore in-memory fallback (prototype/demo roster beyond seeded users)
+    const store = window.CopiStore;
+    const dbUser = store ? store.authenticate(trimmedEmail, password) : null;
     if (dbUser) {
-      const u = { ...dbUser, kind: ['owner','admin'].includes(dbUser.role) ? 'admin' : dbUser.role === 'manager' ? 'manager' : 'barista', cafe: 'Milano' };
-      setUser(u);
+      setUser({
+        ...dbUser,
+        kind: ['owner','admin'].includes(dbUser.role) ? 'admin' : dbUser.role === 'manager' ? 'manager' : 'barista',
+        cafe: 'Milano',
+      });
       setLogin(false);
       goTo(routeForRole(dbUser.role));
-      return;
+      return { ok: true };
     }
-    // Legacy fallback for dev
-    const e = email.trim().toLowerCase();
-    if (e === PROTO_ADMIN.email && password === PROTO_ADMIN.password) {
-      setUser({ ...PROTO_ADMIN, email, kind: 'admin', role: 'owner' });
-      setLogin(false); goTo('dashboard'); return;
-    }
-    if (e === PROTO_BARISTA.email && password === PROTO_BARISTA.password) {
-      setUser({ ...PROTO_BARISTA, email, kind: 'barista', role: 'barista' });
-      setLogin(false); goTo('today'); return;
-    }
-    // Unknown user — show error (handled by LoginModal)
+
+    return { ok: false, error: 'Invalid email or password.' };
   };
 
   const handleSignup = (userData) => {
@@ -6387,8 +6468,35 @@ function CopiPrototype() {
     goTo('cafe-setup');
   };
 
-  const handleCafeSetupComplete = (newUser) => {
-    const u = { ...newUser, kind: 'admin', cafe: window.CopiStore?.getCafe(newUser.cafeId)?.name || 'My Cafe' };
+  // After CafeSetupPage.bootstrap_owner_cafe RPC succeeds, hydrate `user`
+  // from Supabase (the source of truth now that public.cafes/users rows
+  // exist). Falls back to CopiStore only for demo/prototype signups made
+  // when Supabase isn't configured.
+  const handleCafeSetupComplete = async (result) => {
+    let u = null;
+
+    if (supabase) {
+      const { data: sessionData } = await supabase.auth.getUser();
+      if (sessionData?.user) {
+        u = await hydrateSupabaseUser(sessionData.user);
+      }
+    }
+
+    if (!u) {
+      // Demo/prototype fallback: build the user shape from CopiStore.
+      // Real signups should never hit this branch — if they do, either
+      // Supabase isn't configured or the RPC didn't create the public.users
+      // row (which would be a bug worth surfacing in logs).
+      u = {
+        cafeId: result?.cafeId,
+        locationId: result?.locationId || null,
+        cafeName: result?.cafeName,
+        kind: 'admin',
+        role: 'owner',
+        cafe: result?.cafeName || window.CopiStore?.getCafe(result?.cafeId)?.name || 'My Cafe',
+      };
+    }
+
     setUser(u);
     // Send new owners through the roaster-import step before the dashboard.
     // The step is fully skippable, so this never blocks login.
@@ -6411,7 +6519,10 @@ function CopiPrototype() {
     goTo(routeForRole(dbUser.role));
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    if (supabase) {
+      try { await supabase.auth.signOut(); } catch (_e) { /* ignore — clearing local state is what matters */ }
+    }
     setUser(null);
     goTo('home');
   };
@@ -6439,7 +6550,7 @@ function CopiPrototype() {
       openFinal:  (volId) => setLessonTarget({ kind: 'final', volId }),
       openAssign: (volId) => setAssignVolId(volId),
       openBarista: (email) => setDetailEmail(email),
-      openTrial: () => setTrial(true),
+      openTrial: () => navigate('signup'),
       openLogin: () => setLogin(true),
       navigate,
     };
@@ -6519,7 +6630,7 @@ function CopiPrototype() {
     // ── CTAs ─────────────────────────────────────────
     if (/start free trial/i.test(text) || /join the waitlist/i.test(text)) {
       e.preventDefault();
-      setTrial(true);
+      navigate('signup');
       return;
     }
     if (/^log in$/i.test(text)) {
@@ -6585,14 +6696,14 @@ function CopiPrototype() {
         <LoginModal
           open={login}
           onClose={() => setLogin(false)}
-          onSwitchToTrial={() => setTrial(true)}
+          onSwitchToTrial={() => { setLogin(false); navigate('signup'); }}
           onAuth={handleAuth}
         />
         <VolumeModal
           open={volumeIdx !== null}
           volume={volumeIdx !== null ? (window.COPI_VOLUMES || [])[volumeIdx] : null}
           onClose={() => setVolumeIdx(null)}
-          onTrial={() => setTrial(true)}
+          onTrial={() => navigate('signup')}
         />
         {window.NewLessonPlayer
           ? React.createElement(window.NewLessonPlayer, {

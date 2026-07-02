@@ -9,13 +9,25 @@ npm install
 npm run dev
 ```
 
+## Environment variables on a fresh clone
+
+`.env` is gitignored (it holds secrets like `ANTHROPIC_API_KEY`). Vercel is the single source of truth for env vars — pull them down after cloning:
+
+```bash
+npm i -g vercel        # one-time, global
+vercel link            # once per clone: connects the folder to the Copi Vercel project
+vercel env pull        # writes current Vercel env vars into .env (Development scope by default)
+```
+
+Re-run `vercel env pull` whenever env vars change in Vercel. `.env.example` documents the required variable names.
+
 ## Build for Vercel
 
 ```bash
 npm run build
 ```
 
-Deploy the repository to Vercel as a Vite project. Add Supabase keys through Vercel Project Settings > Environment Variables.
+Deploy the repository to Vercel as a Vite project. Env vars live in Vercel Project Settings > Environment Variables (see the Environment Variables section in `CLAUDE.md` for the exact list).
 
 ## File map
 

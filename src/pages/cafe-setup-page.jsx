@@ -1,60 +1,76 @@
 import React from 'react';
+import { supabase } from '../lib/supabaseClient.js';
+
+function friendlyBootstrapError(err) {
+  if (!err) return 'Something went wrong. Please try again.';
+  const msg = (err.message || '').toLowerCase();
+  if (msg.includes('not authenticated') || err.code === '42501') {
+    return 'Your session expired. Please sign up again.';
+  }
+  if (msg.includes('duplicate') || err.code === '23505') {
+    return 'A cafe with this name already exists for your account. Try a different name.';
+  }
+  if (msg.includes('fetch') || msg.includes('network')) {
+    return 'Network error — check your connection and try again.';
+  }
+  return err.message || 'Cafe setup failed. Please try again.';
+}
 
 export function CafeSetupPage({ pendingUser, onComplete }) {
-  const [cafeName, setCafeName]     = React.useState('');
+  const [cafeName, setCafeName]         = React.useState('');
   const [numLocations, setNumLocations] = React.useState(1);
-  const [loading, setLoading]       = React.useState(false);
-  const [error, setError]           = React.useState('');
+  const [loading, setLoading]           = React.useState(false);
+  const [error, setError]               = React.useState('');
 
   const th = window.THEME || {};
   const ty = window.TYPOGRAPHY || {};
   const sh = window.SHADOW || {};
-  const store = window.CopiStore;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     if (!cafeName.trim()) return setError('Cafe name is required.');
+
+    if (!supabase) {
+      return setError('Supabase is not configured. Contact the Copi team.');
+    }
+
     setLoading(true);
-
-    setTimeout(() => {
-      const { uid } = window.__copiDbHelpers || {};
-      const cafeId = (uid ? uid() : Math.random().toString(36).slice(2)) + 'c';
-      const now = Date.now();
-
-      // Create cafe record
-      const db = store.raw();
-      db.cafes[cafeId] = {
-        id: cafeId, name: cafeName.trim(), createdAt: now,
-        plan: 'flat', subscription: { status: 'trial', seats: 1, renewsAt: now + 1000 * 60 * 60 * 24 * 30 },
-        setupComplete: false,
-      };
-
-      // Create default locations
-      const locationIds = [];
-      for (let i = 0; i < numLocations; i++) {
-        const locId = `loc-${cafeId}-${i}`;
-        db.locations[locId] = { id: locId, cafeId, name: numLocations === 1 ? 'Main' : `Location ${i + 1}` };
-        locationIds.push(locId);
+    try {
+      // Bootstrap the cafe, first location, and owner user row atomically.
+      // Additional locations (numLocations > 1) can be added from the
+      // dashboard once the owner is signed in — the RPC only seeds one
+      // so a signup that fails halfway can be safely retried.
+      const { data, error: rpcErr } = await supabase.rpc('bootstrap_owner_cafe', {
+        p_cafe_name: cafeName.trim(),
+        p_owner_name: pendingUser?.name || '',
+        p_first_location_name: numLocations === 1 ? 'Main' : 'Location 1',
+      });
+      if (rpcErr) {
+        setLoading(false);
+        return setError(friendlyBootstrapError(rpcErr));
       }
 
-      // Create owner user. Guard against the parent having already
-      // cleared pendingSignupUser by the time this fires.
-      const ownerId = `usr-${cafeId}-owner`;
-      db.users[ownerId] = {
-        id: ownerId, cafeId, locationId: null,
-        name: pendingUser?.name || 'Owner',
-        email: pendingUser?.email || `owner@${cafeName.toLowerCase().replace(/\s+/g, '')}.coffee`,
-        password: pendingUser?.password || 'sso', role: 'owner',
-        status: 'active', joinedAt: now,
-      };
-
-      // Persist
-      const { saveDb } = window.__copiDbHelpers || {};
-      if (saveDb) saveDb(db); else { try { localStorage.setItem('copi.db.v4', JSON.stringify(db)); } catch(_) {} }
+      // RPC returns a table (an array of one row).
+      const row = Array.isArray(data) ? data[0] : data;
+      if (!row?.cafe_id) {
+        setLoading(false);
+        return setError('Cafe setup returned no data. Please try again.');
+      }
 
       setLoading(false);
-      onComplete({ ...db.users[ownerId], cafeId, locationIds });
-    }, 800);
+      // Hand control back to the parent, which hydrates `user` from Supabase.
+      onComplete({
+        cafeId: row.cafe_id,
+        locationId: row.location_id,
+        cafeName: cafeName.trim(),
+        numLocations,
+        alreadyExisted: !!row.already_existed,
+      });
+    } catch (err) {
+      setLoading(false);
+      setError(friendlyBootstrapError(err));
+    }
   };
 
   return (
@@ -84,7 +100,7 @@ export function CafeSetupPage({ pendingUser, onComplete }) {
                 Cafe name <span style={{ color: th.danger }}>*</span>
               </label>
               <input
-                value={cafeName} onChange={(e) => setCafeName(e.target.value)}
+                value={cafeName} onChange={(e) => { setCafeName(e.target.value); if (error) setError(''); }}
                 placeholder="e.g. Ember & Oak Coffee"
                 style={{ width: '100%', ...ty.body, padding: '9px 14px', background: th.bgCard, border: `1.5px solid ${th.line}`, borderRadius: th.input, color: th.ink, outline: 'none', boxSizing: 'border-box' }}
                 onFocus={(e) => { e.target.style.borderColor = th.accent; }}
@@ -111,10 +127,10 @@ export function CafeSetupPage({ pendingUser, onComplete }) {
                   >{n}{n === 4 ? '+' : ''}</button>
                 ))}
               </div>
-              <p style={{ ...ty.caption, color: th.muted, marginTop: 6 }}>You can add or rename locations later.</p>
+              <p style={{ ...ty.caption, color: th.muted, marginTop: 6 }}>We'll create your first location now — you can add or rename more from the dashboard.</p>
             </div>
 
-            {error && <p style={{ ...ty.caption, color: th.danger, marginBottom: 12 }}>{error}</p>}
+            {error && <p role="alert" style={{ ...ty.caption, color: th.danger, marginBottom: 12 }}>{error}</p>}
 
             <button
               type="submit" disabled={loading}

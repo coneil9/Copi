@@ -1,34 +1,111 @@
 import React from 'react';
+import { supabase } from '../lib/supabaseClient.js';
+
+// Maps Supabase auth error codes/messages to user-friendly copy.
+// Falls back to the raw message if we don't recognize it.
+function friendlySignupError(err) {
+  if (!err) return 'Something went wrong. Please try again.';
+  const msg = (err.message || '').toLowerCase();
+  const code = err.code || err.status;
+  if (msg.includes('already registered') || msg.includes('user already exists') || code === 'user_already_exists') {
+    return 'An account with this email already exists. Try signing in instead.';
+  }
+  if (msg.includes('weak password') || msg.includes('password') && msg.includes('short')) {
+    return 'Password is too weak — try at least 8 characters with a number.';
+  }
+  if (msg.includes('email address') && msg.includes('invalid')) {
+    return 'That email address looks invalid. Try a different one.';
+  }
+  if (msg.includes('rate limit')) {
+    return 'Too many signups from this network. Wait a minute and try again.';
+  }
+  if (msg.includes('fetch') || msg.includes('network')) {
+    return 'Network error — check your connection and try again.';
+  }
+  return err.message || 'Signup failed. Please try again.';
+}
 
 export function SignupPage({ onSignup, onLogin }) {
-  const [step, setStep] = React.useState('signup'); // 'signup' | 'verify'
   const [name, setName]         = React.useState('');
   const [email, setEmail]       = React.useState('');
   const [password, setPassword] = React.useState('');
   const [error, setError]       = React.useState('');
   const [loading, setLoading]   = React.useState(false);
+  // 'form' | 'confirm-email' — the latter shows only when Supabase Auth
+  // has "Confirm email" enabled, so signUp returns no session.
+  const [phase, setPhase]       = React.useState('form');
 
   const th = window.THEME || {};
   const ty = window.TYPOGRAPHY || {};
   const sh = window.SHADOW || {};
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    if (!name.trim()) return setError('Please enter your name.');
+    if (!name.trim())       return setError('Please enter your name.');
     if (!email.includes('@')) return setError('Please enter a valid email.');
-    if (password.length < 6) return setError('Password must be at least 6 characters.');
+    if (password.length < 6)  return setError('Password must be at least 6 characters.');
+
+    const trimmedEmail = email.toLowerCase().trim();
+    const trimmedName  = name.trim();
     setLoading(true);
-    // Simulate async signup
-    setTimeout(() => {
+
+    if (!supabase) {
       setLoading(false);
-      onSignup({ name: name.trim(), email: email.toLowerCase().trim(), password });
-    }, 600);
+      return setError('Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your .env.');
+    }
+
+    try {
+      const { data, error: signUpErr } = await supabase.auth.signUp({
+        email: trimmedEmail,
+        password,
+        options: { data: { name: trimmedName } },
+      });
+      if (signUpErr) {
+        setLoading(false);
+        return setError(friendlySignupError(signUpErr));
+      }
+
+      // If Supabase Auth has "Confirm email" ON, signUp succeeds but no
+      // session is issued until the user clicks the email link. Show the
+      // confirm-email screen so the demo doesn't silently freeze.
+      if (!data?.session) {
+        setLoading(false);
+        return setPhase('confirm-email');
+      }
+
+      // Session live — hand off to cafe-setup. The parent (App.jsx)
+      // will call the bootstrap RPC once the cafe form submits.
+      setLoading(false);
+      onSignup({ name: trimmedName, email: trimmedEmail });
+    } catch (err) {
+      setLoading(false);
+      setError(friendlySignupError(err));
+    }
   };
 
-  const handleGoogle = () => {
-    // Simulated Google SSO — pick up a demo name
-    onSignup({ name: 'New Owner', email: `owner+${Date.now()}@demo.coffee`, password: 'google-sso', sso: 'google' });
+  const handleGoogle = async () => {
+    setError('');
+    if (!supabase) return setError('Supabase is not configured.');
+    setLoading(true);
+    try {
+      const { error: oauthErr } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin },
+      });
+      // On success Supabase redirects the browser; we won't get here.
+      if (oauthErr) {
+        setLoading(false);
+        if ((oauthErr.message || '').toLowerCase().includes('provider is not enabled')) {
+          setError('Google sign-in isn\'t configured yet. Use email + password below.');
+        } else {
+          setError(friendlySignupError(oauthErr));
+        }
+      }
+    } catch (err) {
+      setLoading(false);
+      setError(friendlySignupError(err));
+    }
   };
 
   return (
@@ -41,16 +118,33 @@ export function SignupPage({ onSignup, onLogin }) {
         </div>
 
         <div style={{ background: th.bgCard, borderRadius: th.card + 4, padding: 32, boxShadow: sh.card, border: `1px solid ${th.line}` }}>
+          {phase === 'confirm-email' ? (
+            <div style={{ textAlign: 'center' }}>
+              <h2 style={{ ...ty.h3, color: th.ink, margin: '0 0 12px' }}>Check your email</h2>
+              <p style={{ ...ty.body, color: th.muted, margin: '0 0 20px' }}>
+                We sent a confirmation link to <strong style={{ color: th.ink }}>{email}</strong>. Click it to activate your account, then come back and sign in.
+              </p>
+              <button
+                onClick={onLogin}
+                style={{ padding: '10px 20px', background: th.accent, color: th.onDark, border: 'none', borderRadius: th.pill, ...ty.button, cursor: 'pointer' }}
+              >Go to sign in →</button>
+              <p style={{ ...ty.caption, color: th.muted, marginTop: 20 }}>
+                Didn't get an email? Check spam, or ask the Copi team to disable email confirmation for demo mode.
+              </p>
+            </div>
+          ) : (
+          <>
           <h2 style={{ ...ty.h3, color: th.ink, margin: '0 0 24px', textAlign: 'center' }}>Create your account</h2>
 
           {/* Google SSO */}
           <button
-            onClick={handleGoogle}
+            onClick={handleGoogle} disabled={loading}
             style={{
               width: '100%', padding: '10px 16px', borderRadius: th.input,
               background: th.bgInset, border: `1.5px solid ${th.line}`,
-              ...ty.button, color: th.ink, cursor: 'pointer', marginBottom: 20,
+              ...ty.button, color: th.ink, cursor: loading ? 'not-allowed' : 'pointer', marginBottom: 20,
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+              opacity: loading ? 0.7 : 1,
             }}
           >
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -72,7 +166,7 @@ export function SignupPage({ onSignup, onLogin }) {
             <div style={{ marginBottom: 14 }}>
               <label style={{ ...ty.label, display: 'block', marginBottom: 5, color: th.ink }}>Your name</label>
               <input
-                value={name} onChange={(e) => setName(e.target.value)}
+                value={name} onChange={(e) => { setName(e.target.value); if (error) setError(''); }}
                 placeholder="e.g. Sarah Chen"
                 style={{ width: '100%', ...ty.body, padding: '9px 14px', background: th.bgCard, border: `1.5px solid ${th.line}`, borderRadius: th.input, color: th.ink, outline: 'none', boxSizing: 'border-box' }}
                 onFocus={(e) => { e.target.style.borderColor = th.accent; }}
@@ -82,7 +176,7 @@ export function SignupPage({ onSignup, onLogin }) {
             <div style={{ marginBottom: 14 }}>
               <label style={{ ...ty.label, display: 'block', marginBottom: 5, color: th.ink }}>Email address</label>
               <input
-                type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                type="email" value={email} onChange={(e) => { setEmail(e.target.value); if (error) setError(''); }}
                 placeholder="you@yourcafe.com"
                 style={{ width: '100%', ...ty.body, padding: '9px 14px', background: th.bgCard, border: `1.5px solid ${th.line}`, borderRadius: th.input, color: th.ink, outline: 'none', boxSizing: 'border-box' }}
                 onFocus={(e) => { e.target.style.borderColor = th.accent; }}
@@ -92,7 +186,7 @@ export function SignupPage({ onSignup, onLogin }) {
             <div style={{ marginBottom: 20 }}>
               <label style={{ ...ty.label, display: 'block', marginBottom: 5, color: th.ink }}>Password</label>
               <input
-                type="password" value={password} onChange={(e) => setPassword(e.target.value)}
+                type="password" value={password} onChange={(e) => { setPassword(e.target.value); if (error) setError(''); }}
                 placeholder="At least 6 characters"
                 style={{ width: '100%', ...ty.body, padding: '9px 14px', background: th.bgCard, border: `1.5px solid ${th.line}`, borderRadius: th.input, color: th.ink, outline: 'none', boxSizing: 'border-box' }}
                 onFocus={(e) => { e.target.style.borderColor = th.accent; }}
@@ -100,7 +194,7 @@ export function SignupPage({ onSignup, onLogin }) {
               />
             </div>
 
-            {error && <p style={{ ...ty.caption, color: th.danger, marginBottom: 12, marginTop: -8 }}>{error}</p>}
+            {error && <p role="alert" style={{ ...ty.caption, color: th.danger, marginBottom: 12, marginTop: -8 }}>{error}</p>}
 
             <button
               type="submit" disabled={loading}
@@ -112,6 +206,8 @@ export function SignupPage({ onSignup, onLogin }) {
             Already have an account?{' '}
             <button onClick={onLogin} style={{ background: 'none', border: 'none', color: th.accent, cursor: 'pointer', ...ty.caption, fontWeight: 500 }}>Log in</button>
           </p>
+          </>
+          )}
         </div>
       </div>
     </div>

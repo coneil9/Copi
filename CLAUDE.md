@@ -144,6 +144,46 @@ Owners add staff via two methods:
 - Account, location, and user records in main app database
 - Invite tokens stored in `public.invites` table with expiry
 
+### Auth wiring status (as of 2026-06-30)
+
+The login modal and app-root user state are now backed by real Supabase auth. Key decisions:
+
+- **`handleAuth` in `App.jsx`** tries three paths in order: (1) `supabase.auth.signInWithPassword` (real users, creates a real session), (2) hardcoded CMS team login, (3) `CopiStore.authenticate` in-memory fallback (preserves the sales/prototype roster until CopiStore data reads are migrated). It returns `{ ok, error }` so `LoginModal` can render inline errors instead of failing silently.
+- **`supabase.auth.onAuthStateChange`** listener at the app root drives `user` state for real sessions. On mount, `getSession()` rehydrates any existing session and lands the user on their role's home surface. `SIGNED_OUT` clears `user`; token refreshes are no-ops (SDK-managed).
+- **`hydrateSupabaseUser(authUser)`** does the join from `auth.users.id` → `public.users` row → `cafes.name`, producing the same `{ id, cafeId, locationId, email, name, role, kind, cafe }` shape the rest of the app already expects. Users tagged `authProvider: 'supabase'` skip our `copi.user` localStorage write (the Supabase SDK handles session persistence).
+- **`handleLogout`** now calls `supabase.auth.signOut()` before clearing local state.
+- **Demo credentials in `LoginModal`** are now literal `DEMO_CREDENTIALS` matching the seeded Supabase users; they go through real auth, not a mocked bypass. The `PROTO_ADMIN` / `PROTO_BARISTA` constants and their credential-check branches are gone.
+
+**What still uses localStorage / in-memory data** (intentionally deferred to later sessions):
+- `CopiStore` — the entire prototype roster (Milano users beyond the 3 seeded, milestones, lesson catalog, progress) still lives in memory and is read by every dashboard.
+- `copi.route` — persisted so a refresh lands you on the same page. Kept.
+- `copi.user` — retained ONLY for CMS team logins and CopiStore fallback logins (which have no Supabase session to hydrate from). Real Supabase users bypass this path.
+- Owner signup, invite acceptance, milestone signoff, lesson progress writes — all still hit `CopiStore`, not Supabase.
+
+**Next migration steps** (in order): ~~owner signup writes to `public.cafes` + `public.users`~~ (done — see below) → dashboard reads swap `CopiStore.getUsers()` for `supabase.from('users').select()` → invite flow through `supabase.auth.admin.inviteUserByEmail` in an edge function → progress writes to `public.onboarding_progress` + `public.lesson_progress`.
+
+### Owner signup wiring status (as of 2026-06-30)
+
+The full owner signup flow now writes real rows in Supabase. Sign up → cafe setup → dashboard.
+
+- **Signup step** (`src/pages/signup-page.jsx`): `supabase.auth.signUp({ email, password, options: { data: { name } } })` creates the `auth.users` row. Google button calls `supabase.auth.signInWithOAuth({ provider: 'google' })` — surfaces a friendly "not configured" message until Google OAuth is enabled in the Supabase dashboard.
+- **Cafe setup step** (`src/pages/cafe-setup-page.jsx`): calls a Postgres RPC `public.bootstrap_owner_cafe(p_cafe_name, p_owner_name, p_first_location_name, p_first_location_address)` which does **all three inserts in one transaction** (cafes → locations → public.users). This avoids the `locations_insert` RLS ordering gotcha (the caller isn't `is_owner_or_admin()` yet at insert time) and guarantees no orphaned partial state.
+- **Idempotency**: the RPC checks `public.users` for the caller's `auth.uid()` first. If a row already exists, it returns the existing `cafe_id` + first `location_id` with `already_existed=true`. Safe to retry after a network drop or if the user closes the browser mid-setup and comes back.
+- **`bootstrap_owner_cafe` is SECURITY DEFINER + `search_path = public, pg_temp`**. `EXECUTE` is revoked from `public`/`anon` and granted only to `authenticated`. An anon caller gets `permission denied for function bootstrap_owner_cafe` (verified).
+- **After RPC returns**, `App.jsx:handleCafeSetupComplete` calls `hydrateSupabaseUser(session.user)` — same helper the login flow uses — to build the `{ id, cafeId, locationId, email, name, role, kind: 'admin', cafe, authProvider: 'supabase' }` shape and set `user`. New owner then flows into the `import-roaster` step and onward to the dashboard.
+- **Error handling**: both pages have `friendlySignupError`/`friendlyBootstrapError` mapping helpers that translate Supabase error codes/messages (duplicate email, weak password, rate limit, network failure, permission denied, provider-not-enabled) into user-facing copy. Errors render inline in the existing design-system tokens (`th.danger`).
+
+### ⚠️ Live-demo risks — read before demoing
+
+1. **"Confirm email" MUST be OFF in the Supabase dashboard for the demo to flow smoothly.** With it ON (Supabase default), `signUp` succeeds but returns `session: null`, and the user hits a "Check your email" screen instead of landing in the dashboard. Signup won't be able to progress to cafe-setup because there's no authenticated session yet. To disable: **Dashboard → Authentication → Providers → Email → toggle "Confirm email" OFF**. Do this before every live demo unless you've already switched to a fully wired production email flow.
+2. **A freshly signed-up owner sees stale Milano demo data on the dashboard.** Their `user.cafeId` is their new cafe (RLS-correct), but the dashboards still read from `CopiStore` in memory (the Milano prototype roster). This is confusing — a new "Ember & Oak" owner will see Sarah Chen, Lili Turko, etc. as if they were their own staff. **Do not go to the staff/dashboard views during a live signup demo until the CopiStore reads are migrated.** Safest demo script for now: sign up → land in the "Import your roaster" step → stop there and switch back to the seeded Milano admin login to show the working dashboard.
+3. **Google SSO is not enabled.** Clicking "Continue with Google" shows a friendly "not configured yet" error. To enable: Supabase Dashboard → Authentication → Providers → Google, then paste OAuth client ID/secret from Google Cloud Console.
+4. **Signup emails go to Supabase's default sender + are rate-limited (~4/hour per project on the free tier).** Configure custom SMTP before doing many demo signups back-to-back.
+
+### Next migration step
+
+Migrate dashboard reads so a new owner sees an empty (or newly-imported) roster, not the Milano prototype's in-memory data. Concretely: swap `CopiStore.getUsers(cafeId)` for `supabase.from('users').select().eq('cafe_id', cafeId)` in `admin-team.jsx`, `owner-dashboard.jsx`, and the staff detail views. Everything else (milestones, lessons, progress) stays on `CopiStore` for now — that's a bigger surface and belongs in its own session.
+
 ## Tech Stack
 
 - **React** 19.x (latest) - UI library
@@ -203,19 +243,31 @@ npm run preview
 
 ## Environment Variables
 
-Supabase configuration (create `.env` in project root):
+**Vercel is the single source of truth.** `.env` is gitignored so secrets never enter git history. On a fresh clone, pull env vars down from Vercel instead of hand-editing `.env`:
 
-```
-VITE_SUPABASE_URL=your_supabase_project_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```bash
+npm i -g vercel        # one-time, global
+vercel link            # once per clone
+vercel env pull        # writes current Vercel env into .env
 ```
 
-See `.env.example` for template.
+`.env.example` in the repo lists the required variable names.
+
+### Variables the app expects
+
+| Name | Scope | Source | Notes |
+|---|---|---|---|
+| `VITE_SUPABASE_URL` | Client | Supabase → Settings → API | Not a secret; safe in the browser bundle |
+| `VITE_SUPABASE_ANON_KEY` | Client | Supabase → Settings → API | Publishable/anon key; safe in the browser bundle. RLS is what protects data |
+| `ANTHROPIC_API_KEY` | **Server only** | Anthropic console | Must NOT have `VITE_` prefix — that would ship it to the client bundle |
+| `VITE_USE_REAL_AI` | Client | Feature flag | `true` to hit real /api backend; unset/`false` to use simulated services |
+
+Rule of thumb: `VITE_*` = shipped to browser, safe for public keys only. Anything without the prefix stays server-side.
 
 ## Running Locally End-to-End
 
 1. `npm install`
-2. Create `.env` with Supabase credentials (or use localStorage mode for prototype)
+2. `vercel env pull` to populate `.env` (or copy `.env.example` and fill in values manually for prototype mode)
 3. `npm run dev`
 4. Open http://localhost:5173
 5. **With Supabase**: Sign up creates real account, invites send real emails
