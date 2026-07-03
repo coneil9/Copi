@@ -311,8 +311,10 @@ function AdminCurriculumPage({ user = {} }) {
   const store = window.useCopiStore ? window.useCopiStore() : window.CopiStore;
   const cafe  = store?.getDefaultCafe ? store.getDefaultCafe() : null;
   const cafeId = user?.cafeId || cafe?.id || null;
+  // Only the seeded Milano demo login gets the polished mock modules.
+  const isDemo = /@milano\.coffee$/i.test(user?.email || '');
 
-  const [modules, setModules] = React.useState(INITIAL_MODULES);
+  const [modules, setModules] = React.useState(isDemo ? INITIAL_MODULES : []);
   const [status,  setStatus]  = React.useState('All');
   const [diffs,   setDiffs]   = React.useState(['Easy', 'Intermediate', 'Advanced']);
   const [sort,    setSort]    = React.useState('default');

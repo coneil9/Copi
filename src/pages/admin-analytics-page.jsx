@@ -121,6 +121,8 @@ function KnowledgeGapCard({ tag, vol, title, pct, staggerIndex = 0 }) {
 function AdminAnalyticsPage({ user = {} }) {
   const store = window.useCopiStore ? window.useCopiStore() : window.CopiStore;
   const cafe  = store?.getDefaultCafe ? store.getDefaultCafe() : null;
+  // Only the seeded Milano demo login gets the polished mock content.
+  const isDemo = /@milano\.coffee$/i.test(user?.email || '');
 
   return (
     <AdminShell current="analytics" user={user} cafe={cafe}>
@@ -136,10 +138,10 @@ function AdminAnalyticsPage({ user = {} }) {
         gap: 14,
         marginBottom: 32
       }}>
-        <StatCard staggerIndex={0} label="TEAM COMPLETION" value="57%" supporting="across assigned volumes" delta="8%" progress={57} />
-        <StatCard staggerIndex={1} label="LESSONS / WEEK"  value="37"  supporting="last 7 days"             delta="14%" progress={68} progressColor="var(--glade-green)" />
-        <StatCard staggerIndex={2} label="AVG QUIZ SCORE"  value="95%" supporting="across all attempts"     delta="2%"  progress={95} />
-        <StatCard staggerIndex={3} label="NEEDS ATTENTION" value="2"   supporting="baristas under 35%"      delta="1" deltaTone="down" progress={20} progressColor="var(--danger-soft)" />
+        <StatCard staggerIndex={0} label="TEAM COMPLETION" value={isDemo ? '57%' : '—'} supporting={isDemo ? 'across assigned volumes' : 'no lessons completed yet'} delta={isDemo ? '8%' : undefined} progress={isDemo ? 57 : 0} />
+        <StatCard staggerIndex={1} label="LESSONS / WEEK"  value={isDemo ? '37' : '0'}  supporting={isDemo ? 'last 7 days' : 'last 7 days'}                       delta={isDemo ? '14%' : undefined} progress={isDemo ? 68 : 0} progressColor="var(--glade-green)" />
+        <StatCard staggerIndex={2} label="AVG QUIZ SCORE"  value={isDemo ? '95%' : '—'} supporting={isDemo ? 'across all attempts' : 'no attempts yet'}          delta={isDemo ? '2%' : undefined}  progress={isDemo ? 95 : 0} />
+        <StatCard staggerIndex={3} label="NEEDS ATTENTION" value={isDemo ? '2' : '0'}   supporting={isDemo ? 'baristas under 35%' : 'no teammates yet'}          delta={isDemo ? '1' : undefined} deltaTone="down" progress={isDemo ? 20 : 0} progressColor="var(--danger-soft)" />
       </div>
 
       {/* Two-column body: Individual Progress + Knowledge Gaps */}
@@ -152,6 +154,7 @@ function AdminAnalyticsPage({ user = {} }) {
         {/* Individual progress */}
         <Card>
           <SectionHeader title="Individual progress" />
+          {isDemo ? (
           <div>
             <div style={{
               display: 'grid',
@@ -252,6 +255,43 @@ function AdminAnalyticsPage({ user = {} }) {
               </div>
             ))}
           </div>
+          ) : (
+            <div style={{
+              padding: '32px 12px',
+              textAlign: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 14,
+            }}>
+              <div style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: 13,
+                color: 'var(--heathered-gray)',
+                lineHeight: 1.5,
+                maxWidth: 360,
+              }}>
+                Invite your team and analytics will populate here as they complete lessons.
+              </div>
+              <button
+                type="button"
+                onClick={() => window.CopiActions?.navigate?.('admin-team-add')}
+                style={{
+                  background: 'var(--glade-green-deep)',
+                  color: 'var(--white)',
+                  border: 'none',
+                  padding: '9px 18px',
+                  borderRadius: 999,
+                  fontFamily: 'var(--font-body)',
+                  fontSize: 13,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                Invite a teammate →
+              </button>
+            </div>
+          )}
         </Card>
 
         {/* Knowledge gaps */}
@@ -268,7 +308,22 @@ function AdminAnalyticsPage({ user = {} }) {
             KNOWLEDGE GAPS
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {GAPS.map((g, i) => <KnowledgeGapCard key={g.title} {...g} staggerIndex={i} />)}
+            {isDemo ? (
+              GAPS.map((g, i) => <KnowledgeGapCard key={g.title} {...g} staggerIndex={i} />)
+            ) : (
+              <div style={{
+                padding: '20px 18px',
+                background: 'var(--white)',
+                border: '1px solid var(--pearl-bush)',
+                borderRadius: 14,
+                fontFamily: 'var(--font-body)',
+                fontSize: 13,
+                color: 'var(--heathered-gray)',
+                lineHeight: 1.5,
+              }}>
+                Knowledge gaps will surface once your team has completed enough lessons for Copi to analyze.
+              </div>
+            )}
           </div>
         </section>
       </div>

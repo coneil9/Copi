@@ -7,7 +7,7 @@ export function AdminNav({ current, user, cafe }) {
   const ty  = window.TYPOGRAPHY || {};
   const act = window.CopiActions || {};
 
-  const cafeName = cafe?.name || user?.cafe || 'Milano';
+  const cafeName = user?.cafe || cafe?.name || 'Milano';
   const displayName = user?.name || 'Owner';
 
   const links = [

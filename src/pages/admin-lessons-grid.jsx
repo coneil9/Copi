@@ -185,8 +185,9 @@ function EmptyCard({ onClick }) {
 function AdminLessonsGrid({ user = {} }) {
   const store = window.useCopiStore ? window.useCopiStore() : window.CopiStore;
   const cafe  = store?.getDefaultCafe ? store.getDefaultCafe() : null;
+  const isDemo = /@milano\.coffee$/i.test(user?.email || '');
 
-  const [modules, setModules] = React.useState(INITIAL_MODULES);
+  const [modules, setModules] = React.useState(isDemo ? INITIAL_MODULES : []);
   const [modal, setModal] = React.useState(null);
   const [difficultyPicker, setDifficultyPicker] = React.useState(null);
 

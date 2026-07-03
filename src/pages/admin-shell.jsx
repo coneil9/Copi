@@ -38,10 +38,11 @@ function Icon({ name, size = 18, stroke = 'currentColor', fill = 'none' }) {
 // ── Cafe avatar (round, Alabaster, italic cafe name) ────
 function CafeAvatar({ name }) {
   const cleaned = (name || 'milano').toLowerCase();
-  // Split into two lines if a single word — looks like the mockup ("milano / coffee")
-  const parts = cleaned.split(' ');
+  const parts = cleaned.split(/\s+/).filter(Boolean);
+  // 1 word: single centered line. 2+ words: first word / rest (mirrors the
+  // "milano / coffee" mockup shape without inventing a fake second word).
   const top = parts[0];
-  const bottom = parts[1] || 'coffee';
+  const bottom = parts.length > 1 ? parts.slice(1).join(' ') : null;
   return (
     <div style={{
       width: 80, height: 80, borderRadius: '50%',
@@ -57,9 +58,10 @@ function CafeAvatar({ name }) {
         fontSize: 15,
         color: 'var(--glade-green-deep)',
         textAlign: 'center',
-        lineHeight: 1.05
+        lineHeight: 1.05,
+        padding: '0 6px',
       }}>
-        {top}<br/>{bottom}
+        {top}{bottom && <><br/>{bottom}</>}
       </div>
     </div>
   );
@@ -127,7 +129,9 @@ export function AdminShell({
   curriculumBadge = 3
 }) {
   const act = window.CopiActions || {};
-  const cafeName = cafe?.name || user?.cafe || 'Milano';
+  // Prefer the logged-in user's real cafe (from Supabase) over CopiStore's
+  // seeded Milano default — otherwise fresh signups see the Milano branding.
+  const cafeName = user?.cafe || cafe?.name || 'Milano';
   const userName = user?.name || 'Brian Turko';
   const initials = userName.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase();
 
@@ -191,7 +195,7 @@ export function AdminShell({
           marginTop: 10,
           marginBottom: 18
         }}>
-          {cafeName} Coffee Co.
+          {cafeName}
         </div>
 
         {/* Primary nav */}

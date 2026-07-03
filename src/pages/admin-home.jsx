@@ -76,14 +76,60 @@ const ASK_CUPPER_PROMPTS = [
   'Customize coffee education'
 ];
 
+function EmptyBlock({ message, ctaLabel, ctaRoute }) {
+  return (
+    <div style={{
+      padding: '28px 12px',
+      textAlign: 'center',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: 14,
+    }}>
+      <div style={{
+        fontFamily: 'var(--font-body)',
+        fontSize: 13,
+        color: 'var(--heathered-gray)',
+        lineHeight: 1.5,
+        maxWidth: 320,
+      }}>
+        {message}
+      </div>
+      {ctaLabel && ctaRoute && (
+        <button
+          type="button"
+          onClick={() => window.CopiActions?.navigate?.(ctaRoute)}
+          style={{
+            background: 'var(--glade-green-deep)',
+            color: 'var(--white)',
+            border: 'none',
+            padding: '9px 18px',
+            borderRadius: 999,
+            fontFamily: 'var(--font-body)',
+            fontSize: 13,
+            fontWeight: 600,
+            cursor: 'pointer',
+          }}
+        >
+          {ctaLabel} →
+        </button>
+      )}
+    </div>
+  );
+}
+
 function AdminHome({ user = {} }) {
   const store = window.useCopiStore ? window.useCopiStore() : window.CopiStore;
   const cafe  = store?.getDefaultCafe ? store.getDefaultCafe() : null;
   const cafeId = user?.cafeId || cafe?.id || null;
   const firstName = (user?.name || 'Brian').split(' ')[0];
+  // Only the seeded Milano demo login gets the polished mock content.
+  // Every real cafe (fresh signup) sees an empty state with setup CTAs.
+  const isDemo = /@milano\.coffee$/i.test(user?.email || '');
   const today = new Date();
   const todayIndex = (today.getDay() + 6) % 7; // Mon-indexed (0..6)
-  const totalLessons = WEEKLY_ENGAGEMENT.reduce((s, d) => s + d.value, 0);
+  const weeklyData = isDemo ? WEEKLY_ENGAGEMENT : WEEKLY_ENGAGEMENT.map((d) => ({ ...d, value: 0 }));
+  const totalLessons = weeklyData.reduce((s, d) => s + d.value, 0);
 
   // Persistent reminder when an owner skipped publishing during onboarding.
   const draft = cafeId && store?.getDraftCurriculumForCafe
@@ -194,20 +240,36 @@ function AdminHome({ user = {} }) {
           maxWidth: 560,
           lineHeight: 1.55
         }}>
-          Your team is <b>57% through</b> their assigned tracks. Two
-          onboarding steps need your review today.
+          {isDemo ? (
+            <>Your team is <b>57% through</b> their assigned tracks. Two onboarding steps need your review today.</>
+          ) : (
+            <>Welcome to Copi. Import your menu from a roaster website, then invite your team to start onboarding.</>
+          )}
         </p>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <PrimaryButton onClick={() => window.CopiActions?.navigate?.('admin-team')}>
-            Review onboarding
-          </PrimaryButton>
-          <SecondaryButton onClick={() => window.CopiActions?.navigate?.('admin-team')}>
-            View team
-          </SecondaryButton>
-          {!draft && (
-            <SecondaryButton onClick={() => window.CopiActions?.navigate?.('import-roaster')}>
-              Import from a roaster website
-            </SecondaryButton>
+          {isDemo ? (
+            <>
+              <PrimaryButton onClick={() => window.CopiActions?.navigate?.('admin-team')}>
+                Review onboarding
+              </PrimaryButton>
+              <SecondaryButton onClick={() => window.CopiActions?.navigate?.('admin-team')}>
+                View team
+              </SecondaryButton>
+              {!draft && (
+                <SecondaryButton onClick={() => window.CopiActions?.navigate?.('import-roaster')}>
+                  Import from a roaster website
+                </SecondaryButton>
+              )}
+            </>
+          ) : (
+            <>
+              <PrimaryButton onClick={() => window.CopiActions?.navigate?.('import-roaster')}>
+                Import from a roaster website
+              </PrimaryButton>
+              <SecondaryButton onClick={() => window.CopiActions?.navigate?.('admin-team-add')}>
+                Invite your team
+              </SecondaryButton>
+            </>
           )}
         </div>
       </div>
@@ -238,17 +300,17 @@ function AdminHome({ user = {} }) {
           <StatCard
             staggerIndex={0}
             label="QUALITY EDUCATION"
-            value="A-"
-            supporting="Score climbing 4 weeks"
-            delta="12%"
-            progress={88}
+            value={isDemo ? 'A-' : '—'}
+            supporting={isDemo ? 'Score climbing 4 weeks' : 'Available after first lesson'}
+            delta={isDemo ? '12%' : undefined}
+            progress={isDemo ? 88 : 0}
           />
           <StatCard
             staggerIndex={1}
             label="ACTIVE TEAMMATES"
-            value="6"
-            supporting="All on schedule"
-            badge={
+            value={isDemo ? '6' : '0'}
+            supporting={isDemo ? 'All on schedule' : 'No teammates yet'}
+            badge={isDemo ? (
               <span style={{
                 padding: '3px 9px',
                 borderRadius: 999,
@@ -258,16 +320,16 @@ function AdminHome({ user = {} }) {
                 fontSize: 11,
                 fontWeight: 700
               }}>+2 new</span>
-            }
-            progress={100}
+            ) : null}
+            progress={isDemo ? 100 : 0}
             progressColor="var(--glade-green)"
           />
           <StatCard
             staggerIndex={2}
             label="COMPLETION"
-            value="57%"
-            supporting="Across assigned tracks"
-            badge={
+            value={isDemo ? '57%' : '—'}
+            supporting={isDemo ? 'Across assigned tracks' : 'Import a menu to add lessons'}
+            badge={isDemo ? (
               <span style={{
                 padding: '3px 9px',
                 borderRadius: 999,
@@ -277,17 +339,17 @@ function AdminHome({ user = {} }) {
                 fontSize: 11,
                 fontWeight: 700
               }}>On track</span>
-            }
-            progress={57}
+            ) : null}
+            progress={isDemo ? 57 : 0}
           />
           <StatCard
             staggerIndex={3}
             label="AVG. TIME / LESSON"
-            value="14m"
-            supporting="Down from 19m"
-            delta="26%"
+            value={isDemo ? '14m' : '—'}
+            supporting={isDemo ? 'Down from 19m' : 'Available after first lesson'}
+            delta={isDemo ? '26%' : undefined}
             deltaTone="down"
-            progress={72}
+            progress={isDemo ? 72 : 0}
             progressColor="var(--glade-green)"
           />
         </div>
@@ -301,7 +363,8 @@ function AdminHome({ user = {} }) {
         marginBottom: 28
       }}>
         <Card>
-          <SectionHeader title="Team progress" action="View all 6" />
+          <SectionHeader title="Team progress" action={isDemo ? 'View all 6' : undefined} />
+          {isDemo ? (
           <div>
             <div style={{
               display: 'grid',
@@ -377,10 +440,18 @@ function AdminHome({ user = {} }) {
               </div>
             ))}
           </div>
+          ) : (
+            <EmptyBlock
+              message="Invite your team so onboarding progress and lesson completion show up here."
+              ctaLabel="Invite a teammate"
+              ctaRoute="admin-team-add"
+            />
+          )}
         </Card>
 
         <Card>
           <SectionHeader title="Recent activity" />
+          {isDemo ? (
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             {ACTIVITY.map((a, i) => (
               <ActivityItem
@@ -393,6 +464,9 @@ function AdminHome({ user = {} }) {
               />
             ))}
           </div>
+          ) : (
+            <EmptyBlock message="No activity yet. Lesson completions and onboarding sign-offs will appear here as your team gets started." />
+          )}
         </Card>
       </section>
 
@@ -404,7 +478,8 @@ function AdminHome({ user = {} }) {
         marginBottom: 28
       }}>
         <Card>
-          <SectionHeader title="Onboarding steps" action="2 of 4 done" />
+          <SectionHeader title="Onboarding steps" action={isDemo ? '2 of 4 done' : undefined} />
+          {isDemo ? (
           <div>
             {ONBOARDING_STEPS.map((s, i) => (
               <OnboardingStep
@@ -416,10 +491,18 @@ function AdminHome({ user = {} }) {
               />
             ))}
           </div>
+          ) : (
+            <EmptyBlock
+              message="Once you invite teammates, their onboarding milestones will show up here for you to review and sign off on."
+              ctaLabel="Invite a teammate"
+              ctaRoute="admin-team-add"
+            />
+          )}
         </Card>
 
         <Card>
-          <SectionHeader title="Current lessons" action={{ label: 'All curriculum' }} />
+          <SectionHeader title="Current lessons" action={isDemo ? { label: 'All curriculum' } : undefined} />
+          {isDemo ? (
           <div>
             {CURRENT_LESSONS.map((l, i) => (
               <LessonRow
@@ -431,6 +514,13 @@ function AdminHome({ user = {} }) {
               />
             ))}
           </div>
+          ) : (
+            <EmptyBlock
+              message="Import your menu from a roaster website and Copi will generate lesson tracks tailored to your cafe."
+              ctaLabel="Import from a roaster website"
+              ctaRoute="import-roaster"
+            />
+          )}
         </Card>
       </section>
 
@@ -478,7 +568,7 @@ function AdminHome({ user = {} }) {
               }}>total</span>
             </div>
           </header>
-          <WeeklyBarChart data={WEEKLY_ENGAGEMENT} todayIndex={todayIndex} height={220} />
+          <WeeklyBarChart data={weeklyData} todayIndex={todayIndex} height={220} />
         </Card>
       </section>
 

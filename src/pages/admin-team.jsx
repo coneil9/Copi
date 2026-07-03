@@ -887,9 +887,37 @@ const inputStyle = {
 };
 
 // ── Combined page ─────────────────────────────────────────
+function EmptyRosterView() {
+  return (
+    <>
+      <PageHeader
+        eyebrow="OWNER · TEAM"
+        title="Your team roster"
+        subtitle="Invite teammates to see onboarding and education progress here."
+      />
+      <Card style={{ padding: '48px 24px', textAlign: 'center' }}>
+        <div style={{
+          fontFamily: 'var(--font-body)',
+          fontSize: 14,
+          color: 'var(--heathered-gray)',
+          maxWidth: 420,
+          margin: '0 auto 20px',
+          lineHeight: 1.55,
+        }}>
+          You haven't added any teammates yet. Invite your first barista, host, or manager to start tracking their onboarding and lesson progress.
+        </div>
+        <PrimaryButton onClick={() => window.CopiActions?.navigate?.('admin-team-add')}>
+          Invite a teammate
+        </PrimaryButton>
+      </Card>
+    </>
+  );
+}
+
 function AdminTeam({ user = {}, view = 'roster' }) {
   const store = window.useCopiStore ? window.useCopiStore() : window.CopiStore;
   const cafe  = store?.getDefaultCafe ? store.getDefaultCafe() : null;
+  const isDemo = /@milano\.coffee$/i.test(user?.email || '');
 
   const subnav = [
     { label: 'Roster',       route: 'admin-team',     active: view === 'roster' },
@@ -898,7 +926,7 @@ function AdminTeam({ user = {}, view = 'roster' }) {
 
   return (
     <AdminShell current="team" subnav={subnav} user={user} cafe={cafe}>
-      {view === 'add' ? <AddTeammateView /> : <RosterView />}
+      {view === 'add' ? <AddTeammateView /> : (isDemo ? <RosterView /> : <EmptyRosterView />)}
     </AdminShell>
   );
 }

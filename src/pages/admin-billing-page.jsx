@@ -37,6 +37,8 @@ function PaidPill() {
 function AdminBillingPage({ user = {} }) {
   const store = window.useCopiStore ? window.useCopiStore() : window.CopiStore;
   const cafe  = store?.getDefaultCafe ? store.getDefaultCafe() : null;
+  const isDemo = /@milano\.coffee$/i.test(user?.email || '');
+  const invoices = isDemo ? INVOICES : [];
   const [modal, setModal] = React.useState(null);
 
   return (
@@ -326,9 +328,9 @@ function AdminBillingPage({ user = {} }) {
               </tr>
             </thead>
             <tbody>
-              {INVOICES.map((inv, i) => (
+              {invoices.map((inv, i) => (
                 <tr key={inv.id} style={{
-                  borderBottom: i === INVOICES.length - 1 ? 'none' : '1px solid rgba(181, 163, 139, 0.4)',
+                  borderBottom: i === invoices.length - 1 ? 'none' : '1px solid rgba(181, 163, 139, 0.4)',
                   background: i % 2 === 0 ? 'var(--alabaster)' : 'rgba(232, 221, 200, 0.4)'
                 }}>
                   <td style={{ padding: '14px 18px', fontSize: 13, color: 'var(--graphite)' }}>
