@@ -6201,9 +6201,12 @@ function PageFor({ route, user, inviteToken, onSignup, onCafeSetupComplete, onIm
     return <AdminCurriculumPage user={user || {}} />;
   }
   if (route === 'settings') {
-    const AdminSettingsNew = window.AdminSettingsNew;
-    if (AdminSettingsNew) return <AdminSettingsNew user={user || {}} />;
-    return <AdminSettingsPage user={user || {}} />;
+    // Old top-nav "Account settings" page is scrapped — legacy 'settings'
+    // route now renders the sidebar-layout Set up (Copi AI) page so any
+    // stray link/delegation lands users in the current settings surface.
+    const AdminSetupCopi = window.AdminSetupCopi;
+    if (AdminSetupCopi) return <AdminSetupCopi user={user || {}} />;
+    return null;
   }
   if (route === 'analytics') {
     const AdminAnalyticsPageNew = window.AdminAnalyticsPageNew;
@@ -6213,7 +6216,14 @@ function PageFor({ route, user, inviteToken, onSignup, onCafeSetupComplete, onIm
     return <AdminAnalyticsPage user={user || {}} />;
   }
   if (route === 'manager-dashboard') return ManagerDashboard ? <ManagerDashboard user={user || {}} /> : <RoasterDashboard user={user || {}} />;
-  if (route === 'billing')   return BillingPage ? <BillingPage user={user || {}} /> : <AdminSettingsPage user={user || {}} />;
+  if (route === 'billing') {
+    // Old top-nav "Subscription" page is scrapped — legacy 'billing' route
+    // now renders the sidebar-layout Billing page so stray links land users
+    // in the current billing surface.
+    const AdminBillingPage = window.AdminBillingPage;
+    if (AdminBillingPage) return <AdminBillingPage user={user || {}} />;
+    return BillingPage ? <BillingPage user={user || {}} /> : null;
+  }
   if (route === 'cms')       return CmsPage ? <CmsPage user={user || {}} /> : null;
   if (route === 'ai-review') return AiReviewPage ? <AiReviewPage user={user || {}} /> : <AdminCurriculumPage user={user || {}} />;
   if (route === 'today')     return <BaristaDashboard user={user || {}} />;
@@ -6605,7 +6615,7 @@ function CopiPrototype() {
     if (text === 'Home')              { e.preventDefault(); navigate('home');             return; }
     if (text === 'Team')              { e.preventDefault(); navigate('team');             return; }
     if (text === 'Dashboard')         { e.preventDefault(); navigate(user?.role === 'manager' ? 'manager-dashboard' : 'dashboard'); return; }
-    if (text === 'Billing')           { e.preventDefault(); navigate('billing');          return; }
+    if (text === 'Billing')           { e.preventDefault(); navigate('admin-billing-page'); return; }
     if (text === 'Curriculum')        {
       e.preventDefault();
       const adminRoutes = ['dashboard','team','admin-curriculum','analytics','settings','billing','ai-review','manager-dashboard'];
@@ -6615,7 +6625,7 @@ function CopiPrototype() {
     }
     if (text === 'Pricing')           { e.preventDefault(); navigate('pricing');          return; }
     if (text === 'About')             { e.preventDefault(); navigate('about');            return; }
-    if (text === 'Settings')          { e.preventDefault(); navigate('settings');         return; }
+    if (text === 'Settings')          { e.preventDefault(); navigate('admin-setup-copi');  return; }
     if (text === 'Analytics')         { e.preventDefault(); navigate('analytics');        return; }
     if (text === 'Today')             { e.preventDefault(); navigate('today');            return; }
     if (text === 'Profile')           { e.preventDefault(); navigate('barista-profile');  return; }

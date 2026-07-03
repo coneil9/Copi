@@ -176,19 +176,28 @@ function FoundCard({ label, sublabel, value, onChange, onAdjust, onRefine, multi
 // ═══════════════════════════════════
 // General tab
 // ═══════════════════════════════════
-function GeneralTab({ openModal }) {
-  const [domain,   setDomain]   = React.useState('milano.coffee');
+function GeneralTab({ openModal, isDemo, cafeName }) {
+  const [domain,   setDomain]   = React.useState(isDemo ? 'milano.coffee' : '');
   const [about,    setAbout]    = React.useState(
-    'Milano is a two-location Italian-style espresso bar in Vancouver. We opened on Main Street in 2017 and added our Kits storefront in 2022. We pour single-origin espresso, milk drinks made with house-stretched whole milk, and a small batch-brew rotation.'
+    isDemo
+      ? 'Milano is a two-location Italian-style espresso bar in Vancouver. We opened on Main Street in 2017 and added our Kits storefront in 2022. We pour single-origin espresso, milk drinks made with house-stretched whole milk, and a small batch-brew rotation.'
+      : ''
   );
   const [values, setValues] = React.useState(
-    'We hire for warmth before skill. Every drink leaves the bar at the same quality as the one before it, even on a Saturday rush. We name growers when we can, and we taste through the menu together every Monday.'
+    isDemo
+      ? 'We hire for warmth before skill. Every drink leaves the bar at the same quality as the one before it, even on a Saturday rush. We name growers when we can, and we taste through the menu together every Monday.'
+      : ''
   );
-  const [products, setProducts] = React.useState([
-    "Brian's Summertime — washed Ethiopia Yirgacheffe, jasmine + apricot",
-    'Butter — Brazil Daterra, milk-chocolate forward, espresso staple',
-    'Cognac — natural Colombia La Esperanza, brandy + dark fruit'
-  ]);
+  const [products, setProducts] = React.useState(
+    isDemo
+      ? [
+          "Brian's Summertime — washed Ethiopia Yirgacheffe, jasmine + apricot",
+          'Butter — Brazil Daterra, milk-chocolate forward, espresso staple',
+          'Cognac — natural Colombia La Esperanza, brandy + dark fruit'
+        ]
+      : ['', '', '']
+  );
+  const brand = isDemo ? 'Milano' : (cafeName || 'your cafe');
 
   return (
     <div>
@@ -229,16 +238,16 @@ function GeneralTab({ openModal }) {
       </h3>
 
       <FoundCard
-        label="About Milano"
+        label={`About ${brand}`}
         sublabel="+ history"
         value={about}
         onChange={setAbout}
-        onAdjust={() => openModal({ title: 'Adjust About Milano', body: 'Edit inline above — your changes save as you type.' })}
+        onAdjust={() => openModal({ title: `Adjust About ${brand}`, body: 'Edit inline above — your changes save as you type.' })}
         onRefine={() => openModal({ title: 'Help Copi Refine', body: 'Cupper will re-read your handbook and source docs to update this section. Drafts come back to you for review.' })}
       />
 
       <FoundCard
-        label="Milano's value + goals"
+        label={`${brand}'s value + goals`}
         value={values}
         onChange={setValues}
         onAdjust={() => openModal({ title: 'Adjust values + goals', body: 'Edit inline above — your changes save as you type.' })}
@@ -246,7 +255,7 @@ function GeneralTab({ openModal }) {
       />
 
       <FoundCard
-        label="Milano's products"
+        label={`${brand}'s products`}
         sublabel="+ descriptions"
         listMode
         value={products}
@@ -573,6 +582,8 @@ function RefineTab({ openModal }) {
 function AdminSetupCopi({ user = {}, tab: initialTab = 'General' }) {
   const store = window.useCopiStore ? window.useCopiStore() : window.CopiStore;
   const cafe  = store?.getDefaultCafe ? store.getDefaultCafe() : null;
+  const isDemo = /@milano\.coffee$/i.test(user?.email || '');
+  const cafeName = user?.cafe || cafe?.name || '';
 
   const [tab, setTab] = React.useState(TABS.includes(initialTab) ? initialTab : 'General');
   const [modal, setModal] = React.useState(null);
@@ -643,7 +654,7 @@ function AdminSetupCopi({ user = {}, tab: initialTab = 'General' }) {
         })}
       </div>
 
-      {tab === 'General'    && <GeneralTab    openModal={setModal} />}
+      {tab === 'General'    && <GeneralTab    openModal={setModal} isDemo={isDemo} cafeName={cafeName} />}
       {tab === 'Documents'  && <DocumentsTab  openModal={setModal} />}
       {tab === 'Education'  && <EducationTab  openModal={setModal} />}
       {tab === 'Refine'     && <RefineTab     openModal={setModal} />}
