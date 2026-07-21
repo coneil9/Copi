@@ -10,12 +10,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "latest",
+    "@supabase/supabase-js": "latest",
     "@vitejs/plugin-react": "latest",
-    "vite": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "@supabase/supabase-js": "latest",
-    "@anthropic-ai/sdk": "latest",
+    "stripe": "^22.3.2",
+    "vite": "latest",
     "zod": "latest"
   },
   "devDependencies": {

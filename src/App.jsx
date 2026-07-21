@@ -18,7 +18,7 @@ import './pages/blocks/FlashcardBlock.jsx';
 import './pages/blocks/DragDropBlock.jsx';
 import './pages/lesson-player-new.jsx';
 import './pages/cms-page.jsx';
-import './pages/billing-page.jsx';
+import './pages/paywall-page.jsx';
 import './pages/barista-profile-new.jsx';
 import './pages/admin-curriculum-new.jsx';
 import './pages/admin-analytics-new.jsx';
@@ -6130,6 +6130,30 @@ function VolumeModal({ open, volume, onClose, onTrial }) {
 }
 
 // ────────────────────────────────────────────────────────────
+// Subscription gate. Owner/admin routes are blocked when the cafe's
+// Stripe subscription isn't in a working state. Feature-flagged off by
+// default (VITE_STRIPE_PAYWALL_ENABLED) so nothing changes until we're
+// ready to flip it — this lets us ship the paywall code without breaking
+// the seeded Milano demo or any pre-Stripe signups.
+// ────────────────────────────────────────────────────────────
+const PAYWALL_ENABLED = import.meta.env.VITE_STRIPE_PAYWALL_ENABLED === 'true';
+const ALLOWED_SUBSCRIPTION_STATUSES = new Set(['trialing', 'active', 'past_due']);
+const PAYWALLED_ROUTES = new Set([
+  'dashboard', 'team', 'admin-curriculum', 'analytics', 'settings',
+  'billing', 'ai-review',
+  'admin-home', 'admin-team', 'admin-team-add', 'admin-lessons-grid',
+  'admin-setup-copi', 'admin-curriculum-page', 'admin-billing-page',
+  'admin-profile-page', 'admin-notifications-page',
+]);
+function shouldPaywall(user, route) {
+  if (!PAYWALL_ENABLED) return false;
+  if (!user || !user.cafeId) return false;
+  if (!['owner', 'admin'].includes(user.role)) return false;
+  if (!PAYWALLED_ROUTES.has(route)) return false;
+  return !ALLOWED_SUBSCRIPTION_STATUSES.has(user.subscriptionStatus);
+}
+
+// ────────────────────────────────────────────────────────────
 // Route → page
 // ────────────────────────────────────────────────────────────
 function PageFor({ route, user, inviteToken, onSignup, onCafeSetupComplete, onImportRoasterComplete, onInviteAccepted, onLogin }) {
@@ -6138,11 +6162,18 @@ function PageFor({ route, user, inviteToken, onSignup, onCafeSetupComplete, onIm
   const CafeSetupPage     = window.CafeSetupPage;
   const InviteAcceptPage  = window.InviteAcceptPage;
   const ManagerDashboard  = window.ManagerDashboard;
-  const BillingPage       = window.BillingPage;
   const CmsPage           = window.CmsPage;
   const OwnerDashboard    = window.OwnerDashboard;
   const StaffPage         = window.StaffPage;
   const AiReviewPage      = window.AiReviewPage;
+  const PaywallPage       = window.PaywallPage;
+
+  if (route === 'paywall') {
+    return PaywallPage ? <PaywallPage user={user || {}} /> : null;
+  }
+  if (shouldPaywall(user, route)) {
+    return PaywallPage ? <PaywallPage user={user} /> : null;
+  }
 
   // Wireframe-based admin screens (left-sidebar shell)
   if (route === 'admin-home') {
@@ -6217,12 +6248,8 @@ function PageFor({ route, user, inviteToken, onSignup, onCafeSetupComplete, onIm
   }
   if (route === 'manager-dashboard') return ManagerDashboard ? <ManagerDashboard user={user || {}} /> : <RoasterDashboard user={user || {}} />;
   if (route === 'billing') {
-    // Old top-nav "Subscription" page is scrapped — legacy 'billing' route
-    // now renders the sidebar-layout Billing page so stray links land users
-    // in the current billing surface.
     const AdminBillingPage = window.AdminBillingPage;
-    if (AdminBillingPage) return <AdminBillingPage user={user || {}} />;
-    return BillingPage ? <BillingPage user={user || {}} /> : null;
+    return AdminBillingPage ? <AdminBillingPage user={user || {}} /> : null;
   }
   if (route === 'cms')       return CmsPage ? <CmsPage user={user || {}} /> : null;
   if (route === 'ai-review') return AiReviewPage ? <AiReviewPage user={user || {}} /> : <AdminCurriculumPage user={user || {}} />;
@@ -6372,10 +6399,11 @@ function CopiPrototype() {
     if (!supabase || !authUser) return null;
     const { data: row, error: err } = await supabase
       .from('users')
-      .select('id, cafe_id, location_id, email, name, role, cafes(name)')
+      .select('id, cafe_id, location_id, email, name, role, cafes(name, subscription_status, trial_end, current_period_end, cancel_at_period_end)')
       .eq('id', authUser.id)
       .maybeSingle();
     if (err || !row) return null;
+    const cafe = row.cafes || {};
     return {
       id: row.id,
       cafeId: row.cafe_id,
@@ -6384,7 +6412,11 @@ function CopiPrototype() {
       name: row.name,
       role: row.role,
       kind: ['owner','admin'].includes(row.role) ? 'admin' : row.role,
-      cafe: row.cafes?.name || '',
+      cafe: cafe.name || '',
+      subscriptionStatus: cafe.subscription_status || null,
+      trialEnd: cafe.trial_end || null,
+      currentPeriodEnd: cafe.current_period_end || null,
+      cancelAtPeriodEnd: !!cafe.cancel_at_period_end,
       authProvider: 'supabase',
     };
   }, []);

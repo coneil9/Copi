@@ -8,5 +8,8 @@
   },
   "enabledMcpjsonServers": [
     "supabase"
-  ]
+  ],
+  "enabledPlugins": {
+    "stripe@claude-plugins-official": true
+  }
 }

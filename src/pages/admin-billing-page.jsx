@@ -7,6 +7,7 @@
 import React from 'react';
 import { AdminShell, CopiModal } from './admin-shell.jsx';
 import { PageHeader, Card } from './admin-ui.jsx';
+import { openBillingPortal } from '../lib/stripe-actions.js';
 
 const INVOICES = [
   { id: 'INV-2026-006', date: 'Jun 1, 2026',  description: 'Copi Pro — monthly subscription', amount: '$49.00', status: 'Paid' },
@@ -40,6 +41,22 @@ function AdminBillingPage({ user = {} }) {
   const isDemo = /@milano\.coffee$/i.test(user?.email || '');
   const invoices = isDemo ? INVOICES : [];
   const [modal, setModal] = React.useState(null);
+  const [portalLoading, setPortalLoading] = React.useState(false);
+
+  const handleOpenPortal = React.useCallback(async () => {
+    setPortalLoading(true);
+    try {
+      await openBillingPortal();
+    } catch (err) {
+      setModal({
+        title: 'Couldn\'t open billing portal',
+        body: err.message || 'Something went wrong. Try again in a moment.',
+        accent: 'var(--danger)',
+      });
+    } finally {
+      setPortalLoading(false);
+    }
+  }, []);
 
   return (
     <AdminShell current="billing" user={user} cafe={cafe}>
@@ -155,11 +172,8 @@ function AdminBillingPage({ user = {} }) {
 
           <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
             <button
-              onClick={() => setModal({
-                title: 'Manage your plan',
-                body: 'Upgrade to Copi Studio for unlimited seats and custom curriculum review by our team.',
-                accent: 'var(--glade-green-deep)'
-              })}
+              onClick={handleOpenPortal}
+              disabled={portalLoading}
               style={{
                 padding: '10px 20px',
                 borderRadius: 999,
@@ -169,17 +183,15 @@ function AdminBillingPage({ user = {} }) {
                 fontFamily: 'var(--font-body)',
                 fontSize: 13,
                 fontWeight: 600,
-                cursor: 'pointer'
+                cursor: portalLoading ? 'wait' : 'pointer',
+                opacity: portalLoading ? 0.7 : 1,
               }}
             >
-              Manage plan
+              {portalLoading ? 'Opening…' : 'Manage plan'}
             </button>
             <button
-              onClick={() => setModal({
-                title: 'Cancel subscription',
-                body: 'We hate to see you go. Your account will stay active until Jul 1, 2026 and won\'t renew.',
-                accent: 'var(--danger)'
-              })}
+              onClick={handleOpenPortal}
+              disabled={portalLoading}
               style={{
                 padding: '10px 20px',
                 borderRadius: 999,
@@ -189,7 +201,8 @@ function AdminBillingPage({ user = {} }) {
                 fontFamily: 'var(--font-body)',
                 fontSize: 13,
                 fontWeight: 500,
-                cursor: 'pointer'
+                cursor: portalLoading ? 'wait' : 'pointer',
+                opacity: portalLoading ? 0.7 : 1,
               }}
             >
               Cancel
@@ -263,11 +276,8 @@ function AdminBillingPage({ user = {} }) {
           </div>
 
           <button
-            onClick={() => setModal({
-              title: 'Update card',
-              body: 'You\'ll be taken to our secure payment partner to update your card on file.',
-              accent: 'var(--glade-green-deep)'
-            })}
+            onClick={handleOpenPortal}
+            disabled={portalLoading}
             style={{
               alignSelf: 'flex-start',
               padding: '10px 20px',
@@ -278,10 +288,11 @@ function AdminBillingPage({ user = {} }) {
               fontFamily: 'var(--font-body)',
               fontSize: 13,
               fontWeight: 600,
-              cursor: 'pointer'
+              cursor: portalLoading ? 'wait' : 'pointer',
+              opacity: portalLoading ? 0.7 : 1,
             }}
           >
-            Update card
+            {portalLoading ? 'Opening…' : 'Update card'}
           </button>
         </section>
       </div>

@@ -10,3 +10,4 @@ yarn-error.log*
 
 # Claude Code per-developer overrides
 .claude/settings.local.json
+.env*
